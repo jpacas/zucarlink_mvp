@@ -1,88 +1,79 @@
 # Zucarlink
 
-**La red profesional exclusiva de la industria azucarera.**
+Base técnica inicial del MVP de Zucarlink para la Semana 4.
 
-Zucarlink es una red técnica vertical para conectar a técnicos, especialistas y proveedores de la industria azucarera en un solo lugar.
+## Objetivo actual
 
-Su objetivo es preservar, compartir y hacer evolucionar el conocimiento técnico del sector mediante perfiles profesionales, directorio, mensajería privada y foro técnico.
+Este repositorio cubre la base técnica inicial de Semana 4:
 
----
+- frontend con `Vite + React + TypeScript`
+- rutas públicas y privadas base
+- integración con `Supabase`
+- autenticación mínima con email/password
 
-## Visión
+## Stack actual
 
-Ser la red global de referencia donde el conocimiento técnico azucarero se preserva, comparte y evoluciona.
+- React
+- TypeScript
+- Vite
+- React Router DOM
+- Supabase JS
 
-## Misión
+## Scripts
 
-Conectar a técnicos azucareros de todo el mundo en una red verificada donde puedan compartir conocimiento, resolver problemas y crecer profesionalmente.
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run typecheck
+```
 
----
+## Variables de entorno
 
-## MVP
+El archivo `.env.example` documenta las variables mínimas actuales.
 
-El MVP de Zucarlink se enfoca en:
+```bash
+cp .env.example .env
+```
 
-- Registro y login
-- Perfiles profesionales
-- Directorio público y privado
-- Mensajería privada 1 a 1
-- Foro técnico
-- Perfil básico para proveedores
-- Contacto interno sin exponer datos sensibles
+Variables requeridas:
 
----
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
 
-## Módulos principales
+## Estructura inicial
 
-### Perfil
-Ficha técnica-profesional del usuario.
+```text
+src/
+  app/
+  components/
+  features/
+  layouts/
+  lib/
+  pages/
+  routes/
+  styles/
+  types/
+```
 
-### Directorio
-Descubrimiento de miembros, ingenios y empresas.
+## Arranque local
 
-### Mensajería
-Contacto privado entre miembros.
+```bash
+npm install
+npm run dev
+```
 
-### Foro
-Interacción técnica visible para la comunidad.
+## Flujo de auth base
 
-### Proveedores
-Capa comercial inicial para presencia y generación de leads.
+- `register` crea cuenta con email/password
+- guarda `account_type` y `full_name` en `user_metadata`
+- `login` usa Supabase Auth
+- `logout` cierra sesión
+- rutas bajo `/app` requieren sesión
+- la sesión persiste al recargar si Supabase está configurado
 
----
+## Estado
 
-## Stack base
-
-- **Frontend:** React + TypeScript
-- **Backend / BaaS:** Supabase
-
----
-
-## Estado del proyecto
-
-Actualmente Zucarlink está en fase de construcción del MVP, con enfoque en un producto claro, útil y escalable para Latinoamérica.
-
----
-
-## Roadmap
-
-- **Semana 1:** Definición estratégica
-- **Semana 2:** Arquitectura del producto
-- **Semana 3:** UI/UX y wireframes
-- **Semana 4:** Setup técnico
-- **Semanas 5–9:** Construcción de módulos
-- **Semanas 10–12:** Beta, activación y validación
-
----
-
-## Objetivo
-
-Construir el hub digital de referencia para la industria azucarera.
-
----
-
-## Autor
-
-**Jose Pacas**  
-Fundador de Zucarlink
-
+El frontend ya está listo para continuar con esquema de base de datos, RLS y storage en las siguientes fases.
