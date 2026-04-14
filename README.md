@@ -43,6 +43,30 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```
 
+## Base de datos y storage
+
+La base inicial para Semana 4 quedó definida en SQL:
+
+- `supabase/migrations/20260414_000001_initial_schema.sql`
+- `supabase/migrations/20260414_000002_avatars_storage.sql`
+- `supabase/migrations/20260414_000003_security_baseline.sql`
+- `supabase/sql/verify_setup.sql`
+- `supabase/sql/verify_security.sql`
+
+Resumen:
+
+- 12 tablas base del MVP
+- relaciones mínimas explícitas
+- RLS inicial en tablas sensibles
+- bucket privado `avatars` listo para fotos de perfil
+- trigger para crear `profiles` automáticamente desde `auth.users`
+- helper frontend base para upload y signed URLs de avatars
+
+Guía de aplicación:
+
+- [docs/supabase-setup.md](/Users/np/Desktop/programming/zucarlink_mvp/docs/supabase-setup.md)
+- [docs/avatar-storage.md](/Users/np/Desktop/programming/zucarlink_mvp/docs/avatar-storage.md)
+
 ## Estructura inicial
 
 ```text
@@ -64,6 +88,20 @@ src/
 npm install
 npm run dev
 ```
+
+## Deploy
+
+- hosting: Vercel
+- URL productiva actual: `https://zucarlinkmvp.vercel.app`
+- config de SPA: `vercel.json`
+
+Validado en producción:
+
+- carga de la home
+- redirección de rutas privadas sin sesión
+- login real con Supabase
+- acceso a `/app` y `/app/profile`
+- logout y bloqueo posterior de rutas privadas
 
 ## Flujo de auth base
 

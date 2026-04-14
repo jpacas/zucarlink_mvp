@@ -1,3 +1,4 @@
+import { ScreenShell } from '../components/ScreenShell'
 import { useAuth } from '../features/auth/AuthProvider'
 
 export function AppHomePage() {
@@ -6,22 +7,23 @@ export function AppHomePage() {
   const accountType = user?.user_metadata?.account_type as string | undefined
 
   return (
-    <section className="content-card stack">
+    <ScreenShell
+      audience="Privado"
+      route="/app"
+      title="Panel privado"
+      description="Entrada principal del área autenticada. Desde aquí se confirma el acceso protegido y se enlazan los módulos internos."
+      highlights={[
+        'La sesión se restaura al recargar mediante Supabase Auth.',
+        'Las rutas bajo `/app` requieren autenticación.',
+        'El tipo de cuenta se guarda en `user_metadata`.',
+      ]}
+    >
       <div className="split-header">
-        <div className="stack">
-          <p className="eyebrow">Panel privado</p>
-          <h2>Sesión activa y rutas protegidas</h2>
-        </div>
         <span className="user-badge">{accountType ?? 'sin tipo'}</span>
       </div>
       <p>
         Usuario autenticado: <strong>{fullName ?? user?.email}</strong>
       </p>
-      <ul className="list">
-        <li>La sesión se restaura al recargar mediante Supabase Auth.</li>
-        <li>Las rutas bajo `/app` requieren autenticación.</li>
-        <li>El tipo de cuenta se guarda en `user_metadata`.</li>
-      </ul>
-    </section>
+    </ScreenShell>
   )
 }

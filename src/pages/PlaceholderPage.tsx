@@ -1,19 +1,27 @@
+import { ScreenShell } from '../components/ScreenShell'
+
 interface PlaceholderPageProps {
+  audience: 'Público' | 'Privado'
   description: string
-  eyebrow: string
+  highlights?: string[]
+  route: string
   title: string
 }
 
 export function PlaceholderPage({
+  audience,
   description,
-  eyebrow,
+  highlights,
+  route,
   title,
 }: PlaceholderPageProps) {
   return (
-    <section className="content-card stack">
-      <p className="eyebrow">{eyebrow}</p>
-      <h2>{title}</h2>
-      <p>{description}</p>
-    </section>
+    <ScreenShell
+      audience={audience}
+      description={description}
+      highlights={highlights}
+      route={route}
+      title={title}
+    />
   )
 }

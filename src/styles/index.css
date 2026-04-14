@@ -131,6 +131,19 @@ select {
   color: rgba(17, 34, 51, 0.8);
 }
 
+.route-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(17, 34, 51, 0.08);
+  color: rgba(17, 34, 51, 0.8);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
 .auth-card {
   width: min(560px, 100%);
 }

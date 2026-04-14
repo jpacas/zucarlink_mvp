@@ -22,3 +22,6 @@ coverage
 AGENTS.md
 TASKS.md
 .codex
+.playwright-mcp
+docs
+.vercel
