@@ -44,6 +44,7 @@ export function DirectoryPage() {
   const [summary, setSummary] = useState<DirectoryAggregateSnapshot>(emptySummary)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [retryToken, setRetryToken] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -73,7 +74,7 @@ export function DirectoryPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [retryToken])
 
   return (
     <div className="stack">
@@ -125,7 +126,20 @@ export function DirectoryPage() {
           <li>No se muestran emails, teléfonos, WhatsApp ni fichas individuales.</li>
           <li>El detalle profesional útil requiere sesión activa.</li>
         </ul>
-        {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+        {errorMessage ? (
+          <div className="stack stack--compact">
+            <p className="error-text">{errorMessage}</p>
+            <div className="actions">
+              <button
+                type="button"
+                className="button button--secondary"
+                onClick={() => setRetryToken((current) => current + 1)}
+              >
+                Reintentar resumen
+              </button>
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   )

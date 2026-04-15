@@ -10,6 +10,8 @@ const emptyFilters: DirectoryFilters = {
   specialty: '',
 }
 
+const searchDebounceMs = 300
+
 function toSpecialtySlug(name: string) {
   return name
     .trim()
@@ -21,10 +23,31 @@ function toSpecialtySlug(name: string) {
 
 export function AppDirectoryPage() {
   const [filters, setFilters] = useState<DirectoryFilters>(emptyFilters)
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearchText, setDebouncedSearchText] = useState('')
   const [allProfiles, setAllProfiles] = useState<DirectoryProfileCardData[]>([])
   const [profiles, setProfiles] = useState<DirectoryProfileCardData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [retryToken, setRetryToken] = useState(0)
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchText(searchInput)
+      setFilters((current) =>
+        current.searchText === searchInput
+          ? current
+          : {
+              ...current,
+              searchText: searchInput,
+            },
+      )
+    }, searchDebounceMs)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [searchInput])
 
   useEffect(() => {
     let isMounted = true
@@ -53,7 +76,7 @@ export function AppDirectoryPage() {
     setIsLoading(true)
 
     void searchDirectoryProfiles({
-      searchText: filters.searchText,
+      searchText: debouncedSearchText,
       country: filters.country,
       specialty: filters.specialty ? toSpecialtySlug(filters.specialty) : '',
     })
@@ -80,7 +103,7 @@ export function AppDirectoryPage() {
     return () => {
       isMounted = false
     }
-  }, [filters.country, filters.searchText, filters.specialty])
+  }, [debouncedSearchText, filters.country, filters.specialty, retryToken])
 
   const countries = useMemo(
     () =>
@@ -120,13 +143,8 @@ export function AppDirectoryPage() {
             id="directory-search"
             type="search"
             placeholder="Nombre, empresa o especialidad"
-            value={filters.searchText}
-            onChange={(event) =>
-              setFilters((current) => ({
-                ...current,
-                searchText: event.target.value,
-              }))
-            }
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
           />
         </div>
         <div className="field">
@@ -171,7 +189,20 @@ export function AppDirectoryPage() {
         </div>
       </div>
 
-      {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+      {errorMessage ? (
+        <div className="stack stack--compact">
+          <p className="error-text">{errorMessage}</p>
+          <div className="actions">
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={() => setRetryToken((current) => current + 1)}
+            >
+              Reintentar búsqueda
+            </button>
+          </div>
+        </div>
+      ) : null}
       {isLoading ? <p className="helper-text">Cargando perfiles del directorio...</p> : null}
 
       {!isLoading && !errorMessage && profiles.length === 0 ? (

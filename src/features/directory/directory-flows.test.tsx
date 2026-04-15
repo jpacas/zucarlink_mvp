@@ -1,6 +1,6 @@
-import { screen, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, it } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
 import { renderApp } from '../../test/render-app'
 import {
@@ -43,6 +43,14 @@ const directoryProfiles = [
     short_bio: 'Integración de PLC y sensórica industrial.',
   },
 ]
+
+beforeEach(() => {
+  vi.useRealTimers()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 it('renders the public directory summary without exposing member cards', async () => {
   const supabase = createSupabaseAuthFake({
@@ -188,4 +196,152 @@ it('filters the private directory and opens a profile detail', async () => {
   expect(screen.getByText('Más de una década liderando mejoras de eficiencia en molienda y vapor.')).toBeInTheDocument()
   expect(screen.queryByText(/Email:/)).not.toBeInTheDocument()
   expect(screen.queryByText(/WhatsApp/i)).not.toBeInTheDocument()
+})
+
+it('debounces private directory search requests while typing', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'directory@example.com',
+    userMetadata: {
+      full_name: 'Directory User',
+      account_type: 'technician',
+    },
+  })
+  const searchRpc = vi.fn((args?: Record<string, unknown>) => {
+    const searchText = String(args?.search_text ?? '')
+      .trim()
+      .toLowerCase()
+    const filtered = directoryProfiles.filter((profile) =>
+      !searchText ? true : profile.full_name.toLowerCase().includes(searchText),
+    )
+
+    return { data: filtered }
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      search_directory_profiles: searchRpc,
+    },
+  })
+  await renderApp({
+    initialRoute: '/app/directory',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Directorio técnico' })
+  await waitFor(() => {
+    expect(searchRpc).toHaveBeenCalledTimes(2)
+  })
+
+  const scheduledCallbacks: Array<() => void> = []
+  const timeoutSpy = vi
+    .spyOn(window, 'setTimeout')
+    .mockImplementation(((callback: TimerHandler) => {
+      if (typeof callback === 'function') {
+        scheduledCallbacks.push(callback as () => void)
+      }
+
+      return 1 as unknown as number
+    }) as typeof window.setTimeout)
+  const searchInput = screen.getByLabelText('Buscar perfiles')
+
+  fireEvent.change(searchInput, { target: { value: 'a' } })
+  fireEvent.change(searchInput, { target: { value: 'an' } })
+  fireEvent.change(searchInput, { target: { value: 'ana' } })
+  expect(searchRpc).toHaveBeenCalledTimes(2)
+  expect(scheduledCallbacks.length).toBeGreaterThan(0)
+
+  await act(async () => {
+    const latestCallback = scheduledCallbacks[scheduledCallbacks.length - 1]
+    latestCallback?.()
+  })
+  expect(searchRpc).toHaveBeenCalledTimes(3)
+  expect(searchRpc).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      search_text: 'ana',
+    }),
+  )
+
+  timeoutSpy.mockRestore()
+})
+
+it('allows retrying the public directory summary after a recoverable error', async () => {
+  const getPublicSummary = vi
+    .fn()
+    .mockReturnValueOnce({
+      data: null,
+      error: { message: 'Fallo temporal al cargar.' },
+    })
+    .mockReturnValueOnce({
+      data: {
+        total_members: 12,
+        total_countries: 4,
+        total_companies: 7,
+        total_specialties: 9,
+      },
+      error: null,
+    })
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      get_public_directory_summary: getPublicSummary,
+    },
+  })
+  const user = userEvent.setup()
+
+  await renderApp({
+    initialRoute: '/directory',
+    supabase,
+  })
+
+  await screen.findByText('Fallo temporal al cargar.')
+  await user.click(screen.getByRole('button', { name: 'Reintentar resumen' }))
+
+  expect(await screen.findByText('12')).toBeInTheDocument()
+  expect(getPublicSummary).toHaveBeenCalledTimes(2)
+})
+
+it('allows retrying the private directory search after a recoverable error', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'directory@example.com',
+    userMetadata: {
+      full_name: 'Directory User',
+      account_type: 'technician',
+    },
+  })
+  const searchRpc = vi
+    .fn()
+    .mockReturnValueOnce({
+      data: directoryProfiles,
+      error: null,
+    })
+    .mockReturnValueOnce({
+      data: null,
+      error: { message: 'No fue posible cargar resultados.' },
+    })
+    .mockReturnValueOnce({
+      data: [directoryProfiles[0]],
+      error: null,
+    })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      search_directory_profiles: searchRpc,
+    },
+  })
+  const user = userEvent.setup()
+
+  await renderApp({
+    initialRoute: '/app/directory',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Directorio técnico' })
+  expect(await screen.findByText('No fue posible cargar resultados.')).toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: 'Reintentar búsqueda' }))
+
+  const results = await screen.findByTestId('directory-results')
+  expect(within(results).getByText('Ana Mejía')).toBeInTheDocument()
+  expect(searchRpc).toHaveBeenCalledTimes(3)
 })
