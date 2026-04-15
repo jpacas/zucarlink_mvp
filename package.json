@@ -5,13 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "seed:week5-demo": "node scripts/seed-week5-demo-profiles.mjs"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",

@@ -1,6 +1,6 @@
 # Zucarlink
 
-Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos y directorio de Semana 6 en implementación activa.
+Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos, directorio de Semana 6 y foro técnico de Semana 7 listos para iteración.
 
 ## Objetivo actual
 
@@ -14,6 +14,8 @@ Este repositorio cubre:
 - perfil propio editable
 - especialidades, experiencia y avatar conectados a Supabase
 - directorio público agregado y directorio privado con filtros
+- foro técnico público con detalle, respuestas y creación de temas
+- perfil público ligero del autor con actividad visible
 
 ## Stack actual
 
@@ -32,7 +34,6 @@ npm run preview
 npm run lint
 npm run typecheck
 npm test
-npm run seed:week5-demo
 ```
 
 ## Variables de entorno
@@ -51,6 +52,7 @@ VITE_SUPABASE_ANON_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 WEEK5_DEMO_PASSWORD=
+WEEK7_FORUM_PASSWORD=
 ```
 
 ## Base de datos y storage
@@ -143,6 +145,9 @@ Validado localmente el 14 de abril de 2026:
 - `/directory`
   - resumen público agregado del directorio
   - muestra masa crítica sin exponer fichas individuales
+- `/directory/:profileId`
+  - perfil público ligero del autor
+  - muestra identidad profesional básica y actividad reciente en foro
 - `/app/directory`
   - grid privado de perfiles completos
   - búsqueda por texto, filtro por país y filtro por especialidad
@@ -156,6 +161,13 @@ Validado localmente el 14 de abril de 2026:
   - multi-select de especialidades
   - CRUD básico de experiencia
   - upload de avatar con `Supabase Storage`
+- `/forum`
+  - listado público de temas con categorías, metadata y CTA de participación
+- `/forum/thread/:threadSlug`
+  - detalle público del tema
+  - respuestas públicas y composer autenticado
+- `/forum/new`
+  - creación de tema para usuarios autenticados con `profile_status = complete`
 
 ## SQL adicional de Semana 5
 
@@ -167,13 +179,16 @@ Validado localmente el 14 de abril de 2026:
   - habilita `INSERT` autenticado en `companies` para que onboarding, edición y experiencias puedan resolver empresa/ingenio sin romper RLS
 - `supabase/migrations/20260414_000006_directory_week6.sql`
   - agrega funciones seguras para resumen público y lectura privada del directorio
+- `supabase/migrations/20260415_000007_forum_week7.sql`
+  - agrega slugs, estados, replies anidadas, reply count y last activity al foro
+  - agrega funciones RPC para lectura pública, publicación autenticada y perfil público ligero
 
 ## Seed demo de Semana 5
 
 Para cerrar el pendiente de `TASKS.md`, el repo ahora incluye un seed idempotente con 10 perfiles técnicos demo distribuidos por país, experiencia y especialidades:
 
 - script: `scripts/seed-week5-demo-profiles.mjs`
-- comando: `npm run seed:week5-demo`
+- comando: `node scripts/seed-week5-demo-profiles.mjs`
 - alcance:
   - crea o actualiza 10 usuarios demo en `auth.users`
   - confirma el email automáticamente
@@ -197,14 +212,38 @@ ZucarlinkDemo2026!
 Uso:
 
 ```bash
-npm run seed:week5-demo
+node scripts/seed-week5-demo-profiles.mjs
 ```
 
 El script es idempotente para esas 10 cuentas: si ya existen, actualiza metadata, perfil, especialidades y experiencias para dejarlas en un estado consistente.
 
+## Seed de foro Semana 7
+
+El repo ahora incluye un seed reproducible para categorías, autores y publicaciones semilla del foro:
+
+- script: `scripts/seed-week7-forum.mjs`
+- comando: `node scripts/seed-week7-forum.mjs`
+- alcance:
+  - garantiza autores demo con perfil completo
+  - inserta o actualiza las 6 categorías técnicas oficiales
+  - inserta o actualiza 10 temas semilla
+  - agrega respuestas iniciales a algunos hilos para evitar vacío
+
+Variables necesarias:
+
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_URL` o `VITE_SUPABASE_URL`
+- `WEEK7_FORUM_PASSWORD` opcional
+
+Si `WEEK7_FORUM_PASSWORD` no está definida, el script usa esta contraseña por defecto:
+
+```text
+ZucarlinkForum2026!
+```
+
 ## Estado
 
-El estado actual deja lista la transición a Semana 6:
+El estado actual deja lista la transición a activación y refinamiento de Semana 7:
 
 - registro, login, logout y persistencia de sesión verificados
 - rutas públicas y privadas funcionando
@@ -212,8 +251,7 @@ El estado actual deja lista la transición a Semana 6:
 - onboarding técnico y perfil editable funcionando en frontend
 - experiencia, especialidades y avatar conectados al esquema actual
 - resumen público de directorio y rutas privadas del directorio integradas al router
+- foro público con categorías, detalle, respuestas y creación de temas
+- perfil público del autor conectado desde el foro
+- actividad del foro visible en home y perfil autenticado
 - deploy activo en Vercel
-
-## Activación inicial del directorio
-
-- checklist operativo: [docs/directory-activation-week6.md](/Users/np/Desktop/programming/zucarlink_mvp/docs/directory-activation-week6.md)

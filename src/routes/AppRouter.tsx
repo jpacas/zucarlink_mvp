@@ -9,11 +9,14 @@ import { AppDirectoryPage } from '../pages/AppDirectoryPage'
 import { DirectoryPage } from '../pages/DirectoryPage'
 import { DirectoryProfileDetailPage } from '../pages/DirectoryProfileDetailPage'
 import { ForumPage } from '../pages/ForumPage'
+import { ForumNewThreadPage } from '../pages/ForumNewThreadPage'
+import { ForumThreadPage } from '../pages/ForumThreadPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { MessagesPage } from '../pages/MessagesPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
 import { ProfilePage } from '../pages/ProfilePage'
+import { PublicProfilePage } from '../pages/PublicProfilePage'
 import { ProfileEditPage } from '../pages/ProfileEditPage'
 import { ProvidersPage } from '../pages/ProvidersPage'
 import { RegisterPage } from '../pages/RegisterPage'
@@ -25,7 +28,15 @@ export function AppRouter() {
       <Route element={<PublicLayout />}>
         <Route index element={<HomePage />} />
         <Route path="directory" element={<DirectoryPage />} />
+        <Route path="directory/:profileId" element={<PublicProfilePage />} />
         <Route path="forum" element={<ForumPage />} />
+        <Route path="forum/category/:categorySlug" element={<ForumPage />} />
+        <Route path="forum/thread/:threadSlug" element={<ForumThreadPage />} />
+        <Route path="forum/new" element={<ForumNewThreadPage />} />
+        <Route path="foro" element={<Navigate to="/forum" replace />} />
+        <Route path="foro/nuevo" element={<ForumNewThreadPage />} />
+        <Route path="foro/tema/:threadSlug" element={<ForumThreadPage />} />
+        <Route path="foro/:categorySlug" element={<ForumPage />} />
         <Route path="providers" element={<ProvidersPage />} />
         <Route element={<PublicOnlyRoute />}>
           <Route path="login" element={<LoginPage />} />

@@ -1,7 +1,10 @@
 import { Link, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { getProfileForumActivity } from '../features/profile/public-api'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
+import type { PublicProfileForumActivity } from '../features/profile/types'
 
 function verificationLabel(status: 'unverified' | 'pending' | 'verified') {
   switch (status) {
@@ -17,6 +20,32 @@ function verificationLabel(status: 'unverified' | 'pending' | 'verified') {
 export function ProfilePage() {
   const { user } = useAuth()
   const { profile, isLoading, errorMessage } = useCurrentProfile(user)
+  const [forumActivity, setForumActivity] = useState<PublicProfileForumActivity | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    if (!user) {
+      setForumActivity(null)
+      return
+    }
+
+    void getProfileForumActivity(user.id)
+      .then((activity) => {
+        if (isMounted) {
+          setForumActivity(activity)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setForumActivity(null)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [user])
 
   if (!user) {
     return <Navigate to="/login" replace />
@@ -131,6 +160,36 @@ export function ProfilePage() {
           ))
         ) : (
           <p className="helper-text">Todavía no hay experiencia registrada.</p>
+        )}
+      </div>
+
+      <div className="info-card stack">
+        <h3>Actividad en foro</h3>
+        <div className="actions">
+          <span className="user-badge">{forumActivity?.threadCount ?? 0} temas</span>
+          <span className="user-badge">{forumActivity?.replyCount ?? 0} respuestas</span>
+        </div>
+        {forumActivity && forumActivity.topCategories.length > 0 ? (
+          <div className="chip-grid">
+            {forumActivity.topCategories.map((category) => (
+              <span key={category} className="chip chip--active">
+                {category}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">Aún no hay categorías destacadas para tu actividad.</p>
+        )}
+        {forumActivity && forumActivity.recentContributions.length > 0 ? (
+          <div className="stack stack--compact">
+            {forumActivity.recentContributions.map((item) => (
+              <Link key={item.id} className="inline-link" to={`/forum/thread/${item.slug}`}>
+                {item.title}
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">Tus aportes al foro aparecerán aquí cuando participes.</p>
         )}
       </div>
 

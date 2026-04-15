@@ -162,7 +162,7 @@ it('logs out from the private layout and returns home', async () => {
   await screen.findByRole('heading', { name: 'Panel privado' })
   await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
 
-  await screen.findByRole('heading', { name: 'Directorio privado listo para descubrimiento profesional' })
+  await screen.findByRole('heading', { name: 'Foro técnico público para activar conversación real' })
 
   expect(supabase.calls.signOut).toHaveLength(1)
 })

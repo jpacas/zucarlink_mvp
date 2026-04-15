@@ -37,16 +37,15 @@ const configurationError =
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: PropsWithChildren) {
+  const client = getSupabaseBrowserClient()
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(
-    configurationError,
+    client ? null : configurationError,
   )
 
   useEffect(() => {
-    const client = getSupabaseBrowserClient()
-
     if (!client) {
       setIsLoading(false)
       return
@@ -78,7 +77,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      isConfigured: !configurationError,
+      isConfigured: Boolean(client),
       isLoading,
       session,
       user,
@@ -163,7 +162,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         setErrorMessage(null)
       },
     }),
-    [errorMessage, isLoading, session, user],
+    [client, errorMessage, isLoading, session, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

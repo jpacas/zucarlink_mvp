@@ -32,8 +32,16 @@ export function useCurrentProfile(user: User | null) {
   }, [user])
 
   useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      setIsLoading(false)
+      setErrorMessage(null)
+      return
+    }
+
+    setIsLoading(true)
     void reload()
-  }, [reload])
+  }, [reload, user])
 
   return {
     profile,

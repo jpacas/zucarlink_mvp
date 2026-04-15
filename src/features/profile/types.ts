@@ -63,3 +63,27 @@ export interface ExperienceInput {
   description: string
   achievements: string
 }
+
+export interface PublicMemberProfile {
+  id: string
+  fullName: string
+  avatarUrl: string | null
+  currentRole: string
+  organizationName: string
+  country: string
+  shortBio: string
+  verificationStatus: VerificationStatus
+}
+
+export interface PublicProfileForumActivity {
+  threadCount: number
+  replyCount: number
+  topCategories: string[]
+  recentContributions: Array<{
+    id: string
+    type: 'thread' | 'reply'
+    title: string
+    slug: string
+    createdAt: string
+  }>
+}
