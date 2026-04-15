@@ -41,7 +41,7 @@ interface SupabaseAuthFake {
     signInWithPassword: (
       params: SignInWithPasswordParams,
     ) => Promise<{ data: { session: Session | null; user: User | null }; error: AuthErrorLike | null }>
-    signOut: () => Promise<{ data: {}; error: AuthErrorLike | null }>
+    signOut: () => Promise<{ data: Record<string, never>; error: AuthErrorLike | null }>
   }
   calls: AuthCallHistory
   state: AuthFakeState
@@ -70,7 +70,7 @@ interface CreateSupabaseAuthFakeOptions {
 
 let authSequence = 0
 
-function createFakeUser(email: string): User {
+function createFakeUser(email: string, userMetadata: Record<string, unknown> = {}): User {
   const now = new Date().toISOString()
   const id = `user_${++authSequence}`
 
@@ -84,7 +84,7 @@ function createFakeUser(email: string): User {
       provider: 'email',
       providers: ['email'],
     },
-    user_metadata: {},
+    user_metadata: userMetadata,
     role: 'authenticated',
     identities: [],
   } as User
@@ -116,6 +116,19 @@ function cloneSession(session: Session | null, user: User | null) {
   }
 }
 
+export function createAuthenticatedAuthState(options: {
+  email: string
+  userMetadata?: Record<string, unknown>
+}): { session: Session; user: User } {
+  const user = createFakeUser(options.email, options.userMetadata)
+  const session = createFakeSession(user)
+
+  return {
+    session,
+    user,
+  }
+}
+
 export function createSupabaseAuthFake(
   options: CreateSupabaseAuthFakeOptions = {},
 ): SupabaseAuthFake {
@@ -140,16 +153,33 @@ export function createSupabaseAuthFake(
     state.user = state.session?.user ?? null
   }
 
-  function resolveAuthenticatedState(email: string) {
+  function resolveAuthenticatedState(
+    email: string,
+    userMetadata: Record<string, unknown> = {},
+  ) {
     if (state.session && state.user) {
+      state.user = {
+        ...state.user,
+        user_metadata: {
+          ...state.user.user_metadata,
+          ...userMetadata,
+        },
+      }
+      state.session = cloneSession(state.session, state.user)
+
       return {
         session: state.session,
         user: state.user,
       }
     }
 
-    const user = state.user ?? createFakeUser(email)
+    const user = state.user ?? createFakeUser(email, userMetadata)
     const session = state.session ?? createFakeSession(user)
+
+    user.user_metadata = {
+      ...user.user_metadata,
+      ...userMetadata,
+    }
 
     state.user = user
     state.session = cloneSession(session, user)
@@ -224,7 +254,10 @@ export function createSupabaseAuthFake(
           }
         }
 
-        const { session, user } = resolveAuthenticatedState(params.email)
+        const { session, user } = resolveAuthenticatedState(
+          params.email,
+          params.options?.data ?? {},
+        )
 
         if (!signUpReturnsSession) {
           state.session = null

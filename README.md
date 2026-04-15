@@ -25,7 +25,9 @@ Este repositorio cubre la base técnica inicial de Semana 4:
 npm run dev
 npm run build
 npm run preview
+npm run lint
 npm run typecheck
+npm test
 ```
 
 ## Variables de entorno
@@ -98,10 +100,19 @@ npm run dev
 Validado en producción:
 
 - carga de la home
+- registro real con Supabase
 - redirección de rutas privadas sin sesión
 - login real con Supabase
 - acceso a `/app` y `/app/profile`
+- persistencia de sesión después de recargar `/app/profile`
 - logout y bloqueo posterior de rutas privadas
+
+Validado localmente el 14 de abril de 2026:
+
+- `npm run build`
+- `npm run lint`
+- `npm run typecheck`
+- `npm test`
 
 ## Flujo de auth base
 
@@ -114,4 +125,9 @@ Validado en producción:
 
 ## Estado
 
-El frontend ya está listo para continuar con esquema de base de datos, RLS y storage en las siguientes fases.
+La base técnica de Semana 4 quedó cerrada para continuar con Semana 5:
+
+- registro, login, logout y persistencia de sesión verificados
+- rutas públicas y privadas funcionando
+- migraciones SQL y storage listos para Supabase
+- deploy activo en Vercel

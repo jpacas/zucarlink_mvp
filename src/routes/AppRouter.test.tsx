@@ -1,9 +1,13 @@
+import { screen, waitFor } from '@testing-library/react'
 import { expect, it } from 'vitest'
 
-import { createSupabaseAuthFake } from '../test/fakes/supabase'
+import {
+  createAuthenticatedAuthState,
+  createSupabaseAuthFake,
+} from '../test/fakes/supabase'
 import { renderApp } from '../test/render-app'
 
-it('boots the auth router harness', async () => {
+it('redirects anonymous users from /app to /login', async () => {
   const supabase = createSupabaseAuthFake()
 
   await renderApp({
@@ -11,5 +15,33 @@ it('boots the auth router harness', async () => {
     supabase,
   })
 
+  await screen.findByRole('heading', { name: 'Iniciar sesión' })
+  expect(screen.getByRole('button', { name: 'Ingresar' })).toBeInTheDocument()
+})
+
+it('keeps a preloaded session and renders /app directly after boot', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'persisted@example.com',
+    userMetadata: {
+      full_name: 'Persisted User',
+      account_type: 'technician',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+  })
+
+  await renderApp({
+    initialRoute: '/app',
+    supabase,
+  })
+
+  await screen.findByText('Usuario autenticado:')
+  expect(screen.getByText('Persisted User')).toBeInTheDocument()
+  expect(screen.getByText('/app')).toBeInTheDocument()
   expect(supabase.calls.getSession).toHaveLength(1)
+  await waitFor(() =>
+    expect(screen.queryByText('Verificando sesión...')).not.toBeInTheDocument(),
+  )
 })
