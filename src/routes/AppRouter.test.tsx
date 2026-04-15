@@ -45,3 +45,24 @@ it('keeps a preloaded session and renders /app directly after boot', async () =>
     expect(screen.queryByText('Verificando sesión...')).not.toBeInTheDocument(),
   )
 })
+
+it('redirects authenticated users away from /login to onboarding until their profile is complete', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'week5-redirect@example.com',
+    userMetadata: {
+      full_name: 'Redirect User',
+      account_type: 'technician',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+  })
+
+  await renderApp({
+    initialRoute: '/login',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Completa tu perfil técnico' })
+})

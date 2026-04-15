@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
+import { resolvePostAuthDestination } from '../features/profile/api'
 import type { AccountType } from '../types/auth'
 
 export function RegisterPage() {
@@ -35,7 +36,14 @@ export function RegisterPage() {
         return
       }
 
-      navigate('/app', { replace: true })
+      if (!result.user) {
+        throw new Error('No fue posible recuperar el usuario recién creado.')
+      }
+
+      const destination = await resolvePostAuthDestination(result.user)
+      navigate(destination, { replace: true })
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No fue posible crear la cuenta.')
     } finally {
       setIsSubmitting(false)
     }

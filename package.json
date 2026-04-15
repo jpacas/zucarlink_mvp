@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:week5-demo": "node scripts/seed-week5-demo-profiles.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",

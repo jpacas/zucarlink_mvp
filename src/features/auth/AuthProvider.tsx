@@ -19,10 +19,12 @@ interface AuthContextValue {
   user: User | null
   errorMessage: string | null
   clearError: () => void
-  signIn: (payload: SignInPayload) => Promise<{ needsEmailConfirmation: false }>
+  signIn: (
+    payload: SignInPayload,
+  ) => Promise<{ needsEmailConfirmation: false; user: User }>
   signUp: (
     payload: SignUpPayload,
-  ) => Promise<{ needsEmailConfirmation: boolean }>
+  ) => Promise<{ needsEmailConfirmation: boolean; user: User | null }>
   signOut: () => Promise<void>
 }
 
@@ -100,7 +102,19 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
 
         setErrorMessage(null)
-        return { needsEmailConfirmation: false as const }
+        const nextUser = client.auth.getUser
+        const {
+          data: { user: authenticatedUser },
+        } = await nextUser()
+
+        if (!authenticatedUser) {
+          throw new Error('No fue posible recuperar el usuario autenticado.')
+        }
+
+        return {
+          needsEmailConfirmation: false as const,
+          user: authenticatedUser,
+        }
       },
       signUp: async ({ accountType, fullName, email, password }) => {
         const client = getSupabaseBrowserClient()
@@ -129,6 +143,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
         return {
           needsEmailConfirmation: !data.session,
+          user: data.user,
         }
       },
       signOut: async () => {

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
+import { resolvePostAuthDestination } from '../features/profile/api'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -24,8 +25,11 @@ export function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      await signIn({ email, password })
-      navigate(nextPath ?? '/app', { replace: true })
+      const result = await signIn({ email, password })
+      const destination = nextPath ?? (await resolvePostAuthDestination(result.user))
+      navigate(destination, { replace: true })
+    } catch {
+      // AuthStatusBanner renders the actual Supabase error message.
     } finally {
       setIsSubmitting(false)
     }

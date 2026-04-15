@@ -10,7 +10,9 @@ import { ForumPage } from '../pages/ForumPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { MessagesPage } from '../pages/MessagesPage'
+import { OnboardingPage } from '../pages/OnboardingPage'
 import { ProfilePage } from '../pages/ProfilePage'
+import { ProfileEditPage } from '../pages/ProfileEditPage'
 import { ProvidersPage } from '../pages/ProvidersPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { SettingsPage } from '../pages/SettingsPage'
@@ -30,9 +32,11 @@ export function AppRouter() {
       </Route>
 
       <Route element={<ProtectedRoute />}>
+        <Route path="onboarding" element={<OnboardingPage />} />
         <Route path="app" element={<PrivateLayout />}>
           <Route index element={<AppHomePage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile/edit" element={<ProfileEditPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
