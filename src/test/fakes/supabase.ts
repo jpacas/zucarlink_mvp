@@ -22,6 +22,7 @@ interface AuthCallHistory {
   signUp: SignUpParams[]
   signInWithPassword: SignInWithPasswordParams[]
   signOut: unknown[]
+  rpc: Array<{ fn: string; args: Record<string, unknown> | undefined }>
 }
 
 interface AuthFakeState {
@@ -98,6 +99,17 @@ interface CreateSupabaseAuthFakeOptions {
     profileSpecialties?: ProfileSpecialtyRow[]
     experiences?: ExperienceRow[]
   }
+  rpc?: Record<
+    string,
+    | {
+        data?: unknown
+        error?: { message: string } | null
+      }
+    | ((args: Record<string, unknown> | undefined) => {
+        data?: unknown
+        error?: { message: string } | null
+      })
+  >
 }
 
 type TableName =
@@ -149,6 +161,10 @@ interface SupabaseAuthFake {
     }
   }
   from: (table: TableName) => QueryBuilder
+  rpc: (
+    fn: string,
+    args?: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: AuthErrorLike | null }>
   calls: AuthCallHistory
   state: AuthFakeState
   emitAuthStateChange: (event: string, session?: Session | null) => void
@@ -456,6 +472,7 @@ export function createSupabaseAuthFake(
     signUp: [],
     signInWithPassword: [],
     signOut: [],
+    rpc: [],
   }
 
   const state: AuthFakeState = {
@@ -725,6 +742,31 @@ export function createSupabaseAuthFake(
     },
     from(table) {
       return new QueryBuilder(table, getTable, setTable)
+    },
+    async rpc(fn, args) {
+      calls.rpc.push({ fn, args })
+      const entry = options.rpc?.[fn]
+
+      if (!entry) {
+        return {
+          data: null,
+          error: { message: `RPC ${fn} is not mocked.` },
+        }
+      }
+
+      if (typeof entry === 'function') {
+        const result = entry(args)
+
+        return {
+          data: result.data ?? null,
+          error: result.error ?? null,
+        }
+      }
+
+      return {
+        data: entry.data ?? null,
+        error: entry.error ?? null,
+      }
     },
     calls,
     state,

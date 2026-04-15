@@ -4,18 +4,18 @@ export function HomePage() {
   return (
     <div className="section-grid">
       <section className="hero-card">
-        <p className="eyebrow">Fase 8</p>
-        <h2>Skeletons funcionales y navegación base del MVP</h2>
+        <p className="eyebrow">Semana 6</p>
+        <h2>Directorio privado listo para descubrimiento profesional</h2>
         <p>
-          Esta capa deja todas las pantallas mínimas del producto visibles,
-          ordenadas y listas para evolucionar sin rehacer routing ni layouts.
+          Zucarlink ya separa presencia pública agregada y exploración privada de perfiles
+          técnicos, manteniendo privacidad por defecto y una base lista para activar red.
         </p>
         <div className="actions">
-          <Link className="button" to="/register">
-            Crear cuenta
+          <Link className="button" to="/directory">
+            Ver directorio público
           </Link>
-          <Link className="button button--secondary" to="/app">
-            Ver área privada
+          <Link className="button button--secondary" to="/app/directory">
+            Abrir directorio privado
           </Link>
         </div>
       </section>
@@ -32,7 +32,7 @@ export function HomePage() {
           <li>`/` inicio</li>
           <li>`/login` acceso</li>
           <li>`/register` registro</li>
-          <li>`/directory` directorio</li>
+          <li>`/directory` resumen agregado del directorio</li>
           <li>`/forum` foro</li>
           <li>`/providers` proveedores</li>
         </ul>
@@ -48,6 +48,7 @@ export function HomePage() {
         </div>
         <ul className="list">
           <li>`/app` panel</li>
+          <li>`/app/directory` directorio privado</li>
           <li>`/app/profile` perfil</li>
           <li>`/app/messages` mensajes</li>
           <li>`/app/settings` ajustes</li>
@@ -56,11 +57,10 @@ export function HomePage() {
 
       <section className="content-card stack">
         <p className="eyebrow">Estado</p>
-        <h2>Base lista para Semana 5</h2>
+        <h2>Semana 6 en ejecución</h2>
         <p>
-          Las pantallas existen, la navegación distingue público y privado y los
-          placeholders ya sirven como punto de entrada para implementar módulos
-          reales sin rehacer estructura.
+          El directorio ya muestra masa crítica en público y perfiles útiles en privado.
+          La siguiente etapa puede enfocarse en foro y activación sin rehacer la base.
         </p>
       </section>
     </div>

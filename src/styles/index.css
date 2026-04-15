@@ -153,6 +153,10 @@ select {
   gap: 16px;
 }
 
+.stack--compact {
+  gap: 8px;
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -350,6 +354,56 @@ select {
   gap: 20px;
 }
 
+.section-grid--directory {
+  width: min(960px, 100%);
+}
+
+.metric-value,
+.directory-card h3 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+.directory-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.directory-card,
+.directory-empty {
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(17, 34, 51, 0.08);
+  background: rgba(244, 247, 243, 0.9);
+}
+
+.directory-card {
+  display: grid;
+  gap: 16px;
+}
+
+.directory-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.directory-card__meta,
+.directory-card__headline {
+  margin: 0;
+}
+
+.directory-card__headline {
+  color: rgba(17, 34, 51, 0.76);
+}
+
 .checkbox-row {
   display: inline-flex;
   align-items: center;
@@ -375,10 +429,13 @@ select {
 
   .main-nav {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .nav-link {
     text-align: center;
+    width: 100%;
   }
 
   .hero-card,
@@ -400,8 +457,14 @@ select {
   }
 
   .avatar-card,
-  .profile-header {
+  .profile-header,
+  .directory-card__header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .directory-toolbar,
+  .directory-grid {
+    grid-template-columns: 1fr;
   }
 }

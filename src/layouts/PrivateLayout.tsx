@@ -4,6 +4,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 
 const privateLinks = [
   { to: '/app', label: 'Panel' },
+  { to: '/app/directory', label: 'Directorio' },
   { to: '/app/profile', label: 'Perfil' },
   { to: '/app/messages', label: 'Mensajes' },
   { to: '/app/settings', label: 'Ajustes' },

@@ -5,7 +5,9 @@ import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute'
 import { PrivateLayout } from '../layouts/PrivateLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 import { AppHomePage } from '../pages/AppHomePage'
+import { AppDirectoryPage } from '../pages/AppDirectoryPage'
 import { DirectoryPage } from '../pages/DirectoryPage'
+import { DirectoryProfileDetailPage } from '../pages/DirectoryProfileDetailPage'
 import { ForumPage } from '../pages/ForumPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
@@ -35,6 +37,8 @@ export function AppRouter() {
         <Route path="onboarding" element={<OnboardingPage />} />
         <Route path="app" element={<PrivateLayout />}>
           <Route index element={<AppHomePage />} />
+          <Route path="directory" element={<AppDirectoryPage />} />
+          <Route path="directory/:profileId" element={<DirectoryProfileDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<ProfileEditPage />} />
           <Route path="messages" element={<MessagesPage />} />

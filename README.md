@@ -1,6 +1,6 @@
 # Zucarlink
 
-Base técnica del MVP de Zucarlink con Semana 4 cerrada y el módulo de perfiles de Semana 5 en marcha.
+Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos y directorio de Semana 6 en implementación activa.
 
 ## Objetivo actual
 
@@ -13,6 +13,7 @@ Este repositorio cubre:
 - onboarding técnico progresivo
 - perfil propio editable
 - especialidades, experiencia y avatar conectados a Supabase
+- directorio público agregado y directorio privado con filtros
 
 ## Stack actual
 
@@ -139,6 +140,14 @@ Validado localmente el 14 de abril de 2026:
   - onboarding técnico de 3 pasos
   - avatar opcional
   - perfil mínimo obligatorio para marcar `profile_status = complete`
+- `/directory`
+  - resumen público agregado del directorio
+  - muestra masa crítica sin exponer fichas individuales
+- `/app/directory`
+  - grid privado de perfiles completos
+  - búsqueda por texto, filtro por país y filtro por especialidad
+- `/app/directory/:profileId`
+  - detalle profesional privado del perfil seleccionado
 - `/app/profile`
   - ficha técnica-profesional del usuario autenticado
   - muestra resumen, especialidades, experiencia y contacto con privacidad básica
@@ -156,6 +165,8 @@ Validado localmente el 14 de abril de 2026:
   - agrega `description` y `achievements` a `experiences`
 - `supabase/migrations/20260414_000005_companies_insert_policy.sql`
   - habilita `INSERT` autenticado en `companies` para que onboarding, edición y experiencias puedan resolver empresa/ingenio sin romper RLS
+- `supabase/migrations/20260414_000006_directory_week6.sql`
+  - agrega funciones seguras para resumen público y lectura privada del directorio
 
 ## Seed demo de Semana 5
 
@@ -200,4 +211,9 @@ El estado actual deja lista la transición a Semana 6:
 - migraciones SQL y storage listos para Supabase
 - onboarding técnico y perfil editable funcionando en frontend
 - experiencia, especialidades y avatar conectados al esquema actual
+- resumen público de directorio y rutas privadas del directorio integradas al router
 - deploy activo en Vercel
+
+## Activación inicial del directorio
+
+- checklist operativo: [docs/directory-activation-week6.md](/Users/np/Desktop/programming/zucarlink_mvp/docs/directory-activation-week6.md)
