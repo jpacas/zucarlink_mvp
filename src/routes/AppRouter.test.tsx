@@ -66,3 +66,20 @@ it('redirects authenticated users away from /login to onboarding until their pro
 
   await screen.findByRole('heading', { name: 'Completa tu perfil técnico' })
 })
+
+it.each([
+  ['/informacion', 'Información'],
+  ['/informacion/noticias', 'Noticias del sector'],
+  ['/informacion/blog', 'Artículos y análisis'],
+  ['/informacion/eventos', 'Congresos y eventos'],
+  ['/informacion/precios', 'Precios e indicadores'],
+])('renders the public information route %s for anonymous users', async (route, heading) => {
+  const supabase = createSupabaseAuthFake()
+
+  await renderApp({
+    initialRoute: route,
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: heading })
+})

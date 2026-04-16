@@ -182,6 +182,9 @@ Validado localmente el 14 de abril de 2026:
 - `supabase/migrations/20260415_000007_forum_week7.sql`
   - agrega slugs, estados, replies anidadas, reply count y last activity al foro
   - agrega funciones RPC para lectura pública, publicación autenticada y perfil público ligero
+- `supabase/migrations/20260416_000008_content_week8.sql`
+  - agrega `content_items`, `events` y `price_items`
+  - aplica índices y RLS de lectura pública solo para contenido `published`
 
 ## Seed demo de Semana 5
 
@@ -240,6 +243,34 @@ Si `WEEK7_FORUM_PASSWORD` no está definida, el script usa esta contraseña por 
 ```text
 ZucarlinkForum2026!
 ```
+
+## Seed editorial Semana 8
+
+Semana 8 agrega un módulo público de `Información` con noticias, blog, eventos y precios curados manualmente.
+
+- script: `scripts/seed-week8-content.mjs`
+- guía editorial: `docs/week8-content-sources.md`
+- verificación SQL: `supabase/sql/verify_content_week8.sql`
+
+Uso esperado:
+
+```bash
+node scripts/seed-week8-content.mjs
+```
+
+Antes de correrlo:
+
+1. aplicar `supabase/migrations/20260416_000008_content_week8.sql`
+2. confirmar `SUPABASE_SERVICE_ROLE_KEY`
+3. ejecutar el script de seed
+4. correr la verificación con `supabase/sql/verify_content_week8.sql`
+
+El seed carga 20 piezas iniciales distribuidas así:
+
+- 8 noticias
+- 4 artículos
+- 4 eventos
+- 4 precios o indicadores
 
 ## Estado
 

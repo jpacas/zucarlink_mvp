@@ -76,6 +76,52 @@ interface ExperienceRow {
   achievements: string | null
 }
 
+interface ContentItemRow {
+  id: string
+  type: 'news' | 'blog'
+  title: string
+  slug: string
+  summary: string
+  body: string
+  category: string
+  country?: string | null
+  source_name?: string | null
+  source_url?: string | null
+  cover_image_url?: string | null
+  published_at: string
+  tags: string[]
+  is_featured?: boolean
+  status: 'draft' | 'published'
+}
+
+interface EventRow {
+  id: string
+  title: string
+  slug: string
+  summary: string
+  start_date: string
+  end_date?: string | null
+  city?: string | null
+  country?: string | null
+  organizer?: string | null
+  source_url?: string | null
+  cover_image_url?: string | null
+  tags: string[]
+  status: 'draft' | 'published'
+}
+
+interface PriceItemRow {
+  id: string
+  label: string
+  value: string
+  unit?: string | null
+  observed_at: string
+  source_name?: string | null
+  source_url?: string | null
+  notes?: string | null
+  status: 'draft' | 'published'
+}
+
 interface CreateSupabaseAuthFakeOptions {
   session?: Session | null
   user?: User | null
@@ -98,6 +144,9 @@ interface CreateSupabaseAuthFakeOptions {
     specialties?: SpecialtyRow[]
     profileSpecialties?: ProfileSpecialtyRow[]
     experiences?: ExperienceRow[]
+    contentItems?: ContentItemRow[]
+    events?: EventRow[]
+    priceItems?: PriceItemRow[]
   }
   rpc?: Record<
     string,
@@ -118,6 +167,9 @@ type TableName =
   | 'specialties'
   | 'profile_specialties'
   | 'experiences'
+  | 'content_items'
+  | 'events'
+  | 'price_items'
 
 type BaseRow =
   | ProfileRow
@@ -125,6 +177,9 @@ type BaseRow =
   | SpecialtyRow
   | ProfileSpecialtyRow
   | ExperienceRow
+  | ContentItemRow
+  | EventRow
+  | PriceItemRow
   | Record<string, unknown>
 
 interface StorageObject {
@@ -488,6 +543,9 @@ export function createSupabaseAuthFake(
     specialties: [...(options.data?.specialties ?? [])],
     profile_specialties: [...(options.data?.profileSpecialties ?? [])],
     experiences: [...(options.data?.experiences ?? [])],
+    content_items: [...(options.data?.contentItems ?? [])],
+    events: [...(options.data?.events ?? [])],
+    price_items: [...(options.data?.priceItems ?? [])],
   }
   const storage = new Map<string, StorageObject>()
 
