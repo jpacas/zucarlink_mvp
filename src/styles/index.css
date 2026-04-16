@@ -416,6 +416,79 @@ select {
   text-decoration: underline;
 }
 
+.section-heading h2,
+.section-heading p {
+  margin: 0;
+}
+
+.content-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.content-item-card,
+.price-item-card {
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(17, 34, 51, 0.08);
+  background: rgba(244, 247, 243, 0.9);
+}
+
+.content-item-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: rgba(17, 34, 51, 0.72);
+  font-size: 0.92rem;
+}
+
+.content-item-card__title,
+.content-item-card__heading {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.content-item-card__title {
+  font-weight: 700;
+}
+
+.content-item-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(28, 107, 42, 0.12);
+  color: #1c6b2a;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.price-item-card__value {
+  font-size: 1.1rem;
+  color: #1c6b2a;
+}
+
+.content-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: 16px;
+}
+
 .forum-thread-list,
 .forum-replies {
   display: grid;
@@ -520,6 +593,16 @@ select {
   .directory-toolbar,
   .directory-grid {
     grid-template-columns: 1fr;
+  }
+
+  .content-card-grid,
+  .content-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .content-item-card__footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .forum-meta-row {

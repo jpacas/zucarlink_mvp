@@ -68,7 +68,7 @@ it('redirects authenticated users away from /login to onboarding until their pro
 })
 
 it.each([
-  ['/informacion', 'Información'],
+  ['/informacion', 'Información para seguirle el pulso al sector'],
   ['/informacion/noticias', 'Noticias del sector'],
   ['/informacion/blog', 'Artículos y análisis'],
   ['/informacion/eventos', 'Congresos y eventos'],

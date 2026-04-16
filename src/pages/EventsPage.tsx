@@ -1,16 +1,88 @@
-import { PlaceholderPage } from './PlaceholderPage'
+import { useEffect, useMemo, useState } from 'react'
+
+import { EventCard } from '../features/content/components/EventCard'
+import { SectionHeader } from '../features/content/components/SectionHeader'
+import { listPublishedEvents } from '../features/content/api'
+import type { EventItem } from '../features/content/types'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function EventsPage() {
+  const [items, setItems] = useState<EventItem[]>([])
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  usePageMetadata({
+    title: 'Congresos y eventos',
+    description:
+      'Agenda pública y simple de congresos y eventos relevantes para la industria azucarera.',
+  })
+
+  useEffect(() => {
+    let isMounted = true
+
+    void listPublishedEvents()
+      .then((nextItems) => {
+        if (isMounted) {
+          setItems(nextItems)
+          setErrorMessage(null)
+        }
+      })
+      .catch((error) => {
+        if (isMounted) {
+          setItems([])
+          setErrorMessage(
+            error instanceof Error ? error.message : 'No fue posible cargar los eventos.',
+          )
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const [upcoming, past] = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return [
+      items.filter((item) => item.startDate >= today),
+      items.filter((item) => item.startDate < today),
+    ]
+  }, [items])
+
   return (
-    <PlaceholderPage
-      audience="Público"
-      title="Congresos y eventos"
-      description="Agenda pública y simple de eventos relevantes del sector."
-      route="/informacion/eventos"
-      highlights={[
-        'Semana 8 usa listado simple, no calendario.',
-        'Queda listo para separar próximos y pasados.',
-      ]}
-    />
+    <section className="content-card stack">
+      <SectionHeader
+        eyebrow="Agenda"
+        title="Congresos y eventos"
+        description="Un listado simple para identificar encuentros relevantes sin perderse en un calendario complejo."
+      />
+
+      {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+
+      <div className="stack">
+        <h3>Próximos</h3>
+        {errorMessage ? null : upcoming.length > 0 ? (
+          <div className="content-card-grid">
+            {upcoming.map((item) => (
+              <EventCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">No hay eventos próximos visibles.</p>
+        )}
+      </div>
+
+      <div className="stack">
+        <h3>Pasados</h3>
+        {errorMessage ? null : past.length > 0 ? (
+          <div className="content-card-grid">
+            {past.map((item) => (
+              <EventCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">No hay eventos pasados visibles.</p>
+        )}
+      </div>
+    </section>
   )
 }

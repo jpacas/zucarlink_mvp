@@ -6,6 +6,7 @@ const publicLinks = [
   { to: '/', label: 'Inicio' },
   { to: '/directory', label: 'Directorio' },
   { to: '/forum', label: 'Foro' },
+  { to: '/informacion', label: 'Información' },
   { to: '/providers', label: 'Proveedores' },
 ]
 
