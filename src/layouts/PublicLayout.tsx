@@ -17,7 +17,7 @@ export function PublicLayout() {
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">Semana 7</p>
+          <p className="eyebrow">Semana 8</p>
           <h1>Zucarlink</h1>
         </div>
         <nav className="main-nav" aria-label="Principal">

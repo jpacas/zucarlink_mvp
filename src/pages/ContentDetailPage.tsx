@@ -65,7 +65,7 @@ export function ContentDetailPage() {
 
   return (
     <article className="content-card stack">
-      <SectionHeader eyebrow={item.type === 'news' ? 'Noticia' : 'Blog'} title={item.title} />
+      <SectionHeader as="h1" eyebrow={item.type === 'news' ? 'Noticia' : 'Blog'} title={item.title} />
       <div className="content-item-card__meta">
         <span>{formatPublishedDate(item.publishedAt)}</span>
         {item.sourceName ? <span>{item.sourceName}</span> : null}

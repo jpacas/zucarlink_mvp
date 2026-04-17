@@ -1,6 +1,6 @@
 # Zucarlink
 
-Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos, directorio de Semana 6 y foro técnico de Semana 7 listos para iteración.
+Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos, directorio de Semana 6, foro técnico de Semana 7 y módulo público de Información de Semana 8 listos para iteración.
 
 ## Objetivo actual
 
@@ -16,6 +16,7 @@ Este repositorio cubre:
 - directorio público agregado y directorio privado con filtros
 - foro técnico público con detalle, respuestas y creación de temas
 - perfil público ligero del autor con actividad visible
+- módulo público de `Información` con noticias, blog, eventos y precios
 
 ## Stack actual
 
@@ -251,6 +252,7 @@ Semana 8 agrega un módulo público de `Información` con noticias, blog, evento
 - script: `scripts/seed-week8-content.mjs`
 - guía editorial: `docs/week8-content-sources.md`
 - verificación SQL: `supabase/sql/verify_content_week8.sql`
+- cierre operativo: `docs/week8-closure.md`
 
 Uso esperado:
 
@@ -274,7 +276,7 @@ El seed carga 20 piezas iniciales distribuidas así:
 
 ## Estado
 
-El estado actual deja lista la transición a activación y refinamiento de Semana 7:
+El estado actual deja lista la transición a iteración sobre Semana 8 y siguientes:
 
 - registro, login, logout y persistencia de sesión verificados
 - rutas públicas y privadas funcionando
@@ -285,4 +287,6 @@ El estado actual deja lista la transición a activación y refinamiento de Seman
 - foro público con categorías, detalle, respuestas y creación de temas
 - perfil público del autor conectado desde el foro
 - actividad del foro visible en home y perfil autenticado
+- módulo `Información` conectado a home, navbar pública y rutas indexables
+- seed editorial ajustado para usar fuentes reales o nulas cuando el contenido es propio
 - deploy activo en Vercel

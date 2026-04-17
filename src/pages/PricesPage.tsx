@@ -8,6 +8,7 @@ import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function PricesPage() {
   const [items, setItems] = useState<PriceItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   usePageMetadata({
@@ -18,6 +19,8 @@ export function PricesPage() {
 
   useEffect(() => {
     let isMounted = true
+
+    setIsLoading(true)
 
     void listPublishedPrices()
       .then((nextItems) => {
@@ -34,6 +37,11 @@ export function PricesPage() {
           )
         }
       })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      })
 
     return () => {
       isMounted = false
@@ -43,11 +51,14 @@ export function PricesPage() {
   return (
     <section className="content-card stack">
       <SectionHeader
+        as="h1"
         eyebrow="Mercado"
         title="Precios e indicadores"
         description="Indicadores curados para lectura rápida del entorno. Este bloque no es un feed en tiempo real."
       />
-      {errorMessage ? (
+      {isLoading ? (
+        <p className="helper-text">Cargando indicadores.</p>
+      ) : errorMessage ? (
         <p className="error-text">{errorMessage}</p>
       ) : items.length > 0 ? (
         <div className="content-card-grid">

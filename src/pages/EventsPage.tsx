@@ -8,6 +8,7 @@ import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function EventsPage() {
   const [items, setItems] = useState<EventItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   usePageMetadata({
@@ -18,6 +19,8 @@ export function EventsPage() {
 
   useEffect(() => {
     let isMounted = true
+
+    setIsLoading(true)
 
     void listPublishedEvents()
       .then((nextItems) => {
@@ -32,6 +35,11 @@ export function EventsPage() {
           setErrorMessage(
             error instanceof Error ? error.message : 'No fue posible cargar los eventos.',
           )
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
         }
       })
 
@@ -51,16 +59,18 @@ export function EventsPage() {
   return (
     <section className="content-card stack">
       <SectionHeader
+        as="h1"
         eyebrow="Agenda"
         title="Congresos y eventos"
         description="Un listado simple para identificar encuentros relevantes sin perderse en un calendario complejo."
       />
 
-      {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+      {isLoading ? <p className="helper-text">Cargando eventos.</p> : null}
+      {!isLoading && errorMessage ? <p className="error-text">{errorMessage}</p> : null}
 
       <div className="stack">
         <h3>Próximos</h3>
-        {errorMessage ? null : upcoming.length > 0 ? (
+        {isLoading || errorMessage ? null : upcoming.length > 0 ? (
           <div className="content-card-grid">
             {upcoming.map((item) => (
               <EventCard key={item.id} item={item} />
@@ -73,7 +83,7 @@ export function EventsPage() {
 
       <div className="stack">
         <h3>Pasados</h3>
-        {errorMessage ? null : past.length > 0 ? (
+        {isLoading || errorMessage ? null : past.length > 0 ? (
           <div className="content-card-grid">
             {past.map((item) => (
               <EventCard key={item.id} item={item} />

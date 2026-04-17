@@ -24,6 +24,7 @@ const categories: ContentCategory[] = [
 
 export function NewsListPage() {
   const [items, setItems] = useState<ContentItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -36,6 +37,8 @@ export function NewsListPage() {
 
   useEffect(() => {
     let isMounted = true
+
+    setIsLoading(true)
 
     void listPublishedContent('news', {
       query,
@@ -55,6 +58,11 @@ export function NewsListPage() {
           )
         }
       })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      })
 
     return () => {
       isMounted = false
@@ -64,6 +72,7 @@ export function NewsListPage() {
   return (
     <section className="content-card stack">
       <SectionHeader
+        as="h1"
         eyebrow="Información"
         title="Noticias del sector"
         description="Actualización pública, curada y útil para seguir mercado, operación y señales clave de la industria."
@@ -75,7 +84,9 @@ export function NewsListPage() {
         onQueryChange={setQuery}
         onCategoryChange={setSelectedCategory}
       />
-      {errorMessage ? (
+      {isLoading ? (
+        <p className="helper-text">Cargando noticias.</p>
+      ) : errorMessage ? (
         <p className="error-text">{errorMessage}</p>
       ) : items.length > 0 ? (
         <div className="content-card-grid">

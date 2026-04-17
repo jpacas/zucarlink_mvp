@@ -91,6 +91,7 @@ export function InformationHubPage() {
 
       <section className="content-card stack">
         <SectionHeader
+          as="h1"
           eyebrow="Hub"
           title="Explora el módulo"
           description="Cada sección mantiene el mismo criterio: curación humana, lectura rápida y utilidad real."

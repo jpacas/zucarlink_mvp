@@ -24,6 +24,7 @@ const categories: ContentCategory[] = [
 
 export function BlogListPage() {
   const [items, setItems] = useState<ContentItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -36,6 +37,8 @@ export function BlogListPage() {
 
   useEffect(() => {
     let isMounted = true
+
+    setIsLoading(true)
 
     void listPublishedContent('blog', {
       query,
@@ -55,6 +58,11 @@ export function BlogListPage() {
           )
         }
       })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      })
 
     return () => {
       isMounted = false
@@ -64,6 +72,7 @@ export function BlogListPage() {
   return (
     <section className="content-card stack">
       <SectionHeader
+        as="h1"
         eyebrow="Información"
         title="Artículos y análisis"
         description="Piezas más profundas para convertir señales del sector en criterio práctico y contexto propio."
@@ -75,7 +84,9 @@ export function BlogListPage() {
         onQueryChange={setQuery}
         onCategoryChange={setSelectedCategory}
       />
-      {errorMessage ? (
+      {isLoading ? (
+        <p className="helper-text">Cargando artículos.</p>
+      ) : errorMessage ? (
         <p className="error-text">{errorMessage}</p>
       ) : items.length > 0 ? (
         <div className="content-card-grid">

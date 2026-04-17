@@ -22,6 +22,21 @@ Definir una base editorial manual para el módulo `Información` de Zucarlink si
 - bolsas o fuentes públicas de referencia para azúcar y etanol
 - comunicados institucionales de ingenios, gremios o asociaciones cuando aporten contexto real
 
+## Fuentes ya usadas en el lote inicial
+
+- ISO sector sugar: `https://www.isosugar.org/sugarsector/sugar`
+- ISO homepage y agenda sectorial: `https://www.isosugar.org/`
+- USDA FAS Brazil Sugar Annual: `https://www.fas.usda.gov/data/brazil-sugar-annual-11`
+- ICE sugar benchmark hub: `https://www.ice.com/agriculture/sugar`
+- ICE White Sugar futures: `https://www.ice.com/products/37089080/White-Sugar`
+- CME No. 11 Sugar contract specs: `https://www.cmegroup.com/markets/agriculture/lumber-and-softs/sugar-no11.contractSpecs.html`
+- B3 / CEPEA metodología del indicador de etanol: `https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/mercado-de-derivativos/metodologia/metodologia-do-indicador-de-precos-do-etanol-hidratado-paulinia-sp-esalq-b3/`
+- CCEE home de mercado eléctrico: `https://www.ccee.org.br/en/web/guest/ccee`
+- Fenasucro & Agrocana: `https://www.fenasucro.com.br/`
+- DATAGRO Conference 2026: `https://www.datagroconferences.com/en/eventos/international-datagro-conference-sugar-ethanol-2026/`
+- CITI ISO DATAGRO NY 2026: `https://www.datagroconferences.com/en/eventos/citi-iso-datagro-ny-conference-2-2026/`
+- Africa Sugar 2026: `https://informaconnect.com/africa-sugar/`
+
 ## Reglas editoriales
 
 - No copiar artículos completos de terceros.
@@ -98,3 +113,4 @@ Cada lote inicial debe marcar entre 3 y 5 piezas como `featured` cuando cumplan 
 - tags no redundantes
 - CTA potencial a foro o registro
 - ortografía revisada
+- sin `example.com` ni dominios placeholder en piezas publicadas

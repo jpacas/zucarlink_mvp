@@ -58,18 +58,18 @@ export function HomePage() {
   return (
     <div className="section-grid">
       <section className="hero-card">
-        <p className="eyebrow">Semana 7</p>
-        <h2>Foro técnico público para activar conversación real</h2>
+        <p className="eyebrow">Semana 8</p>
+        <h2>Zucarlink combina red técnica, foro y una capa editorial pública</h2>
         <p>
-          Zucarlink ya combina perfiles, directorio y un foro público donde la industria puede
-          leer debates reales y participar con identidad técnica.
+          El MVP ya reúne perfiles, directorio, foro técnico e información curada para convertir
+          visitas públicas en registro, recurrencia y conversación sectorial.
         </p>
         <div className="actions">
-          <Link className="button" to="/forum">
-            Ver foro
+          <Link className="button" to="/informacion">
+            Ver información
           </Link>
-          <Link className="button button--secondary" to="/directory">
-            Ver directorio público
+          <Link className="button button--secondary" to="/forum">
+            Ver foro
           </Link>
         </div>
       </section>

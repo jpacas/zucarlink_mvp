@@ -459,6 +459,12 @@ it('renders tag badge and section header helpers', () => {
   expect(screen.getByText('automatización')).toBeInTheDocument()
 })
 
+it('renders a section header with h1 when requested', () => {
+  render(<SectionHeader title="Información" as="h1" />)
+
+  expect(screen.getByRole('heading', { name: 'Información', level: 1 })).toBeInTheDocument()
+})
+
 it('renders featured content strip with cards', () => {
   render(
     <MemoryRouter>
@@ -610,6 +616,7 @@ it('renders only news items in the news page', async () => {
     supabase,
   })
 
+  expect(screen.getByText('Cargando noticias.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Noticias del sector' })
   expect(screen.getByText('Noticia visible')).toBeInTheDocument()
   expect(screen.queryByText('Blog oculto en noticias')).not.toBeInTheDocument()
@@ -658,6 +665,7 @@ it('renders only blog items in the blog page', async () => {
     supabase,
   })
 
+  expect(screen.getByText('Cargando artículos.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Artículos y análisis' })
   expect(screen.getByText('Blog visible')).toBeInTheDocument()
   expect(screen.queryByText('Noticia fuera de blog')).not.toBeInTheDocument()
@@ -752,6 +760,7 @@ it('renders events page with upcoming and past sections', async () => {
     supabase,
   })
 
+  expect(screen.getByText('Cargando eventos.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Congresos y eventos' })
   expect(screen.getByRole('heading', { name: 'Próximos' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Pasados' })).toBeInTheDocument()
@@ -783,6 +792,7 @@ it('renders prices page with a note about curated indicators', async () => {
     supabase,
   })
 
+  expect(screen.getByText('Cargando indicadores.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Precios e indicadores' })
   expect(screen.getByText('Azúcar crudo')).toBeInTheDocument()
   expect(screen.getByText(/no es un feed en tiempo real/i)).toBeInTheDocument()
@@ -823,7 +833,8 @@ it('renders an information preview on the home page', async () => {
 
   await screen.findByRole('heading', { name: 'Información útil para volver al sitio' })
   expect(screen.getByText('Preview de información')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Ver información' })).toHaveAttribute(
+  const informationLinks = screen.getAllByRole('link', { name: 'Ver información' })
+  expect(informationLinks[informationLinks.length - 1]).toHaveAttribute(
     'href',
     '/informacion',
   )
