@@ -162,7 +162,7 @@ it('logs out from the private layout and returns home', async () => {
   await screen.findByRole('heading', { name: 'Panel privado' })
   await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
 
-  await screen.findByRole('heading', { name: 'Foro técnico público para activar conversación real' })
+  await screen.findByRole('heading', { name: 'Zucarlink suma una capa comercial ligera para proveedores' })
 
   expect(supabase.calls.signOut).toHaveLength(1)
 })

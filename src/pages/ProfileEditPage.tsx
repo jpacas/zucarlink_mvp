@@ -176,6 +176,10 @@ export function ProfileEditPage() {
     )
   }
 
+  if (profile?.accountType === 'provider') {
+    return <Navigate to="/app/provider/edit" replace />
+  }
+
   return (
     <section className="content-card stack">
       <div className="split-header">

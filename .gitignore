@@ -23,5 +23,6 @@ AGENTS.md
 TASKS.md
 .codex
 .playwright-mcp
+.worktrees
 docs
 .vercel

@@ -122,6 +122,43 @@ interface PriceItemRow {
   status: 'draft' | 'published'
 }
 
+interface ProviderCategoryRow {
+  id: string
+  slug: string
+  name: string
+}
+
+interface ProviderRow {
+  id: string
+  owner_id: string
+  slug: string | null
+  company_name: string
+  logo_url: string | null
+  short_description: string | null
+  long_description: string | null
+  category_id: string | null
+  countries: string[] | null
+  products_services: string[] | null
+  website: string | null
+  contact_email: string | null
+  is_verified: boolean
+  status: 'lead' | 'draft_profile' | 'active' | 'inactive'
+  created_at?: string
+  updated_at?: string
+}
+
+interface ProviderLeadRow {
+  id: string
+  provider_id: string
+  requester_id: string | null
+  name: string
+  email: string
+  company: string | null
+  message: string
+  status: 'new' | 'reviewed' | 'contacted' | 'closed'
+  created_at?: string
+}
+
 interface CreateSupabaseAuthFakeOptions {
   session?: Session | null
   user?: User | null
@@ -147,6 +184,9 @@ interface CreateSupabaseAuthFakeOptions {
     contentItems?: ContentItemRow[]
     events?: EventRow[]
     priceItems?: PriceItemRow[]
+    providerCategories?: ProviderCategoryRow[]
+    providers?: ProviderRow[]
+    providerLeads?: ProviderLeadRow[]
   }
   rpc?: Record<
     string,
@@ -170,6 +210,9 @@ type TableName =
   | 'content_items'
   | 'events'
   | 'price_items'
+  | 'provider_categories'
+  | 'providers'
+  | 'provider_leads'
 
 type BaseRow =
   | ProfileRow
@@ -180,6 +223,9 @@ type BaseRow =
   | ContentItemRow
   | EventRow
   | PriceItemRow
+  | ProviderCategoryRow
+  | ProviderRow
+  | ProviderLeadRow
   | Record<string, unknown>
 
 interface StorageObject {
@@ -423,6 +469,46 @@ class QueryBuilder {
       }
     }
 
+    if (this.tableName === 'providers') {
+      const now = new Date().toISOString()
+
+      return {
+        id: nextId('provider'),
+        slug: null,
+        logo_url: null,
+        short_description: null,
+        long_description: null,
+        category_id: null,
+        countries: [],
+        products_services: [],
+        website: null,
+        contact_email: null,
+        is_verified: false,
+        status: 'draft_profile',
+        created_at: now,
+        updated_at: now,
+        ...row,
+      }
+    }
+
+    if (this.tableName === 'provider_categories') {
+      return {
+        id: nextId('provider_category'),
+        ...row,
+      }
+    }
+
+    if (this.tableName === 'provider_leads') {
+      return {
+        id: nextId('provider_lead'),
+        requester_id: null,
+        company: null,
+        status: 'new',
+        created_at: new Date().toISOString(),
+        ...row,
+      }
+    }
+
     return row
   }
 }
@@ -546,6 +632,9 @@ export function createSupabaseAuthFake(
     content_items: [...(options.data?.contentItems ?? [])],
     events: [...(options.data?.events ?? [])],
     price_items: [...(options.data?.priceItems ?? [])],
+    provider_categories: [...(options.data?.providerCategories ?? [])],
+    providers: [...(options.data?.providers ?? [])],
+    provider_leads: [...(options.data?.providerLeads ?? [])],
   }
   const storage = new Map<string, StorageObject>()
 
@@ -804,6 +893,27 @@ export function createSupabaseAuthFake(
     async rpc(fn, args) {
       calls.rpc.push({ fn, args })
       const entry = options.rpc?.[fn]
+
+      if (!entry && fn === 'create_provider_lead') {
+        const rows = getTable('provider_leads') as ProviderLeadRow[]
+        rows.push({
+          id: nextId('provider_lead'),
+          provider_id: String(args?.provider_id ?? ''),
+          requester_id: state.user?.id ?? null,
+          name: String(args?.name_text ?? ''),
+          email: String(args?.email_text ?? ''),
+          company:
+            typeof args?.company_text === 'string' ? String(args.company_text) : null,
+          message: String(args?.message_text ?? ''),
+          status: 'new',
+          created_at: new Date().toISOString(),
+        })
+
+        return {
+          data: null,
+          error: null,
+        }
+      }
 
       if (!entry) {
         return {

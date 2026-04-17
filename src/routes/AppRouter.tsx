@@ -1,10 +1,12 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 
 import { ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute'
 import { PrivateLayout } from '../layouts/PrivateLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 import { AppHomePage } from '../pages/AppHomePage'
+import { AppProviderEditPage } from '../pages/AppProviderEditPage'
+import { AppProviderPage } from '../pages/AppProviderPage'
 import { AppDirectoryPage } from '../pages/AppDirectoryPage'
 import { BlogListPage } from '../pages/BlogListPage'
 import { ContentDetailPage } from '../pages/ContentDetailPage'
@@ -23,8 +25,10 @@ import { OnboardingPage } from '../pages/OnboardingPage'
 import { ProfilePage } from '../pages/ProfilePage'
 import { PublicProfilePage } from '../pages/PublicProfilePage'
 import { PricesPage } from '../pages/PricesPage'
+import { ProviderDetailPage } from '../pages/ProviderDetailPage'
 import { ProfileEditPage } from '../pages/ProfileEditPage'
-import { ProvidersPage } from '../pages/ProvidersPage'
+import { ProvidersDirectoryPage } from '../pages/ProvidersDirectoryPage'
+import { ProvidersLandingPage } from '../pages/ProvidersLandingPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { SettingsPage } from '../pages/SettingsPage'
 
@@ -49,7 +53,12 @@ export function AppRouter() {
         <Route path="foro/nuevo" element={<ForumNewThreadPage />} />
         <Route path="foro/tema/:threadSlug" element={<ForumThreadPage />} />
         <Route path="foro/:categorySlug" element={<ForumPage />} />
-        <Route path="providers" element={<ProvidersPage />} />
+        <Route path="providers" element={<Navigate to="/proveedores" replace />} />
+        <Route path="providers/directory" element={<Navigate to="/proveedores/directorio" replace />} />
+        <Route path="providers/:slug" element={<LegacyProviderRedirect />} />
+        <Route path="proveedores" element={<ProvidersLandingPage />} />
+        <Route path="proveedores/directorio" element={<ProvidersDirectoryPage />} />
+        <Route path="proveedores/:slug" element={<ProviderDetailPage />} />
         <Route element={<PublicOnlyRoute />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
@@ -64,6 +73,8 @@ export function AppRouter() {
           <Route path="directory/:profileId" element={<DirectoryProfileDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<ProfileEditPage />} />
+          <Route path="provider" element={<AppProviderPage />} />
+          <Route path="provider/edit" element={<AppProviderEditPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
@@ -72,4 +83,10 @@ export function AppRouter() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
+}
+
+function LegacyProviderRedirect() {
+  const { slug = '' } = useParams()
+
+  return <Navigate to={`/proveedores/${slug}`} replace />
 }

@@ -83,6 +83,10 @@ export function ProfilePage() {
     )
   }
 
+  if (profile.accountType === 'provider') {
+    return <Navigate to="/app/provider" replace />
+  }
+
   return (
     <section className="content-card stack">
       <div className="split-header">

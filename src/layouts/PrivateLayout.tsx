@@ -2,18 +2,27 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 
-const privateLinks = [
-  { to: '/app', label: 'Panel' },
-  { to: '/app/directory', label: 'Directorio' },
-  { to: '/forum', label: 'Foro' },
-  { to: '/app/profile', label: 'Perfil' },
-  { to: '/app/messages', label: 'Mensajes' },
-  { to: '/app/settings', label: 'Ajustes' },
-]
-
 export function PrivateLayout() {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
+  const accountType = user?.user_metadata?.account_type
+  const privateLinks =
+    accountType === 'provider'
+      ? [
+          { to: '/app', label: 'Panel' },
+          { to: '/proveedores/directorio', label: 'Directorio' },
+          { to: '/app/provider', label: 'Perfil comercial' },
+          { to: '/app/provider/edit', label: 'Editar perfil' },
+          { to: '/app/settings', label: 'Ajustes' },
+        ]
+      : [
+          { to: '/app', label: 'Panel' },
+          { to: '/app/directory', label: 'Directorio' },
+          { to: '/forum', label: 'Foro' },
+          { to: '/app/profile', label: 'Perfil' },
+          { to: '/app/messages', label: 'Mensajes' },
+          { to: '/app/settings', label: 'Ajustes' },
+        ]
 
   async function handleLogout() {
     await signOut()

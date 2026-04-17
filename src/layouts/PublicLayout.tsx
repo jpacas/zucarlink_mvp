@@ -7,7 +7,7 @@ const publicLinks = [
   { to: '/directory', label: 'Directorio' },
   { to: '/forum', label: 'Foro' },
   { to: '/informacion', label: 'Información' },
-  { to: '/providers', label: 'Proveedores' },
+  { to: '/proveedores', label: 'Proveedores' },
 ]
 
 export function PublicLayout() {
@@ -17,7 +17,7 @@ export function PublicLayout() {
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">Semana 8</p>
+          <p className="eyebrow">Semana 9</p>
           <h1>Zucarlink</h1>
         </div>
         <nav className="main-nav" aria-label="Principal">

@@ -6,6 +6,7 @@ import {
   uploadAvatar,
 } from '../../lib/avatar-storage'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getCurrentProviderProfile } from '../providers/api'
 import type {
   CurrentProfile,
   ExperienceInput,
@@ -420,6 +421,11 @@ export async function resolvePostAuthDestination(user: User) {
 
   if (!profile) {
     return '/onboarding'
+  }
+
+  if (profile.accountType === 'provider') {
+    const providerProfile = await getCurrentProviderProfile(user)
+    return providerProfile ? '/app/provider' : '/onboarding'
   }
 
   return profile.profileStatus === 'complete' ? '/app/profile' : '/onboarding'

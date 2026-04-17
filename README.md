@@ -1,6 +1,6 @@
 # Zucarlink
 
-Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos, directorio de Semana 6, foro técnico de Semana 7 y módulo público de Información de Semana 8 listos para iteración.
+Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos, directorio de Semana 6, foro técnico de Semana 7, módulo público de Información de Semana 8 y módulo comercial de proveedores de Semana 9 listos para iteración.
 
 ## Objetivo actual
 
@@ -17,6 +17,9 @@ Este repositorio cubre:
 - foro técnico público con detalle, respuestas y creación de temas
 - perfil público ligero del autor con actividad visible
 - módulo público de `Información` con noticias, blog, eventos y precios
+- landing comercial, directorio y ficha pública de proveedores
+- onboarding/autoservicio base para cuentas `provider`
+- leads internos a proveedores vía Supabase RPC
 
 ## Stack actual
 
@@ -53,6 +56,7 @@ VITE_SUPABASE_ANON_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 WEEK5_DEMO_PASSWORD=
+WEEK9_PROVIDER_PASSWORD=
 WEEK7_FORUM_PASSWORD=
 ```
 
@@ -186,6 +190,10 @@ Validado localmente el 14 de abril de 2026:
 - `supabase/migrations/20260416_000008_content_week8.sql`
   - agrega `content_items`, `events` y `price_items`
   - aplica índices y RLS de lectura pública solo para contenido `published`
+- `supabase/migrations/20260417_000009_providers_week9.sql`
+  - agrega `provider_categories`
+  - expande `providers` y `provider_leads` al modelo comercial mínimo
+  - crea RPCs para categorías, búsqueda, detalle y leads internos
 
 ## Seed demo de Semana 5
 
@@ -259,6 +267,38 @@ Uso esperado:
 ```bash
 node scripts/seed-week8-content.mjs
 ```
+
+## Flujo de proveedores Semana 9
+
+- `/proveedores`
+  - landing comercial pública con CTA a registro y directorio
+- `/proveedores/directorio`
+  - directorio público con búsqueda y filtros básicos
+- `/proveedores/:slug`
+  - ficha pública individual con CTA de contacto interno
+- `/app/provider`
+  - resumen privado del perfil comercial del proveedor
+- `/app/provider/edit`
+  - edición mínima del perfil comercial
+- `/onboarding`
+  - las cuentas `provider` usan un flujo de 2 pasos para perfil comercial y solicitud de activación
+
+## Seed de proveedores Semana 9
+
+El repo ahora incluye un seed reproducible para dejar 5 proveedores demo activos:
+
+- script: `scripts/seed-week9-providers.mjs`
+- comando: `node scripts/seed-week9-providers.mjs`
+- alcance:
+  - crea o reutiliza cuentas demo `provider`
+  - inserta o actualiza categorías comerciales
+  - inserta o actualiza 5 perfiles comerciales activos y verificados
+
+Variables necesarias:
+
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_URL` o `VITE_SUPABASE_URL`
+- `WEEK9_PROVIDER_PASSWORD` opcional
 
 Antes de correrlo:
 

@@ -276,6 +276,12 @@ select {
   gap: 16px;
 }
 
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .field--full {
   grid-column: 1 / -1;
 }
@@ -580,6 +586,10 @@ select {
   }
 
   .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-two {
     grid-template-columns: 1fr;
   }
 

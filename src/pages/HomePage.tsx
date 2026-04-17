@@ -58,15 +58,15 @@ export function HomePage() {
   return (
     <div className="section-grid">
       <section className="hero-card">
-        <p className="eyebrow">Semana 8</p>
-        <h2>Zucarlink combina red técnica, foro y una capa editorial pública</h2>
+        <p className="eyebrow">Semana 9</p>
+        <h2>Zucarlink suma una capa comercial ligera para proveedores</h2>
         <p>
-          El MVP ya reúne perfiles, directorio, foro técnico e información curada para convertir
-          visitas públicas en registro, recurrencia y conversación sectorial.
+          El MVP ya reúne perfiles, directorio, foro técnico, información pública y ahora un
+          módulo comercial mínimo para presencia de proveedores y captura de leads internos.
         </p>
         <div className="actions">
-          <Link className="button" to="/informacion">
-            Ver información
+          <Link className="button" to="/proveedores">
+            Ver proveedores
           </Link>
           <Link className="button button--secondary" to="/forum">
             Ver foro
@@ -89,7 +89,7 @@ export function HomePage() {
           <li>`/directory` resumen agregado del directorio</li>
           <li>`/forum` foro técnico público</li>
           <li>`/informacion` noticias, blog, eventos e indicadores</li>
-          <li>`/providers` proveedores</li>
+          <li>`/proveedores` landing comercial de proveedores</li>
         </ul>
       </section>
 
@@ -105,7 +105,8 @@ export function HomePage() {
           <li>`/app` panel</li>
           <li>`/app/directory` directorio privado</li>
           <li>`/forum/new` crear tema con perfil completo</li>
-          <li>`/app/profile` perfil</li>
+          <li>`/app/profile` perfil técnico</li>
+          <li>`/app/provider` perfil comercial proveedor</li>
           <li>`/app/messages` mensajes</li>
           <li>`/app/settings` ajustes</li>
         </ul>

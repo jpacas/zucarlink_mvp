@@ -10,9 +10,21 @@ import {
   saveAvatarForProfile,
   saveProfileDraft,
 } from '../features/profile/api'
+import { ProviderProfileForm } from '../features/providers/ProviderProfileForm'
+import {
+  createEmptyProviderDraft,
+  getCurrentProviderProfile,
+  isProviderDraftComplete,
+  listProviderCategories,
+  saveProviderProfile,
+} from '../features/providers/api'
 import { isProfileComplete } from '../features/profile/profile-status'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import type { ProfileDraftInput, ProfileSpecialty } from '../features/profile/types'
+import type {
+  ProviderCategory,
+  ProviderProfileDraft,
+} from '../features/providers/types'
 import { useAuth } from '../features/auth/AuthProvider'
 
 function createDraft(
@@ -56,6 +68,10 @@ export function OnboardingPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [providerDraft, setProviderDraft] = useState<ProviderProfileDraft>(
+    createEmptyProviderDraft(),
+  )
+  const [providerCategories, setProviderCategories] = useState<ProviderCategory[]>([])
 
   useEffect(() => {
     void listSpecialties()
@@ -64,6 +80,47 @@ export function OnboardingPage() {
         setFeedback(error instanceof Error ? error.message : 'No fue posible cargar especialidades.'),
       )
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    if (profile?.accountType !== 'provider') {
+      return
+    }
+
+    void Promise.all([getCurrentProviderProfile(user), listProviderCategories()])
+      .then(([providerProfile, categories]) => {
+        setProviderCategories(categories)
+
+        if (providerProfile) {
+          setProviderDraft({
+            companyName: providerProfile.companyName,
+            categoryId: providerProfile.categoryId,
+            countries: providerProfile.countries,
+            shortDescription: providerProfile.shortDescription,
+            longDescription: providerProfile.longDescription,
+            productsServices: providerProfile.productsServices,
+            website: providerProfile.website,
+            contactEmail:
+              providerProfile.contactEmail || user.email || '',
+          })
+        } else {
+          setProviderDraft((current) => ({
+            ...current,
+            contactEmail: current.contactEmail || user.email || '',
+          }))
+        }
+      })
+      .catch((error) =>
+        setFeedback(
+          error instanceof Error
+            ? error.message
+            : 'No fue posible cargar la activación comercial.',
+        ),
+      )
+  }, [profile?.accountType, user])
 
   useEffect(() => {
     if (!user) {
@@ -163,6 +220,30 @@ export function OnboardingPage() {
     )
   }
 
+  async function handleProviderSave(nextStep?: number) {
+    if (!isProviderDraftComplete(providerDraft)) {
+      setFeedback(
+        'Completa empresa, categoría, países donde operas y descripción corta.',
+      )
+      return
+    }
+
+    setIsSaving(true)
+    setFeedback(null)
+
+    try {
+      await saveProviderProfile(currentUser, providerDraft, nextStep === 1 ? 'draft_profile' : 'lead')
+
+      if (typeof nextStep === 'number') {
+        setStep(nextStep)
+      }
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No fue posible guardar el perfil comercial.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (isLoading && !profile) {
     return (
       <section className="content-card stack">
@@ -184,19 +265,81 @@ export function OnboardingPage() {
   if (profile?.accountType === 'provider') {
     return (
       <section className="content-card stack">
-        <p className="eyebrow">Proveedor</p>
-        <h2>Activación comercial próxima</h2>
-        <p>
-          El flujo de proveedor queda registrado, pero en Semana 5 priorizamos el perfil técnico.
-        </p>
-        <div className="actions">
-          <Link className="button" to="/app/profile">
-            Ir a mi perfil
-          </Link>
-          <Link className="button button--secondary" to="/app">
-            Volver al panel
-          </Link>
+        <div className="split-header">
+          <div className="stack">
+            <p className="eyebrow">Proveedor</p>
+            <h2>Activa tu perfil comercial</h2>
+            <p>Completa la ficha mínima para dejar lista tu presencia comercial en Zucarlink.</p>
+          </div>
+          <span className="route-chip">Paso {Math.min(step + 1, 2)} de 2</span>
         </div>
+
+        {step === 0 ? (
+          <>
+            <ProviderProfileForm
+              categories={providerCategories}
+              draft={providerDraft}
+              isSaving={isSaving}
+              onChange={setProviderDraft}
+              onSubmit={() => handleProviderSave(1)}
+              onSubmitLabel="Continuar"
+            />
+            {feedback ? <p className="error-text">{feedback}</p> : null}
+          </>
+        ) : null}
+
+        {step === 1 ? (
+          <div className="stack">
+            <div className="info-card stack">
+              <h3>Solicitud de activación</h3>
+              <p>
+                Tu perfil comercial ya tiene la base mínima. Al enviar la solicitud quedará listo
+                para revisión y activación manual.
+              </p>
+              <div className="actions">
+                <span className="user-badge">{providerDraft.companyName}</span>
+                {providerDraft.categoryId ? <span className="user-badge">Categoría definida</span> : null}
+              </div>
+            </div>
+            {feedback ? <p className="error-text">{feedback}</p> : null}
+            <div className="actions">
+              <button
+                className="button button--secondary"
+                type="button"
+                disabled={isSaving}
+                onClick={() => setStep(0)}
+              >
+                Atrás
+              </button>
+              <button
+                className="button"
+                type="button"
+                disabled={isSaving}
+                onClick={() => void handleProviderSave(2)}
+              >
+                {isSaving ? 'Enviando...' : 'Solicitar activación'}
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {step === 2 ? (
+          <div className="stack">
+            <h3>Solicitud enviada</h3>
+            <p>
+              Tu perfil comercial quedó registrado como lead. Puedes revisarlo o editarlo desde tu
+              área privada mientras se activa manualmente.
+            </p>
+            <div className="actions">
+              <Link className="button" to="/app/provider">
+                Ver perfil comercial
+              </Link>
+              <Link className="button button--secondary" to="/app/provider/edit">
+                Editar perfil
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </section>
     )
   }

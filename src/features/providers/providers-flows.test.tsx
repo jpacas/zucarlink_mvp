@@ -1,0 +1,214 @@
+import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { expect, it } from 'vitest'
+
+import { renderApp } from '../../test/render-app'
+import {
+  createAuthenticatedAuthState,
+  createSupabaseAuthFake,
+} from '../../test/fakes/supabase'
+
+const providerCategories = [
+  { id: 'cat-automation', slug: 'automatizacion', name: 'Automatización' },
+  { id: 'cat-lab', slug: 'laboratorio', name: 'Laboratorio' },
+]
+
+const providerCards = [
+  {
+    id: 'provider-automation',
+    slug: 'tecno-control',
+    company_name: 'Tecno Control',
+    logo_url: null,
+    short_description: 'Automatización industrial para ingenios.',
+    countries: ['Guatemala', 'El Salvador'],
+    category: providerCategories[0],
+    is_verified: true,
+  },
+  {
+    id: 'provider-lab',
+    slug: 'lab-cana',
+    company_name: 'Lab Caña',
+    logo_url: null,
+    short_description: 'Servicios de laboratorio y control de calidad.',
+    countries: ['México'],
+    category: providerCategories[1],
+    is_verified: false,
+  },
+]
+
+it('renders the public providers landing and supports the legacy /providers redirect', async () => {
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      list_provider_categories: { data: providerCategories },
+      search_providers: { data: providerCards },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/providers',
+    supabase,
+  })
+
+  await screen.findByRole('heading', {
+    name: 'Convierte tu marca en un proveedor visible para la industria azucarera',
+  })
+  expect(screen.getByRole('link', { name: 'Ver directorio de proveedores' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Solicitar activación comercial' })).toBeInTheDocument()
+})
+
+it('renders the providers directory, filters by category and opens the provider detail', async () => {
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      list_provider_categories: { data: providerCategories },
+      search_providers: (args) => {
+        const searchText = String(args?.search_text ?? '').trim().toLowerCase()
+        const categorySlug = String(args?.category_slug ?? '').trim().toLowerCase()
+        const country = String(args?.country_filter ?? '').trim().toLowerCase()
+
+        const filtered = providerCards.filter((provider) => {
+          const matchesSearch =
+            !searchText ||
+            [provider.company_name, provider.short_description]
+              .join(' ')
+              .toLowerCase()
+              .includes(searchText)
+          const matchesCategory =
+            !categorySlug || provider.category.slug.toLowerCase() === categorySlug
+          const matchesCountry =
+            !country ||
+            provider.countries.some((item) => item.toLowerCase() === country)
+
+          return matchesSearch && matchesCategory && matchesCountry
+        })
+
+        return { data: filtered }
+      },
+      get_provider_by_slug: (args) => {
+        if (args?.provider_slug !== 'tecno-control') {
+          return {
+            data: null,
+            error: { message: 'Proveedor no encontrado.' },
+          }
+        }
+
+        return {
+          data: {
+            id: 'provider-automation',
+            slug: 'tecno-control',
+            company_name: 'Tecno Control',
+            logo_url: null,
+            short_description: 'Automatización industrial para ingenios.',
+            long_description:
+              'Integramos PLC, sensórica y soporte remoto para operación continua.',
+            countries: ['Guatemala', 'El Salvador'],
+            products_services: ['PLC', 'SCADA', 'Instrumentación'],
+            website: 'https://tecnocontrol.example.com',
+            contact_email: 'contacto@tecnocontrol.example.com',
+            is_verified: true,
+            status: 'active',
+            category: providerCategories[0],
+          },
+        }
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/proveedores/directorio',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Directorio de proveedores' })
+  await user.selectOptions(screen.getByLabelText('Categoría'), 'automatizacion')
+  await user.selectOptions(screen.getByLabelText('País'), 'El Salvador')
+
+  const results = screen.getByTestId('providers-results')
+  expect(within(results).getByText('Tecno Control')).toBeInTheDocument()
+  expect(within(results).queryByText('Lab Caña')).not.toBeInTheDocument()
+
+  await user.click(within(results).getByRole('link', { name: 'Ver perfil de Tecno Control' }))
+
+  await screen.findByRole('heading', { name: 'Tecno Control' })
+  expect(screen.getByText('Integramos PLC, sensórica y soporte remoto para operación continua.')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Contactar proveedor' })).toBeInTheDocument()
+})
+
+it('routes a provider registration into the provider onboarding flow', async () => {
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake()
+
+  await renderApp({
+    initialRoute: '/register',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Crear cuenta' })
+  await user.click(screen.getByLabelText('Proveedor'))
+  await user.type(screen.getByLabelText('Nombre completo'), 'Proveedor Demo')
+  await user.type(screen.getByLabelText('Email'), 'proveedor@example.com')
+  await user.type(screen.getByLabelText('Contraseña'), 'ProveedorDemo123')
+  await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
+
+  await screen.findByRole('heading', { name: 'Activa tu perfil comercial' })
+})
+
+it('submits a provider lead from the public detail when the user is authenticated', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'compras@example.com',
+    userMetadata: {
+      full_name: 'Compras Ingenio',
+      account_type: 'technician',
+    },
+  })
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      get_provider_by_slug: {
+        data: {
+          id: 'provider-automation',
+          slug: 'tecno-control',
+          company_name: 'Tecno Control',
+          logo_url: null,
+          short_description: 'Automatización industrial para ingenios.',
+          long_description: 'Automatización, instrumentación y soporte remoto.',
+          countries: ['Guatemala', 'El Salvador'],
+          products_services: ['PLC', 'SCADA'],
+          website: null,
+          contact_email: 'contacto@tecnocontrol.example.com',
+          is_verified: true,
+          status: 'active',
+          category: providerCategories[0],
+        },
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/proveedores/tecno-control',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Tecno Control' })
+  await user.click(screen.getByRole('button', { name: 'Contactar proveedor' }))
+
+  await user.type(screen.getByLabelText('Nombre'), 'Compras Ingenio Central')
+  await user.type(screen.getByLabelText('Email'), 'compras@ingenio.com')
+  await user.type(screen.getByLabelText('Empresa'), 'Ingenio Central')
+  await user.type(screen.getByLabelText('Mensaje'), 'Queremos una propuesta para automatización.')
+  await user.click(screen.getByRole('button', { name: 'Enviar solicitud' }))
+
+  await screen.findByText('Tu solicitud fue enviada al proveedor.')
+  expect(supabase.calls.rpc).toContainEqual({
+    fn: 'create_provider_lead',
+    args: {
+      provider_id: 'provider-automation',
+      name_text: 'Compras Ingenio Central',
+      email_text: 'compras@ingenio.com',
+      company_text: 'Ingenio Central',
+      message_text: 'Queremos una propuesta para automatización.',
+    },
+  })
+})
