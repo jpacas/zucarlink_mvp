@@ -12,6 +12,7 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
   const [email, setEmail] = useState('')
   const [company, setCompany] = useState('')
   const [message, setMessage] = useState('')
+  const [website, setWebsite] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -20,6 +21,11 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
 
     if (!name.trim() || !email.trim() || !message.trim()) {
       setFeedback('Completa nombre, email y mensaje.')
+      return
+    }
+
+    if (website.trim()) {
+      setFeedback('No fue posible validar tu solicitud.')
       return
     }
 
@@ -86,6 +92,18 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
           onChange={(event) => setMessage(event.target.value)}
           rows={4}
           required
+        />
+      </div>
+      <div className="field sr-only" aria-hidden="true">
+        <label htmlFor="provider-lead-company-website">Website</label>
+        <input
+          id="provider-lead-company-website"
+          name="company_website"
+          tabIndex={-1}
+          autoComplete="off"
+          type="text"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
         />
       </div>
       {feedback ? <p className="status">{feedback}</p> : null}

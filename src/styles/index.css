@@ -253,6 +253,37 @@ select {
   gap: 16px;
 }
 
+.provider-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.provider-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  object-fit: cover;
+  border: 1px solid rgba(17, 34, 51, 0.1);
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.provider-logo--sm {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+}
+
+.provider-logo--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(28, 107, 42, 0.12);
+  color: #1c6b2a;
+  font-weight: 800;
+}
+
 .user-badge {
   display: inline-flex;
   padding: 8px 12px;

@@ -5,6 +5,7 @@ import {
   listProviderCategories,
   searchProviders,
 } from '../features/providers/api'
+import { ProviderLogo } from '../features/providers/ProviderLogo'
 import type { ProviderCard, ProviderCategory } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
 
@@ -105,11 +106,14 @@ export function ProvidersDirectoryPage() {
         {providers.map((provider) => (
           <article key={provider.id} className="info-card stack">
             <div className="split-header">
-              <div className="stack">
-                <h3>{provider.companyName}</h3>
-                <div className="actions">
-                  <span className="user-badge">{provider.category.name}</span>
-                  {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
+              <div className="provider-summary">
+                <ProviderLogo companyName={provider.companyName} logoUrl={provider.logoUrl} size="sm" />
+                <div className="stack">
+                  <h3>{provider.companyName}</h3>
+                  <div className="actions">
+                    <span className="user-badge">{provider.category.name}</span>
+                    {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
+                  </div>
                 </div>
               </div>
               <div className="chip-grid">
@@ -130,6 +134,9 @@ export function ProvidersDirectoryPage() {
                 }
               >
                 Ver perfil de {provider.companyName}
+              </Link>
+              <Link className="button" to={`/proveedores/${provider.slug}#contacto`}>
+                Contactar
               </Link>
             </div>
           </article>

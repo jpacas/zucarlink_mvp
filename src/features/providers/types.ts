@@ -25,6 +25,10 @@ export interface ProviderDetail extends ProviderCard {
   status: ProviderStatus
 }
 
+export interface AdminProviderRecord extends ProviderCard {
+  status: ProviderStatus
+}
+
 export interface ProviderProfileDraft {
   companyName: string
   categoryId: string

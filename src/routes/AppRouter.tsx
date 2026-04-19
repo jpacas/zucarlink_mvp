@@ -5,6 +5,7 @@ import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute'
 import { PrivateLayout } from '../layouts/PrivateLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 import { AppHomePage } from '../pages/AppHomePage'
+import { AdminProvidersPage } from '../pages/AdminProvidersPage'
 import { AppProviderEditPage } from '../pages/AppProviderEditPage'
 import { AppProviderPage } from '../pages/AppProviderPage'
 import { AppDirectoryPage } from '../pages/AppDirectoryPage'
@@ -75,6 +76,7 @@ export function AppRouter() {
           <Route path="profile/edit" element={<ProfileEditPage />} />
           <Route path="provider" element={<AppProviderPage />} />
           <Route path="provider/edit" element={<AppProviderEditPage />} />
+          <Route path="providers-admin" element={<AdminProvidersPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>

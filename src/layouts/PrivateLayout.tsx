@@ -6,6 +6,7 @@ export function PrivateLayout() {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
   const accountType = user?.user_metadata?.account_type
+  const isAdmin = Boolean(user?.user_metadata?.is_admin)
   const privateLinks =
     accountType === 'provider'
       ? [
@@ -23,6 +24,9 @@ export function PrivateLayout() {
           { to: '/app/messages', label: 'Mensajes' },
           { to: '/app/settings', label: 'Ajustes' },
         ]
+  const allLinks = isAdmin
+    ? [...privateLinks, { to: '/app/providers-admin', label: 'Admin proveedores' }]
+    : privateLinks
 
   async function handleLogout() {
     await signOut()
@@ -41,7 +45,7 @@ export function PrivateLayout() {
         </div>
         <div className="actions">
           <nav className="main-nav" aria-label="Privada">
-            {privateLinks.map((link) => (
+            {allLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}

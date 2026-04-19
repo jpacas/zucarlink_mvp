@@ -2,6 +2,7 @@ import type { User } from '@supabase/supabase-js'
 
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type {
+  AdminProviderRecord,
   CurrentProviderProfile,
   ProviderCard,
   ProviderCategory,
@@ -33,6 +34,10 @@ interface ProviderDetailRow extends ProviderCardRow {
   products_services: string[] | null
   website: string | null
   contact_email: string | null
+  status: ProviderStatus
+}
+
+interface AdminProviderRow extends ProviderCardRow {
   status: ProviderStatus
 }
 
@@ -152,6 +157,32 @@ export async function getProviderBySlug(slug: string): Promise<ProviderDetail> {
   }
 
   return mapDetail(row)
+}
+
+export async function listAdminProviders(): Promise<AdminProviderRecord[]> {
+  const client = getClient()
+  const { data, error } = await client.rpc('list_providers_admin')
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return ((data ?? []) as AdminProviderRow[]).map((row) => ({
+    ...mapCard(row),
+    status: row.status,
+  }))
+}
+
+export async function updateProviderStatus(providerId: string, nextStatus: ProviderStatus) {
+  const client = getClient()
+  const { error } = await client.rpc('admin_update_provider_status', {
+    provider_id: providerId,
+    next_status: nextStatus,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
 }
 
 export async function getCurrentProviderProfile(

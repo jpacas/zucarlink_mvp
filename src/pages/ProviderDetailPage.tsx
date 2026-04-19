@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { ProviderLeadForm } from '../features/providers/ProviderLeadForm'
+import { ProviderLogo } from '../features/providers/ProviderLogo'
 import { getProviderBySlug } from '../features/providers/api'
 import type { ProviderDetail } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
@@ -48,12 +49,15 @@ export function ProviderDetailPage() {
   return (
     <section className="content-card stack">
       <div className="split-header">
-        <div className="stack">
-          <p className="eyebrow">Proveedor</p>
-          <h2>{provider.companyName}</h2>
-          <div className="actions">
-            <span className="user-badge">{provider.category.name}</span>
-            {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
+        <div className="provider-summary">
+          <ProviderLogo companyName={provider.companyName} logoUrl={provider.logoUrl} />
+          <div className="stack">
+            <p className="eyebrow">Proveedor</p>
+            <h2>{provider.companyName}</h2>
+            <div className="actions">
+              <span className="user-badge">{provider.category.name}</span>
+              {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
+            </div>
           </div>
         </div>
         <div className="chip-grid">
@@ -89,7 +93,7 @@ export function ProviderDetailPage() {
         ) : null}
       </div>
 
-      <div className="info-card stack">
+      <div id="contacto" className="info-card stack">
         <div className="split-header">
           <div className="stack">
             <h3>Contacto interno</h3>
