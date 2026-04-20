@@ -6,7 +6,7 @@ import { createSupabaseAuthFake, type SupabaseAuthFake } from './fakes/supabase'
 
 interface RenderAppOptions {
   initialRoute?: string
-  supabase?: SupabaseAuthFake
+  supabase?: SupabaseAuthFake | null
 }
 
 export async function renderApp({

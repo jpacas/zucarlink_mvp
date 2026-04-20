@@ -7,6 +7,7 @@ import { ProviderLogo } from '../features/providers/ProviderLogo'
 import { getProviderBySlug } from '../features/providers/api'
 import type { ProviderDetail } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 export function ProviderDetailPage() {
   const { slug = '' } = useParams()
@@ -29,10 +30,14 @@ export function ProviderDetailPage() {
   }, [slug])
 
   if (errorMessage) {
+    const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
     return (
       <section className="content-card stack">
-        <h2>Proveedor no encontrado</h2>
-        <p className="error-text">{errorMessage}</p>
+        <h2>{isPublicDataUnavailable ? 'Ficha en preparación' : 'Proveedor no encontrado'}</h2>
+        <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
+          {isPublicDataUnavailable ? 'La ficha comercial estará disponible pronto.' : errorMessage}
+        </p>
       </section>
     )
   }

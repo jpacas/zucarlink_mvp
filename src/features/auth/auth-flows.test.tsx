@@ -8,6 +8,19 @@ import {
   createSupabaseAuthFake,
 } from '../../test/fakes/supabase'
 
+it('keeps login shareable when auth is not available in the environment', async () => {
+  await renderApp({
+    initialRoute: '/login',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', { name: 'Iniciar sesión' })
+  expect(screen.getByText('El acceso estará disponible pronto.')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Ingresar' })).toBeDisabled()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/entorno/i)).not.toBeInTheDocument()
+})
+
 it('registers with account type and full name, then enters /app when a session is returned', async () => {
   const user = userEvent.setup()
   const supabase = createSupabaseAuthFake()
@@ -159,10 +172,71 @@ it('logs out from the private layout and returns home', async () => {
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Panel privado' })
+  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
   await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
 
-  await screen.findByRole('heading', { name: 'Zucarlink suma una capa comercial ligera para proveedores' })
+  await screen.findByRole('heading', {
+    name: 'La red profesional de la industria azucarera en un solo lugar',
+  })
 
   expect(supabase.calls.signOut).toHaveLength(1)
+})
+
+it('renders a productized app home instead of internal implementation copy', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'panel@example.com',
+    userMetadata: {
+      full_name: 'Panel User',
+      account_type: 'technician',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+  })
+
+  await renderApp({
+    initialRoute: '/app',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
+  expect(screen.queryByText(/user_metadata/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/rutas bajo/i)).not.toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Actualizar perfil' })).toHaveAttribute(
+    'href',
+    '/app/profile/edit',
+  )
+})
+
+it('renders messages and settings as minimal product surfaces without placeholder copy', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'surface@example.com',
+    userMetadata: {
+      full_name: 'Surface User',
+      account_type: 'technician',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+  })
+
+  await renderApp({
+    initialRoute: '/app/messages',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Mensajes' })
+  expect(screen.queryByText(/placeholder privado/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/ruta protegida por auth/i)).not.toBeInTheDocument()
+
+  await renderApp({
+    initialRoute: '/app/settings',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Cuenta y acceso' })
+  expect(screen.queryByText(/próximas fases/i)).not.toBeInTheDocument()
+  expect(screen.getAllByRole('button', { name: 'Cerrar sesión' }).length).toBeGreaterThan(0)
 })

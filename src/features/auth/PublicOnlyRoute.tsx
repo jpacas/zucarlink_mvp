@@ -34,12 +34,22 @@ export function PublicOnlyRoute() {
   }, [user])
 
   if (isLoading) {
-    return <p className="helper-text">Cargando sesión...</p>
+    return (
+      <section className="content-card stack content-card--status">
+        <h2>Preparando acceso</h2>
+        <p className="helper-text">Estamos revisando tu sesión.</p>
+      </section>
+    )
   }
 
   if (user) {
     if (!destination) {
-      return <p className="helper-text">Redirigiendo...</p>
+      return (
+        <section className="content-card stack content-card--status">
+          <h2>Redirigiendo</h2>
+          <p className="helper-text">Te llevamos a tu siguiente paso dentro de Zucarlink.</p>
+        </section>
+      )
     }
 
     return <Navigate to={destination} replace />

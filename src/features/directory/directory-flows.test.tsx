@@ -72,8 +72,10 @@ it('renders the public directory summary without exposing member cards', async (
   })
 
   await screen.findByRole('heading', { name: 'Directorio de la industria azucarera' })
-  expect(screen.getByText('10')).toBeInTheDocument()
-  expect(screen.getByText('6')).toBeInTheDocument()
+  expect(screen.getByText('Miembros visibles')).toBeInTheDocument()
+  expect(screen.getByText('Países activos')).toBeInTheDocument()
+  expect(await screen.findByText('10')).toBeInTheDocument()
+  expect(await screen.findByText('6')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Crear cuenta para explorar perfiles' })).toBeInTheDocument()
   expect(screen.queryByText('Ana Mejía')).not.toBeInTheDocument()
 })
@@ -192,8 +194,9 @@ it('filters the private directory and opens a profile detail', async () => {
 
   await user.click(within(results).getByRole('link', { name: 'Ver perfil de Ana Mejía' }))
 
-  await screen.findByRole('heading', { name: 'Ana Mejía' })
-  expect(screen.getByText('Más de una década liderando mejoras de eficiencia en molienda y vapor.')).toBeInTheDocument()
+  expect(
+    await screen.findByText(/Más de una década liderando mejoras de eficiencia en molienda y vapor\./i),
+  ).toBeInTheDocument()
   expect(screen.queryByText(/Email:/)).not.toBeInTheDocument()
   expect(screen.queryByText(/WhatsApp/i)).not.toBeInTheDocument()
 })
@@ -298,6 +301,18 @@ it('allows retrying the public directory summary after a recoverable error', asy
 
   expect(await screen.findByText('12')).toBeInTheDocument()
   expect(getPublicSummary).toHaveBeenCalledTimes(2)
+})
+
+it('keeps the public directory shareable when the summary cannot load', async () => {
+  await renderApp({
+    initialRoute: '/directory',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', { name: 'Directorio de la industria azucarera' })
+  expect(await screen.findByText('El resumen público estará disponible pronto.')).toBeInTheDocument()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/Reintentar resumen/i)).not.toBeInTheDocument()
 })
 
 it('allows retrying the private directory search after a recoverable error', async () => {

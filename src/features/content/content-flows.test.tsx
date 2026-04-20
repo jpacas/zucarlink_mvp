@@ -557,7 +557,10 @@ it('renders the information hub with featured content and links to each section'
   })
 
   await screen.findByRole('heading', { name: 'Información para seguirle el pulso al sector' })
-  expect(screen.getByText('Pieza destacada del hub')).toBeInTheDocument()
+  expect(await screen.findByRole('link', { name: 'Pieza destacada del hub' })).toHaveAttribute(
+    'href',
+    '/informacion/pieza-destacada-hub',
+  )
   expect(screen.getByRole('link', { name: 'Noticias' })).toHaveAttribute(
     'href',
     '/informacion/noticias',
@@ -616,10 +619,21 @@ it('renders only news items in the news page', async () => {
     supabase,
   })
 
-  expect(screen.getByText('Cargando noticias.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Noticias del sector' })
-  expect(screen.getByText('Noticia visible')).toBeInTheDocument()
+  expect(await screen.findByText('Noticia visible')).toBeInTheDocument()
   expect(screen.queryByText('Blog oculto en noticias')).not.toBeInTheDocument()
+})
+
+it('keeps the public news page shareable when content cannot load', async () => {
+  await renderApp({
+    initialRoute: '/informacion/noticias',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', { name: 'Noticias del sector' })
+  expect(await screen.findByText('Las noticias se actualizarán pronto.')).toBeInTheDocument()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/No fue posible cargar/i)).not.toBeInTheDocument()
 })
 
 it('renders only blog items in the blog page', async () => {
@@ -665,9 +679,8 @@ it('renders only blog items in the blog page', async () => {
     supabase,
   })
 
-  expect(screen.getByText('Cargando artículos.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Artículos y análisis' })
-  expect(screen.getByText('Blog visible')).toBeInTheDocument()
+  expect(await screen.findByText('Blog visible')).toBeInTheDocument()
   expect(screen.queryByText('Noticia fuera de blog')).not.toBeInTheDocument()
 })
 
@@ -760,12 +773,11 @@ it('renders events page with upcoming and past sections', async () => {
     supabase,
   })
 
-  expect(screen.getByText('Cargando eventos.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Congresos y eventos' })
   expect(screen.getByRole('heading', { name: 'Próximos' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Pasados' })).toBeInTheDocument()
-  expect(screen.getByText('Evento próximo')).toBeInTheDocument()
-  expect(screen.getByText('Evento pasado')).toBeInTheDocument()
+  expect(await screen.findByText('Evento próximo')).toBeInTheDocument()
+  expect(await screen.findByText('Evento pasado')).toBeInTheDocument()
 })
 
 it('renders prices page with a note about curated indicators', async () => {
@@ -792,9 +804,8 @@ it('renders prices page with a note about curated indicators', async () => {
     supabase,
   })
 
-  expect(screen.getByText('Cargando indicadores.')).toBeInTheDocument()
   await screen.findByRole('heading', { name: 'Precios e indicadores' })
-  expect(screen.getByText('Azúcar crudo')).toBeInTheDocument()
+  expect(await screen.findByText('Azúcar crudo')).toBeInTheDocument()
   expect(screen.getByText(/no es un feed en tiempo real/i)).toBeInTheDocument()
 })
 
@@ -831,13 +842,46 @@ it('renders an information preview on the home page', async () => {
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Información útil para volver al sitio' })
-  expect(screen.getByText('Preview de información')).toBeInTheDocument()
+  await screen.findByRole('heading', {
+    name: 'La red profesional de la industria azucarera en un solo lugar',
+  })
+  expect(screen.getByRole('heading', { name: 'Conversaciones técnicas activas' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Lecturas y señales del sector' })).toBeInTheDocument()
+  expect(await screen.findByText('Preview de información')).toBeInTheDocument()
+  expect(screen.queryByText(/rutas públicas/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/^Preview$/)).not.toBeInTheDocument()
   const informationLinks = screen.getAllByRole('link', { name: 'Ver información' })
   expect(informationLinks[informationLinks.length - 1]).toHaveAttribute(
     'href',
     '/informacion',
   )
+})
+
+it('uses neutral public fallbacks when editorial previews cannot load', async () => {
+  await renderApp({
+    initialRoute: '/',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', {
+    name: 'La red profesional de la industria azucarera en un solo lugar',
+  })
+  expect(screen.getByText('La selección editorial se actualizará aquí pronto.')).toBeInTheDocument()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/No fue posible cargar/i)).not.toBeInTheDocument()
+})
+
+it('uses a neutral featured-state when the information hub cannot load featured content', async () => {
+  await renderApp({
+    initialRoute: '/informacion',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', { name: 'Información para seguirle el pulso al sector' })
+  expect(await screen.findByText('Destacados en preparación')).toBeInTheDocument()
+  expect(await screen.findByText('La próxima selección editorial aparecerá aquí.')).toBeInTheDocument()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/No fue posible cargar/i)).not.toBeInTheDocument()
 })
 
 it('shows the information module in the public navigation', async () => {

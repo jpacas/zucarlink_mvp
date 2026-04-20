@@ -45,9 +45,9 @@ it('shows a forum preview on the public home page', async () => {
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Conversaciones activas en el foro' })
+  await screen.findByRole('heading', { name: 'Conversaciones técnicas activas' })
   expect(
-    screen.getByRole('link', {
+    await screen.findByRole('link', {
       name:
         '¿Vale la pena invertir en automatización cuando la mano de obra en Latinoamérica sigue siendo barata?',
     }),

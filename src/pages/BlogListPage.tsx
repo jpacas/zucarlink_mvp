@@ -6,6 +6,7 @@ import { ContentFilters } from '../features/content/components/ContentFilters'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listPublishedContent } from '../features/content/api'
 import type { ContentCategory, ContentItem } from '../features/content/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
 const categories: ContentCategory[] = [
@@ -69,6 +70,8 @@ export function BlogListPage() {
     }
   }, [query, selectedCategory])
 
+  const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
   return (
     <section className="content-card stack">
       <SectionHeader
@@ -86,6 +89,8 @@ export function BlogListPage() {
       />
       {isLoading ? (
         <p className="helper-text">Cargando artículos.</p>
+      ) : isPublicDataUnavailable ? (
+        <p className="helper-text">Los artículos se actualizarán pronto.</p>
       ) : errorMessage ? (
         <p className="error-text">{errorMessage}</p>
       ) : items.length > 0 ? (

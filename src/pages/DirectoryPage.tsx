@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { getDirectoryPublicSummary } from '../features/directory/api'
 import type { DirectoryAggregateSnapshot } from '../features/directory/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 const emptySummary: DirectoryAggregateSnapshot = {
   totalMembers: 0,
@@ -45,6 +46,7 @@ export function DirectoryPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [retryToken, setRetryToken] = useState(0)
+  const isPublicSummaryUnavailable = isPublicConfigurationError(errorMessage)
 
   useEffect(() => {
     let isMounted = true
@@ -117,16 +119,17 @@ export function DirectoryPage() {
         <div className="split-header">
           <div className="stack">
             <p className="eyebrow">Privacidad primero</p>
-            <h3>Qué se ve aquí y qué queda dentro</h3>
+            <h3>Qué puedes evaluar desde aquí</h3>
           </div>
-          <span className="route-chip">público agregado</span>
         </div>
         <ul className="list">
           <li>Señales de presencia: miembros, países, empresas y especialidades.</li>
           <li>No se muestran emails, teléfonos, WhatsApp ni fichas individuales.</li>
-          <li>El detalle profesional útil requiere sesión activa.</li>
+          <li>El detalle completo se habilita al entrar con tu cuenta.</li>
         </ul>
-        {errorMessage ? (
+        {isPublicSummaryUnavailable ? (
+          <p className="helper-text">El resumen público estará disponible pronto.</p>
+        ) : errorMessage ? (
           <div className="stack stack--compact">
             <p className="error-text">{errorMessage}</p>
             <div className="actions">

@@ -73,11 +73,11 @@ export function InformationHubPage() {
   return (
     <div className="stack">
       <section className="hero-card stack">
-        <p className="eyebrow">Semana 8</p>
+        <p className="eyebrow">Información</p>
         <h2>Información para seguirle el pulso al sector</h2>
         <p>
-          Una capa pública y ligera de noticias, análisis, eventos e indicadores para reforzar la
-          autoridad de Zucarlink y abrir nuevas rutas hacia registro y foro.
+          Noticias, análisis, eventos e indicadores curados para seguir el sector con criterio y
+          volver a la plataforma por contexto útil, no por ruido.
         </p>
         <div className="actions">
           <Link className="button" to="/register">
@@ -116,10 +116,9 @@ export function InformationHubPage() {
           <>
             <SectionHeader
               eyebrow="Curación"
-              title="Destacados de la semana"
-              description="No fue posible cargar los destacados editoriales en este momento."
+              title="Destacados en preparación"
+              description="La próxima selección editorial aparecerá aquí."
             />
-            <p className="error-text">{errorMessage}</p>
           </>
         ) : featuredItems.length > 0 ? (
           <FeaturedContent items={featuredItems} />
@@ -128,7 +127,7 @@ export function InformationHubPage() {
             <SectionHeader
               eyebrow="Curación"
               title="Destacados de la semana"
-              description="Las piezas destacadas aparecerán aquí cuando el seed editorial esté cargado."
+              description="Aquí verás las piezas seleccionadas cuando haya nueva curación publicada."
             />
             <p className="helper-text">Todavía no hay piezas destacadas visibles.</p>
           </>

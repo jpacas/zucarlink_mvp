@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumReply, getForumThread } from '../features/forum/api'
 import type { ForumAuthor, ForumThreadDetail } from '../features/forum/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 function formatForumDate(value: string) {
   if (!value) {
@@ -137,10 +138,16 @@ export function ForumThreadPage() {
   }
 
   if (!thread || errorMessage) {
+    const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
     return (
       <section className="content-card stack">
         <h2>Tema no disponible</h2>
-        <p className="error-text">{errorMessage ?? 'No encontramos el tema solicitado.'}</p>
+        <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
+          {isPublicDataUnavailable
+            ? 'La conversación estará disponible pronto.'
+            : errorMessage ?? 'No encontramos el tema solicitado.'}
+        </p>
         <Link className="button button--secondary" to="/forum">
           Volver al foro
         </Link>

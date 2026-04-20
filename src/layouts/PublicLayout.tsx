@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 
@@ -12,15 +13,34 @@ const publicLinks = [
 
 export function PublicLayout() {
   const { user } = useAuth()
+  const location = useLocation()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [location.pathname])
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">Semana 9</p>
+          <p className="eyebrow">Zucarlink</p>
           <h1>Zucarlink</h1>
         </div>
-        <nav className="main-nav" aria-label="Principal">
+        <button
+          className="menu-toggle"
+          type="button"
+          aria-expanded={isMenuOpen}
+          aria-controls="public-navigation"
+          onClick={() => setIsMenuOpen((current) => !current)}
+        >
+          {isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+        </button>
+        <nav
+          id="public-navigation"
+          className={isMenuOpen ? 'main-nav main-nav--open' : 'main-nav'}
+          aria-label="Principal"
+        >
           {publicLinks.map((link) => (
             <NavItem key={link.to} to={link.to} label={link.label} />
           ))}
@@ -28,7 +48,7 @@ export function PublicLayout() {
             <NavItem to="/app" label="Mi cuenta" />
           ) : (
             <>
-              <NavItem to="/login" label="Login" />
+              <NavItem to="/login" label="Ingresar" />
               <NavItem to="/register" label="Registro" />
             </>
           )}

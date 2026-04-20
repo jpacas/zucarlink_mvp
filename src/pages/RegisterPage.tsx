@@ -6,12 +6,17 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { resolvePostAuthDestination } from '../features/profile/api'
 import type { AccountType } from '../types/auth'
 
+type FeedbackState = {
+  kind: 'error' | 'success'
+  message: string
+} | null
+
 export function RegisterPage() {
   const [accountType, setAccountType] = useState<AccountType>('technician')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<FeedbackState>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { signUp, isConfigured } = useAuth()
   const navigate = useNavigate()
@@ -30,9 +35,10 @@ export function RegisterPage() {
       const result = await signUp({ accountType, fullName, email, password })
 
       if (result.needsEmailConfirmation) {
-        setFeedback(
-          'Cuenta creada. Revisa tu correo para confirmar tu email antes de iniciar sesión.',
-        )
+        setFeedback({
+          kind: 'success',
+          message: 'Cuenta creada. Revisa tu correo para confirmar tu email antes de iniciar sesión.',
+        })
         return
       }
 
@@ -43,7 +49,10 @@ export function RegisterPage() {
       const destination = await resolvePostAuthDestination(result.user)
       navigate(destination, { replace: true })
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No fue posible crear la cuenta.')
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible crear la cuenta.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -115,7 +124,9 @@ export function RegisterPage() {
             required
           />
         </div>
-        {feedback ? <p className="status">{feedback}</p> : null}
+        {feedback ? (
+          <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>{feedback.message}</p>
+        ) : null}
         <div className="actions">
           <button className="button" type="submit" disabled={isSubmitting || !isConfigured}>
             {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}

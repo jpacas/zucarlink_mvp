@@ -8,6 +8,7 @@ import {
 import { ProviderLogo } from '../features/providers/ProviderLogo'
 import type { ProviderCard, ProviderCategory } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 export function ProvidersDirectoryPage() {
   const [providers, setProviders] = useState<ProviderCard[]>([])
@@ -41,6 +42,7 @@ export function ProvidersDirectoryPage() {
         .sort((left, right) => left.localeCompare(right)),
     [providers],
   )
+  const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
   return (
     <section className="content-card stack">
@@ -95,10 +97,15 @@ export function ProvidersDirectoryPage() {
       </div>
 
       {isLoading ? <p className="helper-text">Cargando proveedores.</p> : null}
-      {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+      {!isLoading && isPublicDataUnavailable ? (
+        <p className="helper-text">El directorio de proveedores estará disponible pronto.</p>
+      ) : null}
+      {!isLoading && errorMessage && !isPublicDataUnavailable ? (
+        <p className="error-text">{errorMessage}</p>
+      ) : null}
 
       <div className="stack" data-testid="providers-results">
-        {!isLoading && providers.length === 0 ? (
+        {!isLoading && !errorMessage && providers.length === 0 ? (
           <p className="helper-text">
             No encontramos proveedores con esos filtros. Ajusta tu búsqueda o categoría.
           </p>

@@ -5,6 +5,7 @@ import { SectionHeader } from '../features/content/components/SectionHeader'
 import { TagBadge } from '../features/content/components/TagBadge'
 import { getPublishedContentBySlug } from '../features/content/api'
 import type { ContentItem } from '../features/content/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
 function formatPublishedDate(value: string) {
@@ -46,10 +47,14 @@ export function ContentDetailPage() {
   }, [slug])
 
   if (errorMessage) {
+    const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
     return (
       <section className="content-card stack">
-        <h2>Contenido no disponible</h2>
-        <p className="error-text">{errorMessage}</p>
+        <h2>{isPublicDataUnavailable ? 'Contenido en preparación' : 'Contenido no disponible'}</h2>
+        <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
+          {isPublicDataUnavailable ? 'El detalle editorial estará disponible pronto.' : errorMessage}
+        </p>
       </section>
     )
   }

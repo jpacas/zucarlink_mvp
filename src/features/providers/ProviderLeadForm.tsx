@@ -7,25 +7,30 @@ interface ProviderLeadFormProps {
   onSubmitted?: () => void
 }
 
+type FeedbackState =
+  | { kind: 'error'; message: string }
+  | { kind: 'success'; message: string }
+  | null
+
 export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [company, setCompany] = useState('')
   const [message, setMessage] = useState('')
   const [website, setWebsite] = useState('')
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<FeedbackState>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (!name.trim() || !email.trim() || !message.trim()) {
-      setFeedback('Completa nombre, email y mensaje.')
+      setFeedback({ kind: 'error', message: 'Completa nombre, email y mensaje.' })
       return
     }
 
     if (website.trim()) {
-      setFeedback('No fue posible validar tu solicitud.')
+      setFeedback({ kind: 'error', message: 'No fue posible validar tu solicitud.' })
       return
     }
 
@@ -40,14 +45,17 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
         company,
         message,
       })
-      setFeedback('Tu solicitud fue enviada al proveedor.')
+      setFeedback({ kind: 'success', message: 'Tu solicitud fue enviada al proveedor.' })
       setName('')
       setEmail('')
       setCompany('')
       setMessage('')
       onSubmitted?.()
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No fue posible enviar la solicitud.')
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible enviar la solicitud.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -106,7 +114,11 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
           onChange={(event) => setWebsite(event.target.value)}
         />
       </div>
-      {feedback ? <p className="status">{feedback}</p> : null}
+      {feedback ? (
+        <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>
+          {feedback.message}
+        </p>
+      ) : null}
       <div className="actions">
         <button className="button" type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Enviando...' : 'Enviar solicitud'}

@@ -13,13 +13,13 @@ export function ProvidersLandingPage() {
   }, [])
 
   return (
-    <div className="section-grid">
-      <section className="hero-card">
-        <p className="eyebrow">Semana 9</p>
-        <h2>Convierte tu marca en un proveedor visible para la industria azucarera</h2>
+    <div className="stack">
+      <section className="hero-card stack">
+        <p className="eyebrow">Proveedores</p>
+        <h2>Proveedores con presencia útil dentro del sector azucarero</h2>
         <p>
-          Zucarlink le da presencia continua a proveedores que necesitan visibilidad frente a
-          técnicos, ingenios y tomadores de decisión del sector.
+          Zucarlink permite que las marcas correctas se presenten con claridad, sostengan contacto
+          interno y mantengan visibilidad frente a una audiencia técnica especializada.
         </p>
         <div className="actions">
           <Link
@@ -35,35 +35,36 @@ export function ProvidersLandingPage() {
         </div>
       </section>
 
-      <section className="content-card stack">
-        <p className="eyebrow">Beneficios</p>
-        <h2>Presencia comercial ligera, enfocada en generar conversación</h2>
-        <ul className="list">
-          <li>Perfil comercial público con foco en productos, servicios y cobertura regional.</li>
-          <li>Contacto interno sin exponer teléfonos ni depender de WhatsApp público.</li>
-          <li>Visibilidad permanente frente a una audiencia técnica especializada.</li>
-        </ul>
+      <section className="section-grid">
+        <article className="content-card stack">
+          <p className="eyebrow">Presencia</p>
+          <h3>Una ficha clara y permanente</h3>
+          <p>
+            Expón cobertura, soluciones y una propuesta comercial entendible sin depender de ferias
+            o contactos improvisados.
+          </p>
+        </article>
+
+        <article className="content-card stack">
+          <p className="eyebrow">Contacto</p>
+          <h3>Primer contacto dentro de la plataforma</h3>
+          <p>
+            Las solicitudes entran por un canal interno y ordenado, sin exponer teléfonos o
+            WhatsApp públicamente.
+          </p>
+        </article>
       </section>
 
       <section className="content-card stack">
-        <p className="eyebrow">Comparación</p>
-        <h2>Más contexto que una visita aislada, más continuidad que un congreso</h2>
-        <p>
-          La propuesta no compite por volumen sino por calidad: una ficha clara, una audiencia
-          curada y un lead interno mejor estructurado.
-        </p>
-      </section>
-
-      <section className="content-card stack">
-        <p className="eyebrow">Prueba social</p>
-        <h2>Señales de actividad comercial real</h2>
+        <p className="eyebrow">Cobertura visible</p>
+        <h2>Señales actuales del directorio</h2>
         <div className="actions">
-          <span className="user-badge">{providers.length} proveedores demo visibles</span>
+          <span className="user-badge">{providers.length} perfiles activos</span>
           <span className="user-badge">
             {new Set(providers.flatMap((provider) => provider.countries)).size} países
           </span>
           <span className="user-badge">
-            {providers.filter((provider) => provider.isVerified).length} perfiles verificados
+            {providers.filter((provider) => provider.isVerified).length} verificados
           </span>
         </div>
       </section>

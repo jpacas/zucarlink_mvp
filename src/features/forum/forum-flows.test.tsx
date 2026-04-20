@@ -89,20 +89,33 @@ it('renders the public forum listing with categories and thread metadata', async
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Foro técnico' })
-  expect(screen.getAllByRole('link', { name: /Automatización/i }).length).toBeGreaterThan(0)
+  const automationLinks = await screen.findAllByRole('link', { name: 'Automatización' })
+  expect(automationLinks.length).toBeGreaterThan(0)
+  expect(automationLinks[0]).toHaveAttribute('href', '/forum/category/automatizacion')
   expect(
-    screen.getByRole('link', {
+    await screen.findByRole('link', {
       name:
         '¿Vale la pena invertir en automatización cuando la mano de obra en Latinoamérica sigue siendo barata?',
     }),
   ).toBeInTheDocument()
-  expect(screen.getByText('3 respuestas')).toBeInTheDocument()
+  expect(await screen.findByText('3 respuestas')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Ana Mejía' })).toHaveAttribute(
     'href',
     '/directory/profile-ana',
   )
   expect(screen.getByText('A')).toBeInTheDocument()
+})
+
+it('keeps the public forum shareable when forum data cannot load', async () => {
+  await renderApp({
+    initialRoute: '/forum',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', { name: 'Foro técnico' })
+  expect(await screen.findByText('El foro público estará disponible pronto.')).toBeInTheDocument()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/No fue posible cargar/i)).not.toBeInTheDocument()
 })
 
 it('shows the public thread detail and asks anonymous visitors to sign in before replying', async () => {

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { listForumCategories, listForumThreads } from '../features/forum/api'
 import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/forum/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 function formatForumDate(value: string) {
   if (!value) {
@@ -104,10 +105,14 @@ export function ForumPage() {
   }
 
   if (errorMessage) {
+    const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
     return (
       <section className="content-card stack">
         <h2>Foro técnico</h2>
-        <p className="error-text">{errorMessage}</p>
+        <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
+          {isPublicDataUnavailable ? 'El foro público estará disponible pronto.' : errorMessage}
+        </p>
       </section>
     )
   }

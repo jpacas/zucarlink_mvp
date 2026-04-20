@@ -211,9 +211,9 @@ export function ProfilePage() {
             </a>
           </p>
         ) : null}
-        <button className="button button--secondary" type="button" disabled>
-          Contacto interno próximamente
-        </button>
+        <p className="helper-text">
+          El contacto interno se habilita desde el directorio y las fichas comerciales.
+        </p>
       </div>
     </section>
   )

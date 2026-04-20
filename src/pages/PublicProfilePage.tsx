@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { getProfileForumActivity, getPublicMemberProfile } from '../features/profile/public-api'
 import type { PublicMemberProfile, PublicProfileForumActivity } from '../features/profile/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 function verificationLabel(status: PublicMemberProfile['verificationStatus']) {
   switch (status) {
@@ -70,10 +71,16 @@ export function PublicProfilePage() {
   }
 
   if (!profile || errorMessage) {
+    const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
     return (
       <section className="content-card stack">
         <h2>Perfil no disponible</h2>
-        <p className="error-text">{errorMessage ?? 'No encontramos el perfil solicitado.'}</p>
+        <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
+          {isPublicDataUnavailable
+            ? 'El perfil público estará disponible pronto.'
+            : errorMessage ?? 'No encontramos el perfil solicitado.'}
+        </p>
         <Link className="button button--secondary" to="/forum">
           Volver al foro
         </Link>

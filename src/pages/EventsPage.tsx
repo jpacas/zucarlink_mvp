@@ -4,6 +4,7 @@ import { EventCard } from '../features/content/components/EventCard'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listPublishedEvents } from '../features/content/api'
 import type { EventItem } from '../features/content/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function EventsPage() {
@@ -55,6 +56,7 @@ export function EventsPage() {
       items.filter((item) => item.startDate < today),
     ]
   }, [items])
+  const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
   return (
     <section className="content-card stack">
@@ -66,7 +68,12 @@ export function EventsPage() {
       />
 
       {isLoading ? <p className="helper-text">Cargando eventos.</p> : null}
-      {!isLoading && errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+      {!isLoading && isPublicDataUnavailable ? (
+        <p className="helper-text">La agenda se actualizará pronto.</p>
+      ) : null}
+      {!isLoading && errorMessage && !isPublicDataUnavailable ? (
+        <p className="error-text">{errorMessage}</p>
+      ) : null}
 
       <div className="stack">
         <h3>Próximos</h3>
@@ -77,7 +84,7 @@ export function EventsPage() {
             ))}
           </div>
         ) : (
-          <p className="helper-text">No hay eventos próximos visibles.</p>
+          <p className="helper-text">Aún no hay eventos confirmados para esta agenda.</p>
         )}
       </div>
 
@@ -90,7 +97,7 @@ export function EventsPage() {
             ))}
           </div>
         ) : (
-          <p className="helper-text">No hay eventos pasados visibles.</p>
+          <p className="helper-text">Todavía no hay un histórico disponible en esta sección.</p>
         )}
       </div>
     </section>

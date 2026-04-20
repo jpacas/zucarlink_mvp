@@ -4,6 +4,7 @@ import { PriceCard } from '../features/content/components/PriceCard'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listPublishedPrices } from '../features/content/api'
 import type { PriceItem } from '../features/content/types'
+import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function PricesPage() {
@@ -48,6 +49,8 @@ export function PricesPage() {
     }
   }, [])
 
+  const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+
   return (
     <section className="content-card stack">
       <SectionHeader
@@ -58,6 +61,8 @@ export function PricesPage() {
       />
       {isLoading ? (
         <p className="helper-text">Cargando indicadores.</p>
+      ) : isPublicDataUnavailable ? (
+        <p className="helper-text">Los indicadores se actualizarán pronto.</p>
       ) : errorMessage ? (
         <p className="error-text">{errorMessage}</p>
       ) : items.length > 0 ? (

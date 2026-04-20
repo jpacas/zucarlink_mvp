@@ -50,10 +50,12 @@ it('renders the public providers landing and supports the legacy /providers redi
   })
 
   await screen.findByRole('heading', {
-    name: 'Convierte tu marca en un proveedor visible para la industria azucarera',
+    name: 'Proveedores con presencia útil dentro del sector azucarero',
   })
   expect(screen.getByRole('link', { name: 'Ver directorio de proveedores' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Solicitar activación comercial' })).toBeInTheDocument()
+  expect(screen.queryByText(/semana 9/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/demo visibles/i)).not.toBeInTheDocument()
 })
 
 it('renders the providers directory, filters by category and opens the provider detail', async () => {
@@ -120,6 +122,7 @@ it('renders the providers directory, filters by category and opens the provider 
   })
 
   await screen.findByRole('heading', { name: 'Directorio de proveedores' })
+  await screen.findByRole('option', { name: 'Automatización' })
   await user.selectOptions(screen.getByLabelText('Categoría'), 'automatizacion')
   await user.selectOptions(screen.getByLabelText('País'), 'El Salvador')
 
@@ -133,13 +136,29 @@ it('renders the providers directory, filters by category and opens the provider 
 
   await user.click(within(results).getByRole('link', { name: 'Ver perfil de Tecno Control' }))
 
-  await screen.findByRole('heading', { name: 'Tecno Control' })
-  expect(screen.getByText('Integramos PLC, sensórica y soporte remoto para operación continua.')).toBeInTheDocument()
+  await screen.findByText('Descripción')
+  expect(
+    await screen.findByText(/Integramos PLC, sensórica y soporte remoto para operación continua\./i),
+  ).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Contactar proveedor' })).toBeInTheDocument()
   expect(screen.getByRole('img', { name: 'Logo de Tecno Control' })).toHaveAttribute(
     'src',
     'https://cdn.example.com/tecno-control.png',
   )
+})
+
+it('keeps the providers directory shareable when provider data cannot load', async () => {
+  await renderApp({
+    initialRoute: '/proveedores/directorio',
+    supabase: null,
+  })
+
+  await screen.findByRole('heading', { name: 'Directorio de proveedores' })
+  expect(
+    await screen.findByText('El directorio de proveedores estará disponible pronto.'),
+  ).toBeInTheDocument()
+  expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/No fue posible cargar/i)).not.toBeInTheDocument()
 })
 
 it('routes a provider registration into the provider onboarding flow', async () => {
@@ -219,6 +238,52 @@ it('submits a provider lead from the public detail when the user is authenticate
       message_text: 'Queremos una propuesta para automatización.',
     },
   })
+})
+
+it('renders provider lead validation errors with error styling', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'validation@example.com',
+    userMetadata: {
+      full_name: 'Validation User',
+      account_type: 'technician',
+    },
+  })
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      get_provider_by_slug: {
+        data: {
+          id: 'provider-automation',
+          slug: 'tecno-control',
+          company_name: 'Tecno Control',
+          logo_url: null,
+          short_description: 'Automatización industrial para ingenios.',
+          long_description: 'Automatización, instrumentación y soporte remoto.',
+          countries: ['Guatemala', 'El Salvador'],
+          products_services: ['PLC', 'SCADA'],
+          website: null,
+          contact_email: 'contacto@tecnocontrol.example.com',
+          is_verified: true,
+          status: 'active',
+          category: providerCategories[0],
+        },
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/proveedores/tecno-control',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Tecno Control' })
+  await user.click(screen.getByRole('button', { name: 'Contactar proveedor' }))
+  fireEvent.submit(screen.getByRole('button', { name: 'Enviar solicitud' }).closest('form')!)
+
+  const feedback = await screen.findByText('Completa nombre, email y mensaje.')
+  expect(feedback).toHaveClass('error-text')
 })
 
 it('blocks obvious spam in the lead form before hitting the backend', async () => {

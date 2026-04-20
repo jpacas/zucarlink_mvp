@@ -24,6 +24,11 @@ import type {
 } from '../features/profile/types'
 import { useAuth } from '../features/auth/AuthProvider'
 
+type FeedbackState = {
+  kind: 'error' | 'success'
+  message: string
+} | null
+
 function createDraft(profile?: {
   fullName: string
   country: string
@@ -54,7 +59,7 @@ export function ProfileEditPage() {
   const [draft, setDraft] = useState<ProfileDraftInput>(createDraft())
   const [specialties, setSpecialties] = useState<ProfileSpecialty[]>([])
   const [selectedSpecialtyIds, setSelectedSpecialtyIds] = useState<string[]>([])
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<FeedbackState>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const initializedProfileIdRef = useRef<string | null>(null)
 
@@ -62,7 +67,10 @@ export function ProfileEditPage() {
     void listSpecialties()
       .then(setSpecialties)
       .catch((error) =>
-        setFeedback(error instanceof Error ? error.message : 'No fue posible cargar especialidades.'),
+        setFeedback({
+          kind: 'error',
+          message: error instanceof Error ? error.message : 'No fue posible cargar especialidades.',
+        }),
       )
   }, [])
 
@@ -98,13 +106,17 @@ export function ProfileEditPage() {
     try {
       await saveProfileDraft(currentUser.id, draft, selectedSpecialtyIds)
       await reload()
-      setFeedback(
-        profileComplete
+      setFeedback({
+        kind: 'success',
+        message: profileComplete
           ? 'Perfil actualizado.'
-          : 'Perfil guardado como incompleto. Falta completar campos mínimos.',
-      )
+          : 'Perfil guardado. Aún faltan campos clave para completarlo.',
+      })
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No fue posible guardar el perfil.')
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible guardar el perfil.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -121,9 +133,15 @@ export function ProfileEditPage() {
     try {
       await saveAvatarForProfile(currentUser.id, file, profile.avatarPath)
       await reload()
-      setFeedback('Foto actualizada.')
+      setFeedback({
+        kind: 'success',
+        message: 'Foto actualizada.',
+      })
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No fue posible subir la foto.')
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible subir la foto.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -136,9 +154,15 @@ export function ProfileEditPage() {
     try {
       await saveExperience(currentUser.id, payload)
       await reload()
-      setFeedback('Experiencia actualizada.')
+      setFeedback({
+        kind: 'success',
+        message: 'Experiencia actualizada.',
+      })
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No fue posible guardar la experiencia.')
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible guardar la experiencia.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -151,11 +175,15 @@ export function ProfileEditPage() {
     try {
       await deleteExperience(currentUser.id, experienceId)
       await reload()
-      setFeedback('Experiencia eliminada.')
+      setFeedback({
+        kind: 'success',
+        message: 'Experiencia eliminada.',
+      })
     } catch (error) {
-      setFeedback(
-        error instanceof Error ? error.message : 'No fue posible eliminar la experiencia.',
-      )
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible eliminar la experiencia.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -238,8 +266,8 @@ export function ProfileEditPage() {
           </div>
 
           {feedback ? (
-            <p className={feedback.includes('No fue posible') ? 'error-text' : 'status'}>
-              {feedback}
+            <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>
+              {feedback.message}
             </p>
           ) : null}
 

@@ -11,13 +11,18 @@ import {
 } from '../features/providers/api'
 import type { ProviderCategory, ProviderProfileDraft } from '../features/providers/types'
 
+type FeedbackState = {
+  kind: 'error'
+  message: string
+} | null
+
 export function AppProviderEditPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [draft, setDraft] = useState<ProviderProfileDraft>(createEmptyProviderDraft())
   const [categories, setCategories] = useState<ProviderCategory[]>([])
   const [isSaving, setIsSaving] = useState(false)
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<FeedbackState>(null)
 
   useEffect(() => {
     if (!user) {
@@ -42,7 +47,10 @@ export function AppProviderEditPage() {
         }
       })
       .catch((error) =>
-        setFeedback(error instanceof Error ? error.message : 'No fue posible cargar el formulario.'),
+        setFeedback({
+          kind: 'error',
+          message: error instanceof Error ? error.message : 'No fue posible cargar el formulario.',
+        }),
       )
   }, [user])
 
@@ -60,7 +68,10 @@ export function AppProviderEditPage() {
       await saveProviderProfile(currentUser, draft, 'lead')
       navigate('/app/provider', { replace: true })
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No fue posible guardar el perfil.')
+      setFeedback({
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'No fue posible guardar el perfil.',
+      })
     } finally {
       setIsSaving(false)
     }
@@ -71,7 +82,7 @@ export function AppProviderEditPage() {
       <p className="eyebrow">Proveedor</p>
       <h2>Editar perfil comercial</h2>
       <p>Actualiza la información base que verá el público cuando el perfil esté activo.</p>
-      {feedback ? <p className="status">{feedback}</p> : null}
+      {feedback ? <p className="error-text">{feedback.message}</p> : null}
       <ProviderProfileForm
         categories={categories}
         draft={draft}

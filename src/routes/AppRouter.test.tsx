@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { expect, it } from 'vitest'
 
 import {
@@ -6,6 +7,24 @@ import {
   createSupabaseAuthFake,
 } from '../test/fakes/supabase'
 import { renderApp } from '../test/render-app'
+
+it('exposes a collapsible public menu for compact navigation', async () => {
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake()
+
+  await renderApp({
+    initialRoute: '/',
+    supabase,
+  })
+
+  const menuButton = await screen.findByRole('button', { name: 'Abrir menú' })
+  expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+  await user.click(menuButton)
+
+  expect(menuButton).toHaveAttribute('aria-expanded', 'true')
+  expect(screen.getByRole('navigation', { name: 'Principal' })).toHaveClass('main-nav--open')
+})
 
 it('redirects anonymous users from /app to /login', async () => {
   const supabase = createSupabaseAuthFake()
@@ -37,12 +56,15 @@ it('keeps a preloaded session and renders /app directly after boot', async () =>
     supabase,
   })
 
-  await screen.findByText('Usuario autenticado:')
-  expect(screen.getByText('Persisted User')).toBeInTheDocument()
-  expect(screen.getByText('/app')).toBeInTheDocument()
+  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
+  expect(screen.getByText(/Persisted User, mantén tu perfil al día/i)).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Actualizar perfil' })).toHaveAttribute(
+    'href',
+    '/app/profile/edit',
+  )
   expect(supabase.calls.getSession).toHaveLength(1)
   await waitFor(() =>
-    expect(screen.queryByText('Verificando sesión...')).not.toBeInTheDocument(),
+    expect(screen.queryByRole('heading', { name: 'Abriendo tu cuenta' })).not.toBeInTheDocument(),
   )
 })
 

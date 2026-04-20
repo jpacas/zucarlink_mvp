@@ -7,7 +7,12 @@ export function ProtectedRoute() {
   const location = useLocation()
 
   if (isLoading) {
-    return <p className="helper-text">Verificando sesión...</p>
+    return (
+      <section className="content-card stack content-card--status">
+        <h2>Abriendo tu cuenta</h2>
+        <p className="helper-text">Estamos validando tu sesión.</p>
+      </section>
+    )
   }
 
   if (!user) {

@@ -38,7 +38,7 @@ export function PrivateLayout() {
       <header className="app-header">
         <div className="stack">
           <div>
-            <p className="eyebrow">Área privada</p>
+            <p className="eyebrow">Mi cuenta</p>
             <h1>Zucarlink</h1>
           </div>
           <span className="user-badge">{user?.email}</span>

@@ -491,8 +491,8 @@ export function OnboardingPage() {
         <div className="stack">
           <h3>Perfil listo para la siguiente etapa</h3>
           <p>
-            Tu perfil ya tiene la base mínima para Semana 5. Puedes revisarlo o ampliar
-            contacto y experiencia desde la edición.
+            Tu perfil ya cuenta con la información mínima para empezar a participar en la red.
+            Si lo necesitas, puedes ampliar contacto y experiencia desde la edición.
           </p>
           <div className="actions">
             <Link className="button" to="/app/profile">
