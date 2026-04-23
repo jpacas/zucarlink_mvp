@@ -1,0 +1,43 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - paragraph [ref=e6]: Semana 9
+      - heading "Zucarlink" [level=1] [ref=e7]
+    - navigation "Principal" [ref=e8]:
+      - link "Inicio" [ref=e9] [cursor=pointer]:
+        - /url: /
+      - link "Directorio" [ref=e10] [cursor=pointer]:
+        - /url: /directory
+      - link "Foro" [ref=e11] [cursor=pointer]:
+        - /url: /forum
+      - link "Información" [ref=e12] [cursor=pointer]:
+        - /url: /informacion
+      - link "Proveedores" [ref=e13] [cursor=pointer]:
+        - /url: /proveedores
+      - link "Mi cuenta" [ref=e14] [cursor=pointer]:
+        - /url: /app
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Semana 9
+        - heading "Zucarlink suma una capa comercial ligera para proveedores" [level=2] [ref=e19]
+        - paragraph [ref=e20]: El MVP ya reúne perfiles, directorio, foro técnico, información pública y ahora un módulo comercial mínimo para presencia de proveedores y captura de leads internos.
+        - generic [ref=e21]
+      - generic [ref=e24]:
+        - generic [ref=e25]
+        - list [ref=e30]
+      - generic [ref=e38]:
+        - generic [ref=e39]
+        - list [ref=e44]
+      - generic [ref=e52]:
+        - paragraph [ref=e53]: Preview
+        - heading "Conversaciones activas en el foro" [level=2] [ref=e54]
+        - generic [ref=e64]
+        - link "Ver foro" [ref=e57] [cursor=pointer]:
+          - /url: /forum
+      - generic [ref=e58]:
+        - paragraph [ref=e59]: Preview
+        - heading "Información útil para volver al sitio" [level=2] [ref=e60]
+        - generic [ref=e80]
+        - link "Ver información" [ref=e63] [cursor=pointer]:
+          - /url: /informacion

@@ -25,7 +25,11 @@ export function PrivateLayout() {
           { to: '/app/settings', label: 'Ajustes' },
         ]
   const allLinks = isAdmin
-    ? [...privateLinks, { to: '/app/providers-admin', label: 'Admin proveedores' }]
+    ? [
+        ...privateLinks,
+        { to: '/app/admin/dashboard', label: 'Dashboard gerencial' },
+        { to: '/app/providers-admin', label: 'Admin proveedores' },
+      ]
     : privateLinks
 
   async function handleLogout() {

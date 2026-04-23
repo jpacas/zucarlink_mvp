@@ -403,6 +403,105 @@ label {
   gap: 16px;
 }
 
+.admin-dashboard {
+  width: min(1180px, 100%);
+}
+
+.admin-dashboard__period {
+  min-width: 160px;
+}
+
+.metric-grid,
+.dashboard-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metric-card,
+.info-card {
+  border: 1px solid rgba(17, 34, 51, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.metric-card {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+}
+
+.metric-card span,
+.metric-card small,
+.compact-row small {
+  color: rgba(17, 34, 51, 0.64);
+}
+
+.metric-card strong {
+  color: #1c6b2a;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.info-card {
+  padding: 20px;
+}
+
+.info-card h3 {
+  margin: 0;
+}
+
+.ranking-list,
+.compact-table {
+  display: grid;
+  gap: 12px;
+}
+
+.ranking-row {
+  display: grid;
+  gap: 8px;
+}
+
+.ranking-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(17, 34, 51, 0.08);
+}
+
+.ranking-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1c6b2a;
+}
+
+.compact-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(17, 34, 51, 0.08);
+}
+
+.compact-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.compact-row--stack {
+  display: grid;
+  justify-content: stretch;
+  gap: 4px;
+}
+
 .provider-logo {
   width: 88px;
   height: 88px;
@@ -761,6 +860,17 @@ label {
   .hero-card h2 {
     max-width: none;
     font-size: clamp(2rem, 10vw, 3rem);
+  }
+
+  .metric-grid,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .forum-meta-row {

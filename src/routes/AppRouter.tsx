@@ -7,6 +7,10 @@ import { PrivateLayout } from '../layouts/PrivateLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 
 const AppHomePage = lazyNamed(() => import('../pages/AppHomePage'), 'AppHomePage')
+const AdminDashboardPage = lazyNamed(
+  () => import('../pages/AdminDashboardPage'),
+  'AdminDashboardPage',
+)
 const AdminProvidersPage = lazyNamed(() => import('../pages/AdminProvidersPage'), 'AdminProvidersPage')
 const AppProviderEditPage = lazyNamed(() => import('../pages/AppProviderEditPage'), 'AppProviderEditPage')
 const AppProviderPage = lazyNamed(() => import('../pages/AppProviderPage'), 'AppProviderPage')
@@ -91,6 +95,7 @@ export function AppRouter() {
             <Route path="profile/edit" element={<ProfileEditPage />} />
             <Route path="provider" element={<AppProviderPage />} />
             <Route path="provider/edit" element={<AppProviderEditPage />} />
+            <Route path="admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="providers-admin" element={<AdminProvidersPage />} />
             <Route path="messages" element={<MessagesPage />} />
             <Route path="settings" element={<SettingsPage />} />
