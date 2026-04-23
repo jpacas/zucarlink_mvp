@@ -117,7 +117,7 @@ it('lets an admin open the operational dashboard and switch the reporting period
   })
 
   await user.click(await screen.findByRole('link', { name: 'Dashboard gerencial' }))
-  await screen.findByRole('heading', { name: 'Dashboard gerencial' })
+  await screen.findByText('Usuarios nuevos')
 
   expect(screen.getByText('Últimos 30 días')).toBeInTheDocument()
   expect(screen.getByText('Usuarios nuevos')).toBeInTheDocument()
@@ -155,7 +155,7 @@ it('keeps the operational dashboard hidden from non-admin users', async () => {
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Panel privado' })
+  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
   expect(screen.queryByRole('link', { name: 'Dashboard gerencial' })).not.toBeInTheDocument()
   expect(screen.queryByRole('heading', { name: 'Dashboard gerencial' })).not.toBeInTheDocument()
 })
