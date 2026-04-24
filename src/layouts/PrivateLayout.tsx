@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { SiteFooter } from '../components/SiteFooter'
 
 export function PrivateLayout() {
   const { signOut, user } = useAuth()
@@ -70,6 +71,7 @@ export function PrivateLayout() {
       <main className="app-main">
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   )
 }

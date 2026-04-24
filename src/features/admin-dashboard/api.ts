@@ -173,6 +173,76 @@ function mapDashboard(row: AdminDashboardRow): AdminOperationalDashboard {
   }
 }
 
+export interface PendingVerification {
+  id: string
+  fullName: string
+  country: string
+  roleTitle: string
+  organizationName: string
+  shortBio: string
+  verificationStatus: string
+  profileStatus: string
+  accountType: string
+  createdAt: string
+}
+
+export async function listPendingVerifications(): Promise<PendingVerification[]> {
+  const client = getClient()
+  const { data, error } = await client.rpc('admin_list_pending_verifications')
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return ((data ?? []) as Array<{
+    id: string
+    full_name: string
+    country: string
+    role_title: string
+    organization_name: string
+    short_bio: string
+    verification_status: string
+    profile_status: string
+    account_type: string
+    created_at: string
+  }>).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+    country: row.country,
+    roleTitle: row.role_title,
+    organizationName: row.organization_name,
+    shortBio: row.short_bio,
+    verificationStatus: row.verification_status,
+    profileStatus: row.profile_status,
+    accountType: row.account_type,
+    createdAt: row.created_at,
+  }))
+}
+
+export async function approveVerification(profileId: string): Promise<void> {
+  const client = getClient()
+  const { error } = await client.rpc('admin_update_verification', {
+    p_profile_id: profileId,
+    p_new_status: 'verified',
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export async function rejectVerification(profileId: string): Promise<void> {
+  const client = getClient()
+  const { error } = await client.rpc('admin_update_verification', {
+    p_profile_id: profileId,
+    p_new_status: 'unverified',
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
 export async function getAdminOperationalDashboard(
   periodDays: number,
 ): Promise<AdminOperationalDashboard> {

@@ -156,6 +156,21 @@ export function DirectoryProfileDetailPage() {
       </div>
 
       <div className="info-card stack">
+        <h3>Enviar mensaje privado</h3>
+        <p className="helper-text">
+          Conecta directamente sin exponer datos de contacto. Tus mensajes quedan dentro de Zucarlink.
+        </p>
+        <div className="actions">
+          <Link
+            className="button"
+            to={`/app/messages?to=${profile.id}`}
+          >
+            Enviar mensaje a {profile.fullName.split(' ')[0]}
+          </Link>
+        </div>
+      </div>
+
+      <div className="info-card stack">
         <h3>Privacidad</h3>
         <p className="helper-text">
           Este detalle solo muestra información profesional. Los datos de contacto personales

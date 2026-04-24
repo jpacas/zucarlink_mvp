@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
 
-import { getAdminOperationalDashboard } from '../features/admin-dashboard/api'
+import {
+  approveVerification,
+  getAdminOperationalDashboard,
+  listPendingVerifications,
+  rejectVerification,
+  type PendingVerification,
+} from '../features/admin-dashboard/api'
 import type {
   AdminOperationalDashboard,
   ContentStatusMetric,
@@ -32,6 +38,54 @@ export function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState<AdminOperationalDashboard | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [pendingVerifications, setPendingVerifications] = useState<PendingVerification[]>([])
+  const [verificationLoading, setVerificationLoading] = useState(true)
+  const [processingId, setProcessingId] = useState<string | null>(null)
+
+  const loadPendingVerifications = useCallback(async () => {
+    setVerificationLoading(true)
+
+    try {
+      const items = await listPendingVerifications()
+      setPendingVerifications(items)
+    } catch {
+      // Non-critical: verification queue failure shouldn't crash dashboard
+    } finally {
+      setVerificationLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isAdmin) {
+      void loadPendingVerifications()
+    }
+  }, [isAdmin, loadPendingVerifications])
+
+  async function handleApprove(profileId: string) {
+    setProcessingId(profileId)
+
+    try {
+      await approveVerification(profileId)
+      await loadPendingVerifications()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'No fue posible aprobar la verificación.')
+    } finally {
+      setProcessingId(null)
+    }
+  }
+
+  async function handleReject(profileId: string) {
+    setProcessingId(profileId)
+
+    try {
+      await rejectVerification(profileId)
+      await loadPendingVerifications()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'No fue posible rechazar la verificación.')
+    } finally {
+      setProcessingId(null)
+    }
+  }
 
   useEffect(() => {
     if (!isAdmin) {
@@ -173,6 +227,82 @@ export function AdminDashboardPage() {
           </div>
         </>
       ) : null}
+
+      {/* Verification queue — always visible for admin, independent of period selector */}
+      <article className="info-card stack">
+        <div className="split-header">
+          <h3>
+            Cola de verificación
+            {pendingVerifications.length > 0 ? (
+              <span className="messages-unread-badge" style={{ marginLeft: '8px', verticalAlign: 'middle' }}>
+                {pendingVerifications.length}
+              </span>
+            ) : null}
+          </h3>
+          <button
+            type="button"
+            className="button button--secondary"
+            onClick={() => void loadPendingVerifications()}
+            disabled={verificationLoading}
+          >
+            {verificationLoading ? 'Actualizando...' : 'Actualizar'}
+          </button>
+        </div>
+
+        {verificationLoading ? (
+          <p className="helper-text">Cargando solicitudes pendientes...</p>
+        ) : pendingVerifications.length === 0 ? (
+          <p className="helper-text">No hay solicitudes de verificación pendientes.</p>
+        ) : (
+          <div className="compact-table">
+            {pendingVerifications.map((profile) => (
+              <div key={profile.id} className="compact-row compact-row--stack">
+                <div className="split-header">
+                  <div className="stack stack--compact">
+                    <strong>{profile.fullName || 'Sin nombre'}</strong>
+                    <span className="helper-text">
+                      {profile.roleTitle || 'Sin cargo'}
+                      {profile.organizationName ? ` · ${profile.organizationName}` : ''}
+                      {profile.country ? ` · ${profile.country}` : ''}
+                    </span>
+                    {profile.shortBio ? (
+                      <p className="helper-text" style={{ fontSize: '0.82rem' }}>
+                        {profile.shortBio.slice(0, 120)}{profile.shortBio.length > 120 ? '…' : ''}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="actions">
+                    <Link
+                      className="button button--secondary"
+                      to={`/app/directory/${profile.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Ver perfil
+                    </Link>
+                    <button
+                      type="button"
+                      className="button"
+                      disabled={processingId === profile.id}
+                      onClick={() => void handleApprove(profile.id)}
+                    >
+                      {processingId === profile.id ? '...' : 'Aprobar'}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--secondary"
+                      disabled={processingId === profile.id}
+                      onClick={() => void handleReject(profile.id)}
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </article>
     </section>
   )
 }

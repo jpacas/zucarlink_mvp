@@ -72,6 +72,9 @@ export function LoginPage() {
             ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
           </span>
         </div>
+        <p className="helper-text" style={{ textAlign: 'center' }}>
+          <Link to="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
+        </p>
       </form>
     </AuthFormShell>
   )

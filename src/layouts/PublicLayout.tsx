@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { SiteFooter } from '../components/SiteFooter'
 
 const publicLinks = [
   { to: '/', label: 'Inicio' },
@@ -57,6 +58,7 @@ export function PublicLayout() {
       <main className="app-main">
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   )
 }

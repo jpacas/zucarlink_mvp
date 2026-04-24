@@ -45,7 +45,19 @@ const ProvidersLandingPage = lazyNamed(
   () => import('../pages/ProvidersLandingPage'),
   'ProvidersLandingPage',
 )
+const ContactPage = lazyNamed(() => import('../pages/ContactPage'), 'ContactPage')
+const LegalPage = lazyNamed(() => import('../pages/LegalPage'), 'LegalPage')
+const PasswordResetRequestPage = lazyNamed(
+  () => import('../pages/PasswordResetRequestPage'),
+  'PasswordResetRequestPage',
+)
+const PasswordResetPage = lazyNamed(
+  () => import('../pages/PasswordResetPage'),
+  'PasswordResetPage',
+)
+const PrivacyPage = lazyNamed(() => import('../pages/PrivacyPage'), 'PrivacyPage')
 const RegisterPage = lazyNamed(() => import('../pages/RegisterPage'), 'RegisterPage')
+const TermsPage = lazyNamed(() => import('../pages/TermsPage'), 'TermsPage')
 const SettingsPage = lazyNamed(() => import('../pages/SettingsPage'), 'SettingsPage')
 
 export function AppRouter() {
@@ -79,6 +91,12 @@ export function AppRouter() {
           <Route path="proveedores" element={<ProvidersLandingPage />} />
           <Route path="proveedores/directorio" element={<ProvidersDirectoryPage />} />
           <Route path="proveedores/:slug" element={<ProviderDetailPage />} />
+          <Route path="recuperar-contrasena" element={<PasswordResetRequestPage />} />
+          <Route path="nueva-contrasena" element={<PasswordResetPage />} />
+          <Route path="aviso-legal" element={<LegalPage />} />
+          <Route path="privacidad" element={<PrivacyPage />} />
+          <Route path="terminos" element={<TermsPage />} />
+          <Route path="contacto" element={<ContactPage />} />
           <Route element={<PublicOnlyRoute />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
