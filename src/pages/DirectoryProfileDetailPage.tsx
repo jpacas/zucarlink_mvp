@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getDirectoryProfileDetail } from '../features/directory/api'
 import type { DirectoryProfileDetail } from '../features/directory/types'
 
@@ -75,7 +76,13 @@ export function DirectoryProfileDetailPage() {
   }
 
   return (
-    <section className="content-card stack">
+    <div className="stack">
+      <Breadcrumbs items={[
+        { label: 'Panel', to: '/app' },
+        { label: 'Directorio', to: '/app/directory' },
+        { label: profile.fullName },
+      ]} />
+      <section className="content-card stack">
       <div className="split-header">
         <div className="profile-header">
           {profile.avatarUrl ? (
@@ -178,5 +185,6 @@ export function DirectoryProfileDetailPage() {
         </p>
       </div>
     </section>
+    </div>
   )
 }

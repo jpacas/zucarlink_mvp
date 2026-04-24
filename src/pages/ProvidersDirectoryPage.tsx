@@ -9,6 +9,7 @@ import { ProviderLogo } from '../features/providers/ProviderLogo'
 import type { ProviderCard, ProviderCategory } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import { Skeleton } from '../components/Skeleton'
 
 export function ProvidersDirectoryPage() {
   const [providers, setProviders] = useState<ProviderCard[]>([])
@@ -96,7 +97,25 @@ export function ProvidersDirectoryPage() {
         </div>
       </div>
 
-      {isLoading ? <p className="helper-text">Cargando proveedores.</p> : null}
+      {isLoading ? (
+        <div className="stack" aria-hidden="true">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <article key={i} className="info-card stack">
+              <div className="split-header">
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  <Skeleton variant="avatar-sm" />
+                  <div className="stack stack--compact">
+                    <Skeleton variant="heading" width="160px" />
+                    <Skeleton variant="chip" />
+                  </div>
+                </div>
+              </div>
+              <Skeleton variant="text" width="90%" />
+              <Skeleton variant="text" width="65%" />
+            </article>
+          ))}
+        </div>
+      ) : null}
       {!isLoading && isPublicDataUnavailable ? (
         <p className="helper-text">El directorio de proveedores estará disponible pronto.</p>
       ) : null}

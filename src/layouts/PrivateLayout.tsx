@@ -40,6 +40,7 @@ export function PrivateLayout() {
 
   return (
     <div className="app-shell">
+      <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
         <div className="stack">
           <div>
@@ -68,7 +69,7 @@ export function PrivateLayout() {
           </button>
         </div>
       </header>
-      <main className="app-main">
+      <main id="main-content" className="app-main">
         <Outlet />
       </main>
       <SiteFooter />

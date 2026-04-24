@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ProviderLeadForm } from '../features/providers/ProviderLeadForm'
 import { ProviderLogo } from '../features/providers/ProviderLogo'
 import { getProviderBySlug } from '../features/providers/api'
@@ -52,7 +53,13 @@ export function ProviderDetailPage() {
   }
 
   return (
-    <section className="content-card stack">
+    <div className="stack">
+      <Breadcrumbs items={[
+        { label: 'Inicio', to: '/' },
+        { label: 'Proveedores', to: '/proveedores/directorio' },
+        { label: provider.companyName },
+      ]} />
+      <section className="content-card stack">
       <div className="split-header">
         <div className="provider-summary">
           <ProviderLogo companyName={provider.companyName} logoUrl={provider.logoUrl} />
@@ -133,5 +140,6 @@ export function ProviderDetailPage() {
         ) : null}
       </div>
     </section>
+    </div>
   )
 }

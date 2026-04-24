@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { createForumReply, getForumThread } from '../features/forum/api'
 import type { ForumAuthor, ForumThreadDetail } from '../features/forum/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
@@ -156,12 +157,16 @@ export function ForumThreadPage() {
   }
 
   return (
-    <section className="content-card stack">
+    <div className="stack">
+      <Breadcrumbs items={[
+        { label: 'Inicio', to: '/' },
+        { label: 'Foro', to: '/forum' },
+        { label: thread.category.name, to: `/forum/category/${thread.category.slug}` },
+        { label: thread.title },
+      ]} />
+      <section className="content-card stack">
       <div className="forum-thread-header stack">
         <div className="actions">
-          <Link className="inline-link" to="/forum">
-            Volver al foro
-          </Link>
           <Link className="route-chip" to={`/forum/category/${thread.category.slug}`}>
             {thread.category.name}
           </Link>
@@ -276,5 +281,6 @@ export function ForumThreadPage() {
         </section>
       )}
     </section>
+    </div>
   )
 }

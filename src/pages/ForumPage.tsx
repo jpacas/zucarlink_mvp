@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { listForumCategories, listForumThreads } from '../features/forum/api'
 import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/forum/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import { Skeleton } from '../components/Skeleton'
 
 function formatForumDate(value: string) {
   if (!value) {
@@ -98,8 +99,28 @@ export function ForumPage() {
   if (isLoading) {
     return (
       <section className="content-card stack">
-        <h2>Foro técnico</h2>
-        <p className="helper-text">Estamos cargando categorías y temas activos.</p>
+        <div className="split-header">
+          <div className="stack stack--compact">
+            <Skeleton variant="text" width="60px" />
+            <Skeleton variant="heading" />
+          </div>
+        </div>
+        <div className="chip-grid" aria-hidden="true">
+          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} variant="chip" />)}
+        </div>
+        <div className="forum-thread-list" aria-hidden="true">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <article key={i} className="info-card stack">
+              <Skeleton variant="text" width="100px" />
+              <Skeleton variant="heading" />
+              <Skeleton variant="text" width="85%" />
+              <div className="forum-meta-row">
+                <Skeleton variant="avatar-sm" />
+                <Skeleton variant="text" width="80px" />
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     )
   }
@@ -129,9 +150,20 @@ export function ForumPage() {
         </div>
         <div className="actions">
           {user ? (
-            <Link className="button" to="/forum/new">
-              Crear tema
-            </Link>
+            user.user_metadata?.profile_status === 'complete' ? (
+              <Link className="button" to="/forum/new">
+                Crear tema
+              </Link>
+            ) : (
+              <div className="stack stack--compact">
+                <button type="button" className="button" disabled title="Completa tu perfil para crear temas">
+                  Crear tema
+                </button>
+                <p className="helper-text" style={{ fontSize: '0.8rem' }}>
+                  <Link to="/app/profile/edit">Completa tu perfil</Link> para participar
+                </p>
+              </div>
+            )
           ) : (
             <Link className="button" to="/register">
               Crear cuenta para participar
@@ -182,9 +214,31 @@ export function ForumPage() {
           <h3>{activeCategory ? `Sin temas en ${activeCategory.name}` : 'Sin temas aún'}</h3>
           <p className="helper-text">
             {activeCategory
-              ? 'Todavía no hay conversaciones visibles en esta categoría.'
+              ? 'Todavía no hay conversaciones visibles en esta categoría. ¡Sé el primero!'
               : 'El foro todavía no tiene conversaciones públicas visibles.'}
           </p>
+          {user && user.user_metadata?.profile_status === 'complete' ? (
+            <div className="actions">
+              <Link
+                className="button"
+                to={activeCategory ? `/forum/new?category=${activeCategory.slug}` : '/forum/new'}
+              >
+                Abrir el primer debate
+              </Link>
+            </div>
+          ) : user ? (
+            <div className="actions">
+              <Link className="button button--secondary" to="/app/profile/edit">
+                Completa tu perfil para participar
+              </Link>
+            </div>
+          ) : (
+            <div className="actions">
+              <Link className="button button--secondary" to="/register">
+                Crear cuenta para participar
+              </Link>
+            </div>
+          )}
         </section>
       )}
     </section>

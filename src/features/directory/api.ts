@@ -64,6 +64,54 @@ async function mapDirectoryProfile(row: DirectoryProfileRow): Promise<DirectoryP
   }
 }
 
+export interface PublicPreviewProfile {
+  id: string
+  fullName: string
+  avatarUrl: string | null
+  roleTitle: string
+  organizationName: string
+  country: string
+  specialties: string[]
+  isVerified: boolean
+}
+
+interface PublicPreviewRow {
+  id: string
+  full_name: string
+  avatar_path: string | null
+  role_title: string
+  organization_name: string
+  country: string
+  specialties: string[]
+  is_verified: boolean
+}
+
+export async function listPublicPreviewProfiles(limitCount = 12): Promise<PublicPreviewProfile[]> {
+  const client = getClient()
+  const { data, error } = await client.rpc('list_public_preview_profiles', {
+    limit_count: limitCount,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  const rows = (data ?? []) as PublicPreviewRow[]
+
+  return Promise.all(
+    rows.map(async (row) => ({
+      id: row.id,
+      fullName: row.full_name,
+      avatarUrl: await resolveAvatarUrl(row.avatar_path),
+      roleTitle: row.role_title,
+      organizationName: row.organization_name,
+      country: row.country,
+      specialties: row.specialties ?? [],
+      isVerified: row.is_verified,
+    })),
+  )
+}
+
 export async function getDirectoryPublicSummary(): Promise<DirectoryAggregateSnapshot> {
   const client = getClient()
   const { data, error } = await client.rpc('get_public_directory_summary')

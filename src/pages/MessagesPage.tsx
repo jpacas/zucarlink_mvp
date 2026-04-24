@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { SkeletonThreadItem } from '../components/Skeleton'
 import {
   getThreadMessages,
   listMyThreads,
@@ -303,7 +304,9 @@ export function MessagesPage() {
           <h3 className="messages-sidebar__title">Conversaciones</h3>
 
           {threadsLoading ? (
-            <p className="helper-text" style={{ padding: '16px' }}>Cargando conversaciones...</p>
+            <div className="messages-thread-list" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => <SkeletonThreadItem key={i} />)}
+            </div>
           ) : threadsError ? (
             <div style={{ padding: '16px' }}>
               <p className="error-text">{threadsError}</p>
@@ -385,9 +388,13 @@ export function MessagesPage() {
               {/* Messages */}
               <div className="messages-body" role="log" aria-live="polite" aria-label="Mensajes">
                 {messagesLoading && messages.length === 0 ? (
-                  <p className="helper-text" style={{ textAlign: 'center', padding: '32px 0' }}>
-                    Cargando mensajes...
-                  </p>
+                  <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className={`message-bubble-wrap${i % 2 === 1 ? ' message-bubble-wrap--mine' : ''}`}>
+                        <div className="message-bubble" style={{ width: `${48 + (i * 7) % 30}%`, height: 48, background: 'rgba(17,34,51,0.06)', borderRadius: 16 }} />
+                      </div>
+                    ))}
+                  </div>
                 ) : messages.length === 0 ? (
                   <p className="helper-text" style={{ textAlign: 'center', padding: '32px 0' }}>
                     Aún no hay mensajes. ¡Inicia la conversación!

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getProfileForumActivity, getPublicMemberProfile } from '../features/profile/public-api'
 import type { PublicMemberProfile, PublicProfileForumActivity } from '../features/profile/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
@@ -89,7 +90,13 @@ export function PublicProfilePage() {
   }
 
   return (
-    <section className="content-card stack">
+    <div className="stack">
+      <Breadcrumbs items={[
+        { label: 'Inicio', to: '/' },
+        { label: 'Directorio', to: '/directory' },
+        { label: profile.fullName },
+      ]} />
+      <section className="content-card stack">
       <div className="split-header">
         <div className="profile-header">
           {profile.avatarUrl && !hasAvatarError ? (
@@ -165,5 +172,6 @@ export function PublicProfilePage() {
         )}
       </div>
     </section>
+    </div>
   )
 }

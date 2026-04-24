@@ -23,6 +23,7 @@ export function PublicLayout() {
 
   return (
     <div className="app-shell">
+      <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
         <div>
           <p className="eyebrow">Zucarlink</p>
@@ -33,6 +34,7 @@ export function PublicLayout() {
           type="button"
           aria-expanded={isMenuOpen}
           aria-controls="public-navigation"
+          aria-label={isMenuOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
           onClick={() => setIsMenuOpen((current) => !current)}
         >
           {isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
@@ -55,7 +57,7 @@ export function PublicLayout() {
           )}
         </nav>
       </header>
-      <main className="app-main">
+      <main id="main-content" className="app-main">
         <Outlet />
       </main>
       <SiteFooter />
