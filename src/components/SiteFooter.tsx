@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import { ZucarLogo } from './ZucarLogo'
+
 const currentYear = new Date().getFullYear()
 
 export function SiteFooter() {
@@ -7,7 +9,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer__inner">
         <div className="site-footer__brand">
-          <strong>Zucarlink</strong>
+          <ZucarLogo height={28} />
           <p className="helper-text">
             La red profesional de la industria azucarera en Latinoamérica.
           </p>
