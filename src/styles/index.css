@@ -223,14 +223,17 @@ label {
 
 .menu-toggle {
   display: none;
-  min-height: 44px;
-  padding: 10px 16px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--brand);
-  color: #ffffff;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
   cursor: pointer;
-  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .nav-link {
