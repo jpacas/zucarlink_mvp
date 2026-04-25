@@ -120,7 +120,7 @@ export function HomePage() {
       <section className="section-grid">
         <article className="content-card stack">
           <p className="eyebrow">Para técnicos</p>
-          <h3>Criterio, contactos y contexto sectorial</h3>
+          <h2>Criterio, contactos y contexto sectorial</h2>
           <p>
             Participa en debates técnicos, ubica perfiles relevantes y mantente conectado
             sin depender de canales dispersos.
@@ -137,7 +137,7 @@ export function HomePage() {
 
         <article className="content-card stack">
           <p className="eyebrow">Para proveedores</p>
-          <h3>Presencia útil frente a una audiencia especializada</h3>
+          <h2>Presencia útil frente a una audiencia especializada</h2>
           <p>
             Presenta tu empresa, deja clara tu oferta y recibe contacto directo de técnicos
             y tomadores de decisión del sector.
