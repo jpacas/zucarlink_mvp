@@ -5,6 +5,7 @@ import { ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute'
 import { PrivateLayout } from '../layouts/PrivateLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
+import { ZucarLogo } from '../components/ZucarLogo'
 
 const AppHomePage = lazyNamed(() => import('../pages/AppHomePage'), 'AppHomePage')
 const AdminDashboardPage = lazyNamed(
@@ -135,7 +136,7 @@ function LegacyProviderRedirect() {
 function RouteLoadingState() {
   return (
     <section className="content-card stack content-card--status" aria-live="polite">
-      <p className="eyebrow">Zucarlink</p>
+      <ZucarLogo height={28} />
       <h2>Cargando página</h2>
       <p className="helper-text">Estamos preparando el siguiente módulo.</p>
     </section>
