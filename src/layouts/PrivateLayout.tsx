@@ -44,7 +44,7 @@ export function PrivateLayout() {
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
         <div className="stack">
-          <ZucarLogo size={32} wordmark />
+          <ZucarLogo height={36} />
           <span className="user-badge">{user?.email}</span>
         </div>
         <div className="actions">

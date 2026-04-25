@@ -27,7 +27,7 @@ export function PublicLayout() {
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
         <div>
-          <ZucarLogo size={32} wordmark />
+          <ZucarLogo height={36} />
         </div>
         <button
           className="menu-toggle"

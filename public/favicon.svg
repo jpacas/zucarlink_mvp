@@ -1,17 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#201747" />
+  <rect width="64" height="64" rx="14" fill="#201747"/>
+  <!-- Using the exact petal arrangement from the official logo:
+       top=cyan, top-right=orange, bottom-right=green,
+       bottom=cyan, bottom-left=orange, top-left=green -->
   <!-- Center circle -->
-  <circle cx="32" cy="32" r="8" fill="white" />
-  <!-- Petal top: cyan -->
-  <ellipse cx="32" cy="14" rx="6.5" ry="4" fill="#00C9FF" />
-  <!-- Petal top-right: orange -->
-  <ellipse cx="32" cy="14" rx="6.5" ry="4" fill="#FF724B" transform="rotate(60 32 32)" />
-  <!-- Petal bottom-right: green -->
-  <ellipse cx="32" cy="14" rx="6.5" ry="4" fill="#0DDB89" transform="rotate(120 32 32)" />
-  <!-- Petal bottom: cyan -->
-  <ellipse cx="32" cy="14" rx="6.5" ry="4" fill="#00C9FF" transform="rotate(180 32 32)" />
-  <!-- Petal bottom-left: orange -->
-  <ellipse cx="32" cy="14" rx="6.5" ry="4" fill="#FF724B" transform="rotate(240 32 32)" />
-  <!-- Petal top-left: green -->
-  <ellipse cx="32" cy="14" rx="6.5" ry="4" fill="#0DDB89" transform="rotate(300 32 32)" />
+  <circle cx="32" cy="32" r="7" fill="white"/>
+  <!-- Top petal: cyan, horizontal -->
+  <ellipse cx="32" cy="16.5" rx="7" ry="4.5" fill="#00C9FF"/>
+  <!-- Top-right petal: orange, rotated 60° -->
+  <ellipse cx="32" cy="16.5" rx="7" ry="4.5" fill="#FF724B" transform="rotate(60 32 32)"/>
+  <!-- Bottom-right petal: green, rotated 120° -->
+  <ellipse cx="32" cy="16.5" rx="7" ry="4.5" fill="#0DDB89" transform="rotate(120 32 32)"/>
+  <!-- Bottom petal: cyan, rotated 180° -->
+  <ellipse cx="32" cy="16.5" rx="7" ry="4.5" fill="#00C9FF" transform="rotate(180 32 32)"/>
+  <!-- Bottom-left petal: orange, rotated 240° -->
+  <ellipse cx="32" cy="16.5" rx="7" ry="4.5" fill="#FF724B" transform="rotate(240 32 32)"/>
+  <!-- Top-left petal: green, rotated 300° -->
+  <ellipse cx="32" cy="16.5" rx="7" ry="4.5" fill="#0DDB89" transform="rotate(300 32 32)"/>
 </svg>
