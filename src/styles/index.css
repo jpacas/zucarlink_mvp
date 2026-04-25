@@ -195,6 +195,8 @@ label {
   color: var(--text-soft);
   font-size: 0.88rem;
   text-decoration: none;
+  padding-block: 11px;
+  margin-block: -11px;
 }
 
 .site-footer__links a:hover {
@@ -798,6 +800,8 @@ label {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  padding-block: 10px;
+  margin-block: -10px;
 }
 
 .section-heading h2,
