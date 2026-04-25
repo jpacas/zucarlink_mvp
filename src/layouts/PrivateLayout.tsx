@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { SiteFooter } from '../components/SiteFooter'
+import { ZucarLogo } from '../components/ZucarLogo'
 
 export function PrivateLayout() {
   const { signOut, user } = useAuth()
@@ -43,10 +44,7 @@ export function PrivateLayout() {
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
         <div className="stack">
-          <div>
-            <p className="eyebrow">Mi cuenta</p>
-            <h1>Zucarlink</h1>
-          </div>
+          <ZucarLogo size={32} wordmark />
           <span className="user-badge">{user?.email}</span>
         </div>
         <div className="actions">

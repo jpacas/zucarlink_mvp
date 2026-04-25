@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { SiteFooter } from '../components/SiteFooter'
+import { ZucarLogo } from '../components/ZucarLogo'
 
 const publicLinks = [
   { to: '/', label: 'Inicio' },
@@ -26,8 +27,7 @@ export function PublicLayout() {
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
         <div>
-          <p className="eyebrow">Zucarlink</p>
-          <h1>Zucarlink</h1>
+          <ZucarLogo size={32} wordmark />
         </div>
         <button
           className="menu-toggle"
