@@ -143,6 +143,7 @@ label {
 }
 
 .app-header h1,
+.hero-card h1,
 .hero-card h2,
 .hero-card p,
 .content-card h2,
@@ -288,6 +289,7 @@ label {
   position: relative;
 }
 
+.hero-card h1,
 .hero-card h2 {
   margin-top: 8px;
   margin-bottom: 12px;
@@ -1078,6 +1080,7 @@ label {
     align-items: flex-start;
   }
 
+  .hero-card h1,
   .hero-card h2 {
     max-width: none;
     font-size: clamp(2rem, 10vw, 3rem);

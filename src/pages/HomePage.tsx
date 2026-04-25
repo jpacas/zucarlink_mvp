@@ -79,7 +79,7 @@ export function HomePage() {
     <div className="stack">
       <section className="hero-card stack hero-card--home">
         <p className="eyebrow">Red profesional · Industria azucarera</p>
-        <h2>Conecta con técnicos y especialistas del sector azucarero</h2>
+        <h1>Conecta con técnicos y especialistas del sector azucarero</h1>
         <p>
           Directorio curado, foro técnico y contacto directo con proveedores —
           todo en una red privada pensada para la industria.
