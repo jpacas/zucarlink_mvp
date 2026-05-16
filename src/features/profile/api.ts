@@ -77,34 +77,16 @@ async function ensureCompanyId(companyName: string, country: string) {
   }
 
   const client = getClient()
-  const { data: existing, error: existingError } = await client
-    .from('companies')
-    .select('id, name')
-    .eq('name', cleanName)
-    .maybeSingle()
+  const { data, error } = await client.rpc('upsert_company', {
+    p_name: cleanName,
+    p_country: country.trim() || null,
+  })
 
-  if (existingError) {
-    throw new Error(existingError.message)
+  if (error) {
+    throw new Error(error.message)
   }
 
-  if (existing) {
-    return existing.id
-  }
-
-  const { data: created, error: createError } = await client
-    .from('companies')
-    .insert({
-      name: cleanName,
-      country: country.trim() || null,
-    })
-    .select('id, name')
-    .single()
-
-  if (createError) {
-    throw new Error(createError.message)
-  }
-
-  return created.id
+  return data as string
 }
 
 async function loadCompaniesByIds(ids: string[]) {
@@ -312,28 +294,13 @@ export async function saveProfileDraft(
 
 export async function replaceProfileSpecialties(userId: string, specialtyIds: string[]) {
   const client = getClient()
-  const { error: deleteError } = await client
-    .from('profile_specialties')
-    .delete()
-    .eq('profile_id', userId)
+  const { error } = await client.rpc('replace_profile_specialties', {
+    p_user_id: userId,
+    p_specialty_ids: specialtyIds,
+  })
 
-  if (deleteError) {
-    throw new Error(deleteError.message)
-  }
-
-  if (specialtyIds.length === 0) {
-    return
-  }
-
-  const { error: insertError } = await client.from('profile_specialties').insert(
-    specialtyIds.map((specialtyId) => ({
-      profile_id: userId,
-      specialty_id: specialtyId,
-    })),
-  )
-
-  if (insertError) {
-    throw new Error(insertError.message)
+  if (error) {
+    throw new Error(error.message)
   }
 }
 

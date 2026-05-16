@@ -257,9 +257,8 @@ export async function saveProviderProfile(
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean)
-  const row = {
+  const baseRow = {
     owner_id: user.id,
-    slug: slugify(payload.companyName),
     company_name: payload.companyName.trim(),
     short_description: payload.shortDescription.trim() || null,
     long_description: payload.longDescription.trim() || null,
@@ -282,7 +281,7 @@ export async function saveProviderProfile(
   }
 
   if (existing) {
-    const { error } = await client.from('providers').update(row).eq('owner_id', user.id)
+    const { error } = await client.from('providers').update(baseRow).eq('owner_id', user.id)
 
     if (error) {
       throw new Error(error.message)
@@ -291,7 +290,10 @@ export async function saveProviderProfile(
     return
   }
 
-  const { error } = await client.from('providers').insert(row)
+  const { error } = await client.from('providers').insert({
+    ...baseRow,
+    slug: slugify(payload.companyName),
+  })
 
   if (error) {
     throw new Error(error.message)
