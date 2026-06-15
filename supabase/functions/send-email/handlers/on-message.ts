@@ -1,4 +1,4 @@
-import { getAdminClient } from '../../../_shared/supabase-admin.ts'
+import { getAdminClient } from '../../_shared/supabase-admin.ts'
 import { sendEmail } from '../resend.ts'
 import { renderMessageNotificationEmail } from '../templates/message-notification.ts'
 
