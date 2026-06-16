@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { SiteFooter } from '../components/SiteFooter'
@@ -26,9 +26,9 @@ export function PublicLayout() {
     <div className="app-shell">
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
-        <div>
+        <Link to="/" aria-label="Ir al inicio">
           <ZucarLogo height={36} />
-        </div>
+        </Link>
         <button
           className="menu-toggle"
           type="button"

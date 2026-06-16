@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { SiteFooter } from '../components/SiteFooter'
@@ -68,7 +68,9 @@ export function PrivateLayout() {
     <div className="app-shell">
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>
       <header className="app-header">
-        <ZucarLogo height={36} />
+        <Link to="/" aria-label="Ir al inicio">
+          <ZucarLogo height={36} />
+        </Link>
 
         <div className="app-header__right">
           <button
