@@ -27,20 +27,32 @@ export function AppHeader() {
   const accountType = user?.user_metadata?.account_type
   const isAdmin = Boolean(user?.user_metadata?.is_admin)
 
-  const primaryLinks =
+  // Elementos propios de la cuenta (varían según el tipo de usuario)
+  const accountLinks =
     accountType === 'provider'
       ? [
           { to: '/app', label: 'Panel' },
           { to: '/proveedores/directorio', label: 'Directorio' },
           { to: '/app/provider', label: 'Perfil comercial' },
-          { to: '/app/messages', label: 'Mensajes' },
         ]
       : [
           { to: '/app', label: 'Panel' },
           { to: '/app/directory', label: 'Directorio' },
-          { to: '/forum', label: 'Foro' },
-          { to: '/app/messages', label: 'Mensajes' },
         ]
+
+  // Servicios públicos de Zucarlink, accesibles también estando logueado
+  const serviceLinks = [
+    { to: '/forum', label: 'Foro' },
+    { to: '/informacion', label: 'Información' },
+    { to: '/proveedores', label: 'Proveedores' },
+  ]
+
+  // Cuenta + servicios + Mensajes al final (sin duplicar rutas ya presentes)
+  const primaryLinks = [
+    ...accountLinks,
+    ...serviceLinks.filter((s) => !accountLinks.some((a) => a.to === s.to)),
+    { to: '/app/messages', label: 'Mensajes' },
+  ]
 
   const userMenuLinks =
     accountType === 'provider'
