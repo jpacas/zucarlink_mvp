@@ -395,5 +395,5 @@ export async function resolvePostAuthDestination(user: User) {
     return providerProfile ? '/app/provider' : '/onboarding'
   }
 
-  return profile.profileStatus === 'complete' ? '/app/profile' : '/onboarding'
+  return profile.profileStatus === 'complete' ? '/app' : '/onboarding'
 }

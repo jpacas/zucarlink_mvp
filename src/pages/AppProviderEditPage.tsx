@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ProviderProfileForm } from '../features/providers/ProviderProfileForm'
 import {
   createEmptyProviderDraft,
@@ -78,6 +79,12 @@ export function AppProviderEditPage() {
   }
 
   return (
+    <div className="stack">
+    <Breadcrumbs items={[
+      { label: 'Panel', to: '/app' },
+      { label: 'Perfil comercial', to: '/app/provider' },
+      { label: 'Editar' },
+    ]} />
     <section className="content-card stack">
       <p className="eyebrow">Proveedor</p>
       <h2>Editar perfil comercial</h2>
@@ -92,5 +99,6 @@ export function AppProviderEditPage() {
         onSubmitLabel="Guardar perfil comercial"
       />
     </section>
+    </div>
   )
 }

@@ -1,6 +1,7 @@
 import { Link, Navigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { useCurrentProviderProfile } from '../features/providers/useCurrentProviderProfile'
 
 export function AppProviderPage() {
@@ -44,6 +45,11 @@ export function AppProviderPage() {
   }
 
   return (
+    <div className="stack">
+    <Breadcrumbs items={[
+      { label: 'Panel', to: '/app' },
+      { label: 'Perfil comercial' },
+    ]} />
     <section className="content-card stack">
       <div className="split-header">
         <div className="stack">
@@ -75,5 +81,6 @@ export function AppProviderPage() {
         <p>{provider.productsServices || 'Detalla tus soluciones principales.'}</p>
       </div>
     </section>
+    </div>
   )
 }

@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 
 export function SettingsPage() {
   const { user } = useAuth()
 
   return (
+    <div className="stack">
+    <Breadcrumbs items={[
+      { label: 'Panel', to: '/app' },
+      { label: 'Ajustes' },
+    ]} />
     <section className="content-card stack">
       <div className="stack">
         <p className="eyebrow">Cuenta</p>
@@ -72,5 +78,6 @@ export function SettingsPage() {
         </article>
       </div>
     </section>
+    </div>
   )
 }

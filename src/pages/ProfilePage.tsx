@@ -2,6 +2,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getProfileForumActivity } from '../features/profile/public-api'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import type { PublicProfileForumActivity } from '../features/profile/types'
@@ -88,6 +89,11 @@ export function ProfilePage() {
   }
 
   return (
+    <div className="stack">
+    <Breadcrumbs items={[
+      { label: 'Panel', to: '/app' },
+      { label: 'Mi perfil' },
+    ]} />
     <section className="content-card stack">
       <div className="split-header">
         <div className="profile-header">
@@ -216,5 +222,6 @@ export function ProfilePage() {
         </p>
       </div>
     </section>
+    </div>
   )
 }

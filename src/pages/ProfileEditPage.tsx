@@ -23,6 +23,7 @@ import type {
   ProfileSpecialty,
 } from '../features/profile/types'
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 
 type FeedbackState = {
   kind: 'error' | 'success'
@@ -209,6 +210,12 @@ export function ProfileEditPage() {
   }
 
   return (
+    <div className="stack">
+    <Breadcrumbs items={[
+      { label: 'Panel', to: '/app' },
+      { label: 'Mi perfil', to: '/app/profile' },
+      { label: 'Editar' },
+    ]} />
     <section className="content-card stack">
       <div className="split-header">
         <div className="stack">
@@ -282,5 +289,6 @@ export function ProfileEditPage() {
         </>
       ) : null}
     </section>
+    </div>
   )
 }

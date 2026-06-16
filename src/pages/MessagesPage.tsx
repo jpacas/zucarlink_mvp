@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { SkeletonThreadItem } from '../components/Skeleton'
 import {
   getThreadMessages,
@@ -283,6 +284,11 @@ export function MessagesPage() {
   }
 
   return (
+    <div className="stack">
+    <Breadcrumbs items={[
+      { label: 'Panel', to: '/app' },
+      { label: 'Mensajes' },
+    ]} />
     <section className="content-card stack">
       <div className="split-header">
         <div className="stack">
@@ -445,5 +451,6 @@ export function MessagesPage() {
         </div>
       </div>
     </section>
+    </div>
   )
 }

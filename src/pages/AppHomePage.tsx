@@ -111,12 +111,12 @@ export function AppHomePage() {
           <h3>{isProvider ? 'Presencia comercial' : 'Identidad profesional'}</h3>
           <p>
             {isProvider
-              ? 'Ajusta tu propuesta, cobertura y oferta para que la ficha pública mantenga una señal comercial sólida.'
-              : 'Mantén visibles tu experiencia, especialidades y resumen para que el directorio siga siendo útil.'}
+              ? 'Revisa cómo se ve tu ficha antes de que un potencial cliente la encuentre en el directorio.'
+              : 'Así te ven otros miembros cuando buscan en el directorio. Mantén la información al día.'}
           </p>
           <div className="actions">
-            <Link className="inline-link" to={isProvider ? '/app/provider/edit' : '/app/profile/edit'}>
-              Abrir edición
+            <Link className="button button--secondary button--sm" to={isProvider ? '/app/provider' : '/app/profile'}>
+              {isProvider ? 'Ver ficha comercial' : 'Ver mi ficha'}
             </Link>
           </div>
         </article>
