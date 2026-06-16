@@ -122,7 +122,6 @@ it('keeps edited contact values while saving an experience entry', async () => {
           whatsapp: null,
           linkedin_url: null,
           profile_status: 'complete',
-          verification_status: 'unverified',
         },
       ],
       specialties: [{ id: 'molinos', name: 'Molinos', slug: 'molinos' }],

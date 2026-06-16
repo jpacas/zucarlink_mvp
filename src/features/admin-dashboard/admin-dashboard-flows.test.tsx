@@ -17,8 +17,6 @@ const dashboardPayload = {
     provider_users: 3,
     complete_profiles: 7,
     incomplete_profiles: 5,
-    verified_profiles: 2,
-    pending_profiles: 1,
     forum_topics: 4,
     forum_replies: 18,
     active_providers: 5,
@@ -44,11 +42,6 @@ const dashboardPayload = {
   profile_statuses: [
     { profile_status: 'complete', user_count: 7 },
     { profile_status: 'incomplete', user_count: 5 },
-  ],
-  verification_statuses: [
-    { verification_status: 'verified', user_count: 2 },
-    { verification_status: 'pending', user_count: 1 },
-    { verification_status: 'unverified', user_count: 9 },
   ],
   forum_categories: [
     { category_name: 'Molienda', topic_count: 3, reply_count: 12 },

@@ -44,7 +44,6 @@ interface ProfileRow {
   whatsapp: string | null
   linkedin_url: string | null
   profile_status: 'incomplete' | 'complete'
-  verification_status: 'unverified' | 'pending' | 'verified'
 }
 
 interface CompanyRow {
@@ -141,7 +140,6 @@ interface ProviderRow {
   products_services: string[] | null
   website: string | null
   contact_email: string | null
-  is_verified: boolean
   status: 'lead' | 'draft_profile' | 'active' | 'inactive'
   created_at?: string
   updated_at?: string
@@ -483,7 +481,6 @@ class QueryBuilder {
         products_services: [],
         website: null,
         contact_email: null,
-        is_verified: false,
         status: 'draft_profile',
         created_at: now,
         updated_at: now,
@@ -587,7 +584,6 @@ function createProfileRow(user: User): ProfileRow {
     whatsapp: null,
     linkedin_url: null,
     profile_status: 'incomplete',
-    verification_status: 'unverified',
   }
 }
 
