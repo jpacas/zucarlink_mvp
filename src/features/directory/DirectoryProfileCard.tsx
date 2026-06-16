@@ -54,6 +54,9 @@ export function DirectoryProfileCard({ profile }: DirectoryProfileCardProps) {
         <Link className="button button--sm" to={`/app/directory/${profile.id}`}>
           Ver perfil →
         </Link>
+        <Link className="button button--secondary button--sm" to={`/app/messages?to=${profile.id}`}>
+          Mensaje
+        </Link>
       </div>
     </article>
   )

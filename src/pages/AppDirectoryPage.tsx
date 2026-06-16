@@ -139,7 +139,6 @@ export function AppDirectoryPage() {
             detalle profesional sin exponer contacto sensible.
           </p>
         </div>
-        <span className="route-chip">miembros autenticados</span>
       </div>
 
       <div className="directory-toolbar">

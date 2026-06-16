@@ -44,37 +44,14 @@ export function SettingsPage() {
           </div>
         </article>
 
-        <article className="info-card stack settings-notifications">
-          <div className="settings-notifications__header">
-            <div className="stack stack--compact">
-              <h3>Notificaciones</h3>
-              <p className="helper-text">Controla qué correos recibes de Zucarlink.</p>
-            </div>
-            <span className="tag-badge">Próximamente</span>
+        <article className="info-card stack">
+          <div className="stack stack--compact">
+            <h3>Notificaciones</h3>
+            <span className="tag-badge" style={{ alignSelf: 'flex-start' }}>Próximamente</span>
           </div>
-          <div className="settings-toggle-list">
-            <div className="settings-toggle-item">
-              <div className="stack stack--compact">
-                <strong>Mensajes directos</strong>
-                <span className="helper-text">Nuevo mensaje de otro miembro</span>
-              </div>
-              <div className="settings-toggle-item__control settings-toggle-item__control--disabled" aria-disabled="true" />
-            </div>
-            <div className="settings-toggle-item">
-              <div className="stack stack--compact">
-                <strong>Actividad en el foro</strong>
-                <span className="helper-text">Respuestas a tus temas</span>
-              </div>
-              <div className="settings-toggle-item__control settings-toggle-item__control--disabled" aria-disabled="true" />
-            </div>
-            <div className="settings-toggle-item">
-              <div className="stack stack--compact">
-                <strong>Novedades de la plataforma</strong>
-                <span className="helper-text">Nuevas funciones y anuncios</span>
-              </div>
-              <div className="settings-toggle-item__control settings-toggle-item__control--disabled" aria-disabled="true" />
-            </div>
-          </div>
+          <p className="helper-text">
+            Pronto podrás controlar qué correos recibes: mensajes directos, respuestas en el foro y novedades de la plataforma.
+          </p>
         </article>
       </div>
     </section>
