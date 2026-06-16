@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { SkeletonThreadItem } from '../components/Skeleton'
 import {
+  clearThread,
   getThreadMessages,
   listMyThreads,
   markThreadRead,
@@ -131,6 +132,9 @@ export function MessagesPage() {
   const [threadsError, setThreadsError] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
   const [showMobileThread, setShowMobileThread] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -144,7 +148,11 @@ export function MessagesPage() {
     if (!toProfileId) return
 
     void startOrGetThread(toProfileId)
-      .then((threadId) => {
+      .then(async (threadId) => {
+        // Reload the thread list so a newly created conversation is present
+        // before we select it (otherwise selectedThread resolves to null and
+        // the empty-state placeholder is shown by mistake).
+        await loadThreads()
         setSelectedThreadId(threadId)
         setShowMobileThread(true)
       })
@@ -252,6 +260,40 @@ export function MessagesPage() {
     setShowMobileThread(true)
     setSendError(null)
   }
+
+  const handleDeleteThread = async () => {
+    if (!selectedThreadId || isDeleting) return
+
+    setIsDeleting(true)
+    setDeleteError(null)
+
+    try {
+      await clearThread(selectedThreadId)
+      setShowDeleteModal(false)
+      setSelectedThreadId(null)
+      setShowMobileThread(false)
+      setMessages([])
+      await loadThreads()
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : 'No fue posible borrar la conversación.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // Close delete modal with Escape
+  useEffect(() => {
+    if (!showDeleteModal) return
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isDeleting) {
+        setShowDeleteModal(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [showDeleteModal, isDeleting])
 
   const handleSend = async () => {
     if (!selectedThreadId || !newMessage.trim() || isSending) return
@@ -389,6 +431,33 @@ export function MessagesPage() {
                 >
                   Ver perfil
                 </Link>
+                <button
+                  type="button"
+                  className="button button--ghost messages-delete-btn"
+                  onClick={() => {
+                    setDeleteError(null)
+                    setShowDeleteModal(true)
+                  }}
+                  aria-label="Borrar conversación"
+                  title="Borrar conversación"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                </button>
               </div>
 
               {/* Messages */}
@@ -451,6 +520,49 @@ export function MessagesPage() {
         </div>
       </div>
     </section>
+
+    {showDeleteModal && selectedThread ? (
+      <div
+        className="confirm-overlay"
+        role="presentation"
+        onClick={() => {
+          if (!isDeleting) setShowDeleteModal(false)
+        }}
+      >
+        <div
+          className="confirm-card stack"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-thread-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 id="delete-thread-title">¿Borrar conversación?</h3>
+          <p className="helper-text">
+            Se ocultará de tu lista de mensajes. {selectedThread.otherFullName} conservará su copia.
+            Si te vuelve a escribir, la conversación reaparecerá con los mensajes nuevos.
+          </p>
+          {deleteError ? <p className="error-text">{deleteError}</p> : null}
+          <div className="confirm-card__actions">
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={isDeleting}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="button button--danger"
+              onClick={() => void handleDeleteThread()}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Borrando...' : 'Borrar'}
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
     </div>
   )
 }

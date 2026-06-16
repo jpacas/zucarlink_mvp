@@ -116,3 +116,14 @@ export async function markThreadRead(threadId: string): Promise<void> {
     throw new Error(error.message)
   }
 }
+
+export async function clearThread(threadId: string): Promise<void> {
+  const client = getClient()
+  const { error } = await client.rpc('clear_thread', {
+    p_thread_id: threadId,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
