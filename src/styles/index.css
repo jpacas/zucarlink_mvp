@@ -552,6 +552,16 @@ fieldset.field {
   color: var(--text-soft);
 }
 
+.helper-text a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.helper-text a:hover {
+  color: var(--brand-strong);
+}
+
 .list {
   margin: 8px 0 0;
   padding-left: 20px;
