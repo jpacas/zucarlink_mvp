@@ -216,7 +216,7 @@ export function AvatarUploader({
         </div>
         <div className="actions">
           <button
-            className="button button--secondary"
+            className="button button--ghost"
             type="button"
             disabled={isSubmitting}
             onClick={() => inputRef.current?.click()}
@@ -314,14 +314,14 @@ export function ExperienceEditor({
                 </div>
                 <div className="actions">
                   <button
-                    className="button button--secondary"
+                    className="button button--ghost"
                     type="button"
                     onClick={() => editExperience(experience)}
                   >
                     Editar
                   </button>
                   <button
-                    className="button button--secondary"
+                    className="button button--ghost"
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => void onDelete(experience.id)}
@@ -420,7 +420,7 @@ export function ExperienceEditor({
           </button>
           {draft.id ? (
             <button
-              className="button button--secondary"
+              className="button button--ghost"
               type="button"
               onClick={() => setDraft(emptyExperience)}
             >

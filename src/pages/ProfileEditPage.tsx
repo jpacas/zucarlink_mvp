@@ -216,7 +216,7 @@ export function ProfileEditPage() {
           <h2>Editar perfil técnico</h2>
           <p>Actualiza identidad profesional, especialidades, experiencia y contacto.</p>
         </div>
-        <Link className="button button--secondary" to="/app/profile">
+        <Link className="button button--ghost" to="/app/profile">
           Volver al perfil
         </Link>
       </div>

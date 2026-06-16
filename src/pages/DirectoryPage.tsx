@@ -82,7 +82,7 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
       ) : null}
 
       <div className="directory-card__public-cta">
-        <Link className="button button--secondary" to="/register">
+        <Link className="button" to="/register">
           Conectar →
         </Link>
       </div>
@@ -229,7 +229,7 @@ export function DirectoryPage() {
             <div className="actions">
               <button
                 type="button"
-                className="button button--secondary"
+                className="button button--ghost"
                 onClick={() => setRetryToken((current) => current + 1)}
               >
                 Reintentar

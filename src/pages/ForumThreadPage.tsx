@@ -149,7 +149,7 @@ export function ForumThreadPage() {
             ? 'La conversación estará disponible pronto.'
             : errorMessage ?? 'No encontramos el tema solicitado.'}
         </p>
-        <Link className="button button--secondary" to="/forum">
+        <Link className="button button--ghost" to="/forum">
           Volver al foro
         </Link>
       </section>
@@ -239,7 +239,7 @@ export function ForumThreadPage() {
             </div>
             {replyTarget ? (
               <button
-                className="button button--secondary"
+                className="button button--ghost"
                 type="button"
                 onClick={() => setReplyTarget(null)}
               >

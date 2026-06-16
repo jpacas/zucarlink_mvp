@@ -304,7 +304,7 @@ export function OnboardingPage() {
             {feedback ? <p className="error-text">{feedback}</p> : null}
             <div className="actions">
               <button
-                className="button button--secondary"
+                className="button button--ghost"
                 type="button"
                 disabled={isSaving}
                 onClick={() => setStep(0)}
@@ -468,7 +468,7 @@ export function OnboardingPage() {
           {feedback ? <p className="error-text">{feedback}</p> : null}
           <div className="actions">
             <button
-              className="button button--secondary"
+              className="button button--ghost"
               type="button"
               disabled={isSaving}
               onClick={() => setStep(0)}

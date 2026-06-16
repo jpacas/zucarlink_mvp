@@ -312,7 +312,7 @@ export function MessagesPage() {
               <p className="error-text">{threadsError}</p>
               <button
                 type="button"
-                className="button button--secondary"
+                className="button button--ghost"
                 onClick={() => void loadThreads()}
                 style={{ marginTop: '8px' }}
               >

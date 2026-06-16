@@ -241,7 +241,7 @@ export function AdminDashboardPage() {
           </h3>
           <button
             type="button"
-            className="button button--secondary"
+            className="button button--ghost"
             onClick={() => void loadPendingVerifications()}
             disabled={verificationLoading}
           >
@@ -290,7 +290,7 @@ export function AdminDashboardPage() {
                     </button>
                     <button
                       type="button"
-                      className="button button--secondary"
+                      className="button button--ghost"
                       disabled={processingId === profile.id}
                       onClick={() => void handleReject(profile.id)}
                     >

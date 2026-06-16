@@ -29,7 +29,7 @@ export function ContactPage() {
       </div>
 
       <div className="actions">
-        <Link className="button button--secondary" to="/">
+        <Link className="button button--ghost" to="/">
           Volver al inicio
         </Link>
       </div>

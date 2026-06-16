@@ -188,7 +188,7 @@ export function ForumNewThreadPage() {
           <p className="eyebrow">Foro</p>
           <h2>Crear tema</h2>
         </div>
-        <Link className="button button--secondary" to="/forum">
+        <Link className="button button--ghost" to="/forum">
           Cancelar
         </Link>
       </div>

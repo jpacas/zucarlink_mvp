@@ -211,7 +211,7 @@ export function AppDirectoryPage() {
           <div className="actions">
             <button
               type="button"
-              className="button button--secondary"
+              className="button button--ghost"
               onClick={() => setRetryToken((current) => current + 1)}
             >
               Reintentar búsqueda
@@ -236,7 +236,7 @@ export function AppDirectoryPage() {
           {filters.onlyVerified ? (
             <button
               type="button"
-              className="button button--secondary"
+              className="button button--ghost"
               onClick={() => setFilters((f) => ({ ...f, onlyVerified: false }))}
             >
               Mostrar todos los perfiles
