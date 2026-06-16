@@ -22,13 +22,14 @@ const kpiLabels: Array<{
   key: keyof AdminOperationalDashboard['kpis']
   label: string
   detail: string
+  accent: string
 }> = [
-  { key: 'newUsers', label: 'Usuarios nuevos', detail: 'Altas en el periodo' },
-  { key: 'completeProfiles', label: 'Perfiles completos', detail: 'Base lista para directorio' },
-  { key: 'forumReplies', label: 'Respuestas foro', detail: 'Interacciones técnicas' },
-  { key: 'providerLeads', label: 'Leads proveedores', detail: 'Solicitudes comerciales' },
-  { key: 'activeProviders', label: 'Proveedores activos', detail: 'Oferta visible' },
-  { key: 'publishedContent', label: 'Contenido publicado', detail: 'Noticias, blog, eventos y precios' },
+  { key: 'newUsers', label: 'Usuarios nuevos', detail: 'Altas en el periodo', accent: 'var(--brand)' },
+  { key: 'completeProfiles', label: 'Perfiles completos', detail: 'Base lista para directorio', accent: 'var(--accent-green)' },
+  { key: 'forumReplies', label: 'Respuestas foro', detail: 'Interacciones técnicas', accent: 'var(--accent-cyan)' },
+  { key: 'providerLeads', label: 'Leads proveedores', detail: 'Solicitudes comerciales', accent: 'var(--accent-orange)' },
+  { key: 'activeProviders', label: 'Proveedores activos', detail: 'Oferta visible', accent: 'var(--accent-green)' },
+  { key: 'publishedContent', label: 'Contenido publicado', detail: 'Noticias, blog, eventos y precios', accent: 'var(--brand-primary)' },
 ]
 
 export function AdminDashboardPage() {
@@ -184,7 +185,11 @@ export function AdminDashboardPage() {
         <>
           <div className="metric-grid">
             {kpiLabels.map((item) => (
-              <article key={item.key} className="metric-card">
+              <article
+                key={item.key}
+                className="metric-card"
+                style={{ '--kpi-accent': item.accent } as React.CSSProperties}
+              >
                 <span>{item.label}</span>
                 <strong>{formatNumber(dashboard.kpis[item.key])}</strong>
                 <small>{item.detail}</small>
