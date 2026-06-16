@@ -59,8 +59,25 @@ export function PublicLayout() {
             <NavItem to="/app" label="Mi cuenta" />
           ) : (
             <>
-              <NavItem to="/login" label="Ingresar" />
-              <NavItem to="/register" label="Registro" />
+              <span className="nav-divider" aria-hidden="true" />
+              <div className="nav-auth-group">
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    isActive ? 'nav-link nav-link--ghost nav-link--active' : 'nav-link nav-link--ghost'
+                  }
+                >
+                  Ingresar
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    isActive ? 'nav-link nav-link--cta nav-link--active' : 'nav-link nav-link--cta'
+                  }
+                >
+                  Registro
+                </NavLink>
+              </div>
             </>
           )}
         </nav>
