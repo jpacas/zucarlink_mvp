@@ -56,11 +56,13 @@ it('keeps a preloaded session and renders /app directly after boot', async () =>
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
-  expect(screen.getByText(/Persisted User, mantén tu perfil al día/i)).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Actualizar perfil' })).toHaveAttribute(
+  await screen.findByRole('heading', { name: 'Hola, Persisted' })
+  expect(
+    screen.getByText(/Esto es lo que se movió en la red mientras no estabas/i),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: /Ver todos los mensajes/i })).toHaveAttribute(
     'href',
-    '/app/profile/edit',
+    '/app/messages',
   )
   expect(supabase.calls.getSession).toHaveLength(1)
   await waitFor(() =>

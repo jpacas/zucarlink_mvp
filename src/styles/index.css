@@ -1983,3 +1983,132 @@ fieldset.field {
   color: var(--text-soft);
   margin-top: 2px;
 }
+
+/* ─── App dashboard (Panel) ──────────────────────────────────────────────── */
+
+.dashboard-greeting h2 {
+  margin: 0;
+}
+
+.dashboard-nudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-left: 3px solid var(--brand);
+}
+
+.dashboard-nudge__body {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard-nudge__text {
+  margin: 0;
+}
+
+.dashboard-nudge .profile-completeness__bar-wrap {
+  max-width: 320px;
+}
+
+.dashboard-activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.dashboard-widget {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-widget__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dashboard-widget__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dashboard-widget__footer {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.dashboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(32, 23, 71, 0.06);
+}
+
+.dashboard-list__item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-list__item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-list__title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-list__title--link {
+  text-decoration: none;
+}
+
+.dashboard-list__title--link:hover {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.dashboard-list__meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-empty {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  padding: 6px 0;
+}
