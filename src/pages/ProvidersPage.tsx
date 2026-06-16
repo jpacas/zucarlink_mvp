@@ -1,3 +1,5 @@
+// TODO: reemplazar PlaceholderPage con la landing comercial completa de proveedores
+// (catálogo filtrable, generación de leads, llamada a registro de cuenta provider)
 import { PlaceholderPage } from './PlaceholderPage'
 
 export function ProvidersPage() {

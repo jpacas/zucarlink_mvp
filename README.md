@@ -1,332 +1,135 @@
-# Zucarlink
+# Zucarlink MVP
 
-Base técnica del MVP de Zucarlink con Semana 4 cerrada, perfiles de Semana 5 operativos, directorio de Semana 6, foro técnico de Semana 7, módulo público de Información de Semana 8 y módulo comercial de proveedores de Semana 9 listos para iteración.
+Plataforma de red profesional para la industria azucarera. Conecta técnicos de campo con proveedores de insumos y servicios.
 
-## Objetivo actual
+## Stack
 
-Este repositorio cubre:
-
-- frontend con `Vite + React + TypeScript`
-- rutas públicas y privadas base
-- integración con `Supabase`
-- autenticación mínima con email/password
-- onboarding técnico progresivo
-- perfil propio editable
-- especialidades, experiencia y avatar conectados a Supabase
-- directorio público agregado y directorio privado con filtros
-- foro técnico público con detalle, respuestas y creación de temas
-- perfil público ligero del autor con actividad visible
-- módulo público de `Información` con noticias, blog, eventos y precios
-- landing comercial, directorio y ficha pública de proveedores
-- onboarding/autoservicio base para cuentas `provider`
-- leads internos a proveedores vía Supabase RPC
-
-## Stack actual
-
-- React
-- TypeScript
-- Vite
-- React Router DOM
-- Supabase JS
-
-## Scripts
-
-```bash
-npm run dev
-npm run build
-npm run preview
-npm run lint
-npm run typecheck
-npm test
-```
-
-## Variables de entorno
-
-El archivo `.env.example` documenta las variables mínimas actuales.
-
-```bash
-cp .env.example .env
-```
-
-Variables requeridas:
-
-```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-WEEK5_DEMO_PASSWORD=
-WEEK9_PROVIDER_PASSWORD=
-WEEK7_FORUM_PASSWORD=
-```
-
-## Base de datos y storage
-
-La base inicial para Semana 4 quedó definida en SQL:
-
-- `supabase/migrations/20260414_000001_initial_schema.sql`
-- `supabase/migrations/20260414_000002_avatars_storage.sql`
-- `supabase/migrations/20260414_000003_security_baseline.sql`
-- `supabase/sql/verify_setup.sql`
-- `supabase/sql/verify_security.sql`
-
-Resumen:
-
-- 12 tablas base del MVP
-- relaciones mínimas explícitas
-- RLS inicial en tablas sensibles
-- bucket privado `avatars` listo para fotos de perfil
-- trigger para crear `profiles` automáticamente desde `auth.users`
-- helper frontend base para upload y signed URLs de avatars
-
-Guía de aplicación:
-
-- [docs/supabase-setup.md](/Users/np/Desktop/programming/zucarlink_mvp/docs/supabase-setup.md)
-- [docs/avatar-storage.md](/Users/np/Desktop/programming/zucarlink_mvp/docs/avatar-storage.md)
-
-## Estructura inicial
-
-```text
-src/
-  app/
-  components/
-  features/
-  layouts/
-  lib/
-  pages/
-  routes/
-  styles/
-  types/
-```
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 19 + TypeScript + Vite |
+| Routing | React Router DOM v7 |
+| Backend | Supabase (PostgreSQL + Auth + Storage) |
+| Email | Resend vía Supabase Edge Functions |
+| Deploy | Vercel |
 
 ## Arranque local
 
 ```bash
 npm install
+cp .env.example .env   # completar con credenciales de Supabase
 npm run dev
+```
+
+## Variables de entorno
+
+| Variable | Descripción |
+|---|---|
+| `VITE_SUPABASE_URL` | URL del proyecto Supabase (frontend) |
+| `VITE_SUPABASE_ANON_KEY` | Clave anon de Supabase (frontend) |
+| `SUPABASE_URL` | URL del proyecto Supabase (scripts y CLI) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio para scripts de seed y Edge Functions |
+| `RESEND_API_KEY` | API key de Resend para envío de emails |
+| `RESEND_FROM_EMAIL` | Dirección de envío (default: `no-reply@zucarlink.com`) |
+| `EMAIL_WEBHOOK_SECRET` | Token de autenticación del webhook de emails |
+
+Las variables `RESEND_*` y `EMAIL_WEBHOOK_SECRET` se configuran como **Supabase Secrets**, no en Vercel.
+
+## Scripts disponibles
+
+```bash
+npm run dev          # servidor de desarrollo
+npm run build        # build de producción (typecheck + vite build)
+npm run preview      # previsualizar build local
+npm run lint         # ESLint
+npm run typecheck    # TypeScript sin emitir archivos
+npm test             # tests con Vitest
+npm run test:watch   # tests en modo watch
+```
+
+## Base de datos (Supabase)
+
+Las migraciones se aplican en orden desde `supabase/migrations/`:
+
+| # | Archivo | Qué agrega |
+|---|---|---|
+| 001 | `initial_schema` | 12 tablas base: perfiles, empresas, especialidades, experiencias, foro, conversaciones, mensajes, proveedores, leads |
+| 002 | `avatars_storage` | Bucket privado `avatars` con RLS por usuario |
+| 003 | `security_baseline` | Trigger que crea perfil al registrarse un nuevo usuario |
+| 004 | `profiles_week5` | `profile_status`, campos de contacto, seed de 20 especialidades |
+| 005 | `companies_insert_policy` | Permite crear empresas desde onboarding |
+| 006 | `directory_week6` | Funciones RPC para resumen y búsqueda del directorio |
+| 007 | `forum_week7` | Slugs, métricas, replies anidadas, funciones RPC del foro |
+| 008 | `content_week8` | Tablas `content_items`, `events`, `price_items` |
+| 009 | `providers_week9` | Modelo comercial de proveedores y leads, RPCs de búsqueda |
+| 010 | `providers_admin_week9` | Funciones de administración de proveedores |
+| 011 | `admin_operational_dashboard` | Función `get_admin_operational_dashboard()` con KPIs |
+| 012 | `messages` | Funciones RPC de mensajería: hilos, envío, lectura |
+| 013 | `admin_verifications` | Flujo de verificación de perfiles por admins |
+| 014 | `public_profile_preview` | Función para previsualización pública de perfiles |
+| 015 | `business_logic_fixes` | Reemplazo atómico de especialidades, deduplicación de empresas |
+
+## Seeds de desarrollo
+
+Estos scripts pueblan la base de datos con datos demo. Requieren `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`.
+
+```bash
+node scripts/seed-week5-demo-profiles.mjs   # 10 perfiles técnicos completos
+node scripts/seed-week7-forum.mjs           # 6 categorías + 10 temas del foro
+node scripts/seed-week8-content.mjs         # 8 noticias, 4 artículos, 4 eventos, 4 precios
+node scripts/seed-week9-providers.mjs       # 5 proveedores activos con categorías
+```
+
+Cada script es idempotente: si los datos ya existen, los actualiza sin duplicar.
+
+Contraseñas por defecto para cuentas demo (configurables con variables de entorno):
+
+| Variable | Default |
+|---|---|
+| `WEEK5_DEMO_PASSWORD` | `ZucarlinkDemo2026!` |
+| `WEEK7_FORUM_PASSWORD` | `ZucarlinkForum2026!` |
+| `WEEK9_PROVIDER_PASSWORD` | `ZucarlinkDemo2026!` |
+
+## Edge Functions (email)
+
+`supabase/functions/send-email/` — webhook que dispara emails en tres eventos:
+
+| Evento | Trigger | Email enviado |
+|---|---|---|
+| Perfil completado | `profiles.UPDATE` (status: incomplete → complete) | Bienvenida personalizada según tipo de cuenta |
+| Mensaje recibido | `messages.INSERT` | Notificación con preview del mensaje (suprimida si el receptor estuvo activo en los últimos 5 min) |
+| Lead de proveedor | `provider_leads.INSERT` | Notificación al proveedor con datos de contacto del solicitante |
+
+## Estructura del proyecto
+
+```
+src/
+  main.tsx              # punto de entrada
+  routes/               # configuración de rutas (AppRouter)
+  layouts/              # contenedores de página (PublicLayout, PrivateLayout)
+  components/           # componentes compartidos (Logo, Skeleton, Breadcrumbs…)
+  features/             # lógica de dominio
+    auth/               # sesión, guards de ruta
+    profile/            # perfil técnico del usuario
+    providers/          # perfiles comerciales de proveedores
+    directory/          # directorio de miembros
+    forum/              # foro técnico
+    messages/           # mensajería privada
+    content/            # noticias, blog, eventos, precios
+    admin-dashboard/    # panel de administración
+  pages/                # componentes de nivel de ruta
+  lib/                  # utilidades (supabase, storage, analytics)
+  types/                # tipos compartidos
+  styles/               # CSS global (design system completo)
+
+supabase/
+  migrations/           # esquema completo de base de datos (aplicar en orden)
+  functions/            # Edge Functions de Supabase
+
+scripts/                # seeds de datos demo para desarrollo
 ```
 
 ## Deploy
 
-- hosting: Vercel
-- URL productiva actual: `https://zucarlinkmvp.vercel.app`
-- config de SPA: `vercel.json`
-
-Validado en producción:
-
-- carga de la home
-- registro real con Supabase
-- redirección de rutas privadas sin sesión
-- login real con Supabase
-- acceso a `/app` y `/app/profile`
-- persistencia de sesión después de recargar `/app/profile`
-- logout y bloqueo posterior de rutas privadas
-
-Validado localmente el 14 de abril de 2026:
-
-- `npm run build`
-- `npm run lint`
-- `npm run typecheck`
-- `npm test`
-
-## Flujo de auth base
-
-- `register` crea cuenta con email/password
-- guarda `account_type` y `full_name` en `user_metadata`
-- `login` usa Supabase Auth
-- `logout` cierra sesión
-- rutas bajo `/app` requieren sesión
-- la sesión persiste al recargar si Supabase está configurado
-- después de login/registro el destino depende de `profile_status`
-  - `incomplete` → `/onboarding`
-  - `complete` → `/app/profile`
-
-## Flujo de perfiles Semana 5
-
-- `/onboarding`
-  - onboarding técnico de 3 pasos
-  - avatar opcional
-  - perfil mínimo obligatorio para marcar `profile_status = complete`
-- `/directory`
-  - resumen público agregado del directorio
-  - muestra masa crítica sin exponer fichas individuales
-- `/directory/:profileId`
-  - perfil público ligero del autor
-  - muestra identidad profesional básica y actividad reciente en foro
-- `/app/directory`
-  - grid privado de perfiles completos
-  - búsqueda por texto, filtro por país y filtro por especialidad
-- `/app/directory/:profileId`
-  - detalle profesional privado del perfil seleccionado
-- `/app/profile`
-  - ficha técnica-profesional del usuario autenticado
-  - muestra resumen, especialidades, experiencia y contacto con privacidad básica
-- `/app/profile/edit`
-  - edición de identidad profesional
-  - multi-select de especialidades
-  - CRUD básico de experiencia
-  - upload de avatar con `Supabase Storage`
-- `/forum`
-  - listado público de temas con categorías, metadata y CTA de participación
-- `/forum/thread/:threadSlug`
-  - detalle público del tema
-  - respuestas públicas y composer autenticado
-- `/forum/new`
-  - creación de tema para usuarios autenticados con `profile_status = complete`
-
-## SQL adicional de Semana 5
-
-- `supabase/migrations/20260414_000004_profiles_week5.sql`
-  - agrega `profile_status`, contacto opcional y seed de especialidades
-  - amplía `verification_status`
-  - agrega `description` y `achievements` a `experiences`
-- `supabase/migrations/20260414_000005_companies_insert_policy.sql`
-  - habilita `INSERT` autenticado en `companies` para que onboarding, edición y experiencias puedan resolver empresa/ingenio sin romper RLS
-- `supabase/migrations/20260414_000006_directory_week6.sql`
-  - agrega funciones seguras para resumen público y lectura privada del directorio
-- `supabase/migrations/20260415_000007_forum_week7.sql`
-  - agrega slugs, estados, replies anidadas, reply count y last activity al foro
-  - agrega funciones RPC para lectura pública, publicación autenticada y perfil público ligero
-- `supabase/migrations/20260416_000008_content_week8.sql`
-  - agrega `content_items`, `events` y `price_items`
-  - aplica índices y RLS de lectura pública solo para contenido `published`
-- `supabase/migrations/20260417_000009_providers_week9.sql`
-  - agrega `provider_categories`
-  - expande `providers` y `provider_leads` al modelo comercial mínimo
-  - crea RPCs para categorías, búsqueda, detalle y leads internos
-
-## Seed demo de Semana 5
-
-Para cerrar el pendiente de `TASKS.md`, el repo ahora incluye un seed idempotente con 10 perfiles técnicos demo distribuidos por país, experiencia y especialidades:
-
-- script: `scripts/seed-week5-demo-profiles.mjs`
-- comando: `node scripts/seed-week5-demo-profiles.mjs`
-- alcance:
-  - crea o actualiza 10 usuarios demo en `auth.users`
-  - confirma el email automáticamente
-  - completa `profiles` con `profile_status = complete`
-  - sincroniza `profile_specialties`
-  - recrea experiencias demo por perfil
-  - crea empresas faltantes en `companies`
-
-Variables necesarias para correrlo:
-
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_URL` o, si prefieres reutilizar el frontend, `VITE_SUPABASE_URL`
-- `WEEK5_DEMO_PASSWORD` opcional
-
-Si `WEEK5_DEMO_PASSWORD` no está definida, el script usa esta contraseña por defecto:
-
-```text
-ZucarlinkDemo2026!
-```
-
-Uso:
-
-```bash
-node scripts/seed-week5-demo-profiles.mjs
-```
-
-El script es idempotente para esas 10 cuentas: si ya existen, actualiza metadata, perfil, especialidades y experiencias para dejarlas en un estado consistente.
-
-## Seed de foro Semana 7
-
-El repo ahora incluye un seed reproducible para categorías, autores y publicaciones semilla del foro:
-
-- script: `scripts/seed-week7-forum.mjs`
-- comando: `node scripts/seed-week7-forum.mjs`
-- alcance:
-  - garantiza autores demo con perfil completo
-  - inserta o actualiza las 6 categorías técnicas oficiales
-  - inserta o actualiza 10 temas semilla
-  - agrega respuestas iniciales a algunos hilos para evitar vacío
-
-Variables necesarias:
-
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_URL` o `VITE_SUPABASE_URL`
-- `WEEK7_FORUM_PASSWORD` opcional
-
-Si `WEEK7_FORUM_PASSWORD` no está definida, el script usa esta contraseña por defecto:
-
-```text
-ZucarlinkForum2026!
-```
-
-## Seed editorial Semana 8
-
-Semana 8 agrega un módulo público de `Información` con noticias, blog, eventos y precios curados manualmente.
-
-- script: `scripts/seed-week8-content.mjs`
-- guía editorial: `docs/week8-content-sources.md`
-- verificación SQL: `supabase/sql/verify_content_week8.sql`
-- cierre operativo: `docs/week8-closure.md`
-
-Uso esperado:
-
-```bash
-node scripts/seed-week8-content.mjs
-```
-
-## Flujo de proveedores Semana 9
-
-- `/proveedores`
-  - landing comercial pública con CTA a registro y directorio
-- `/proveedores/directorio`
-  - directorio público con búsqueda y filtros básicos
-- `/proveedores/:slug`
-  - ficha pública individual con CTA de contacto interno
-- `/app/provider`
-  - resumen privado del perfil comercial del proveedor
-- `/app/provider/edit`
-  - edición mínima del perfil comercial
-- `/onboarding`
-  - las cuentas `provider` usan un flujo de 2 pasos para perfil comercial y solicitud de activación
-
-## Seed de proveedores Semana 9
-
-El repo ahora incluye un seed reproducible para dejar 5 proveedores demo activos:
-
-- script: `scripts/seed-week9-providers.mjs`
-- comando: `node scripts/seed-week9-providers.mjs`
-- alcance:
-  - crea o reutiliza cuentas demo `provider`
-  - inserta o actualiza categorías comerciales
-  - inserta o actualiza 5 perfiles comerciales activos y verificados
-
-Variables necesarias:
-
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_URL` o `VITE_SUPABASE_URL`
-- `WEEK9_PROVIDER_PASSWORD` opcional
-
-Antes de correrlo:
-
-1. aplicar `supabase/migrations/20260416_000008_content_week8.sql`
-2. confirmar `SUPABASE_SERVICE_ROLE_KEY`
-3. ejecutar el script de seed
-4. correr la verificación con `supabase/sql/verify_content_week8.sql`
-
-El seed carga 20 piezas iniciales distribuidas así:
-
-- 8 noticias
-- 4 artículos
-- 4 eventos
-- 4 precios o indicadores
-
-## Estado
-
-El estado actual deja lista la transición a iteración sobre Semana 8 y siguientes:
-
-- registro, login, logout y persistencia de sesión verificados
-- rutas públicas y privadas funcionando
-- migraciones SQL y storage listos para Supabase
-- onboarding técnico y perfil editable funcionando en frontend
-- experiencia, especialidades y avatar conectados al esquema actual
-- resumen público de directorio y rutas privadas del directorio integradas al router
-- foro público con categorías, detalle, respuestas y creación de temas
-- perfil público del autor conectado desde el foro
-- actividad del foro visible en home y perfil autenticado
-- módulo `Información` conectado a home, navbar pública y rutas indexables
-- seed editorial ajustado para usar fuentes reales o nulas cuando el contenido es propio
-- deploy activo en Vercel
+- Hosting: Vercel
+- URL: `https://zucarlinkmvp.vercel.app`
+- `vercel.json` configura el rewrite de SPA para que todas las rutas sirvan `index.html`

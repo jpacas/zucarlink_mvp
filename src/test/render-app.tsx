@@ -19,15 +19,15 @@ export async function renderApp({
     () => supabase as never,
   )
 
-  const [{ App }, { AuthProvider }] = await Promise.all([
-    import('../app/App'),
+  const [{ AppRouter }, { AuthProvider }] = await Promise.all([
+    import('../routes/AppRouter'),
     import('../features/auth/AuthProvider'),
   ])
 
   const result = render(
     <AuthProvider>
       <MemoryRouter initialEntries={[initialRoute]}>
-        <App />
+        <AppRouter />
       </MemoryRouter>
     </AuthProvider>,
   )
