@@ -389,7 +389,7 @@ fieldset.field {
   color: var(--text);
 }
 
-.field input,
+.field input:not([type="radio"]):not([type="checkbox"]),
 .field select,
 .field textarea {
   width: 100%;
@@ -405,18 +405,18 @@ fieldset.field {
     background-color 140ms ease;
 }
 
-.field input::placeholder,
+.field input:not([type="radio"]):not([type="checkbox"])::placeholder,
 .field textarea::placeholder {
   color: rgba(32, 23, 71, 0.38);
 }
 
-.field input:hover,
+.field input:not([type="radio"]):not([type="checkbox"]):hover,
 .field select:hover,
 .field textarea:hover {
   border-color: var(--line-strong);
 }
 
-.field input:focus,
+.field input:not([type="radio"]):not([type="checkbox"]):focus,
 .field select:focus,
 .field textarea:focus {
   outline: none;
@@ -448,6 +448,24 @@ fieldset.field {
   transition:
     border-color 140ms ease,
     background-color 140ms ease;
+}
+
+.radio-option input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.radio-option:has(input:checked) input[type="radio"] {
+  border-color: var(--brand);
+  background: var(--brand);
+  box-shadow: inset 0 0 0 3px #fff;
 }
 
 .radio-option:has(input:checked) {
