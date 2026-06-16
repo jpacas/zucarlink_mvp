@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { getMyAvatarUrl } from '../features/profile/api'
 import { useUnreadCount } from '../features/messages/useUnreadCount'
 import { SiteFooter } from '../components/SiteFooter'
 import { ZucarLogo } from '../components/ZucarLogo'
@@ -11,6 +12,7 @@ export function PrivateLayout() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const accountType = user?.user_metadata?.account_type
@@ -50,6 +52,24 @@ export function PrivateLayout() {
 
   const initials = (user?.email ?? '?')[0].toUpperCase()
   const unreadCount = useUnreadCount(accountType !== 'provider')
+
+  useEffect(() => {
+    if (!user) {
+      setAvatarUrl(null)
+      return
+    }
+    let active = true
+    getMyAvatarUrl(user)
+      .then((url) => {
+        if (active) setAvatarUrl(url)
+      })
+      .catch(() => {
+        if (active) setAvatarUrl(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [user])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -133,7 +153,11 @@ export function PrivateLayout() {
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((o) => !o)}
             >
-              {initials}
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" aria-hidden="true" />
+              ) : (
+                initials
+              )}
             </button>
 
             {menuOpen && (

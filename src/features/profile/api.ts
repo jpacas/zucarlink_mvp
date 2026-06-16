@@ -182,6 +182,21 @@ function mapExperience(
   }
 }
 
+export async function getMyAvatarUrl(user: User): Promise<string | null> {
+  const client = getClient()
+  const { data, error } = await client
+    .from('profiles')
+    .select('avatar_path')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (error || !data?.avatar_path) {
+    return null
+  }
+
+  return createAvatarSignedUrl(data.avatar_path as string).catch(() => null)
+}
+
 export async function getCurrentProfile(user: User): Promise<CurrentProfile | null> {
   const client = getClient()
   const { data, error } = await client
