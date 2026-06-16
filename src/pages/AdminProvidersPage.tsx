@@ -100,7 +100,16 @@ export function AdminProvidersPage() {
 
       <div className="stack">
         {!isLoading && orderedProviders.length === 0 ? (
-          <p className="helper-text">No hay proveedores pendientes de moderación.</p>
+          <div className="empty-state">
+            <div className="empty-state__icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3>Todo en orden</h3>
+            <p>No hay proveedores que necesiten moderación en este momento. Las nuevas solicitudes aparecerán aquí automáticamente.</p>
+          </div>
         ) : null}
 
         {orderedProviders.map((provider) => (
