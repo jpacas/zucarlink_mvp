@@ -1,5 +1,3 @@
-import type { VerificationStatus } from '../profile/types'
-
 export interface DirectoryAggregateSnapshot {
   totalMembers: number
   totalCountries: number
@@ -15,7 +13,6 @@ export interface DirectoryProfileCard {
   organizationName: string
   country: string
   specialties: string[]
-  isVerified: boolean
   headline: string
 }
 
@@ -41,7 +38,6 @@ export interface DirectoryProfileDetail {
   headline: string
   shortBio: string
   specialties: string[]
-  verificationStatus: VerificationStatus
   experiences: DirectoryProfileExperience[]
 }
 

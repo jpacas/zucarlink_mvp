@@ -22,10 +22,7 @@ export function DirectoryProfileCard({ profile }: DirectoryProfileCardProps) {
           </div>
         )}
         <div className="stack stack--compact">
-          <div className="actions">
-            <h3>{profile.fullName}</h3>
-            {profile.isVerified ? <span className="user-badge">Verificado</span> : null}
-          </div>
+          <h3>{profile.fullName}</h3>
           <p className="directory-card__meta">
             {profile.currentRole || 'Cargo pendiente'}
             {profile.organizationName ? ` · ${profile.organizationName}` : ''}

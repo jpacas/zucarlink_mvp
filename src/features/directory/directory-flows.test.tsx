@@ -17,7 +17,6 @@ const directoryProfiles = [
     organization_name: 'Ingenio El Carmen',
     country: 'El Salvador',
     specialties: ['Molinos', 'Energía'],
-    verification_status: 'verified',
     short_bio: 'Optimización de molienda y balance energético.',
   },
   {
@@ -28,7 +27,6 @@ const directoryProfiles = [
     organization_name: 'Ingenio San Miguel',
     country: 'Guatemala',
     specialties: ['Calderas'],
-    verification_status: 'unverified',
     short_bio: 'Operación de calderas y eficiencia térmica.',
   },
   {
@@ -39,7 +37,6 @@ const directoryProfiles = [
     organization_name: 'Ingenio del Pacífico',
     country: 'México',
     specialties: ['Automatización'],
-    verification_status: 'verified',
     short_bio: 'Integración de PLC y sensórica industrial.',
   },
 ]
@@ -155,7 +152,6 @@ it('filters the private directory and opens a profile detail', async () => {
               short_bio:
               'Más de una década liderando mejoras de eficiencia en molienda y vapor.',
               specialties: ['Molinos', 'Energía'],
-              verification_status: 'verified',
               experiences: [
               {
                 id: 'exp-ana-1',

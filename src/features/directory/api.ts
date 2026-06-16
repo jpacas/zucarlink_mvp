@@ -24,7 +24,6 @@ interface DirectoryProfileRow {
   short_bio: string | null
   avatar_path: string | null
   specialties: string[] | null
-  verification_status: 'unverified' | 'pending' | 'verified'
 }
 
 interface DirectoryProfileDetailRow extends DirectoryProfileRow {
@@ -59,7 +58,6 @@ async function mapDirectoryProfile(row: DirectoryProfileRow): Promise<DirectoryP
     organizationName: row.organization_name ?? '',
     country: row.country ?? '',
     specialties: row.specialties ?? [],
-    isVerified: row.verification_status === 'verified',
     headline: row.short_bio ?? '',
   }
 }
@@ -72,7 +70,6 @@ export interface PublicPreviewProfile {
   organizationName: string
   country: string
   specialties: string[]
-  isVerified: boolean
 }
 
 interface PublicPreviewRow {
@@ -83,7 +80,6 @@ interface PublicPreviewRow {
   organization_name: string
   country: string
   specialties: string[]
-  is_verified: boolean
 }
 
 export async function listPublicPreviewProfiles(limitCount = 12): Promise<PublicPreviewProfile[]> {
@@ -107,7 +103,6 @@ export async function listPublicPreviewProfiles(limitCount = 12): Promise<Public
       organizationName: row.organization_name,
       country: row.country,
       specialties: row.specialties ?? [],
-      isVerified: row.is_verified,
     })),
   )
 }
@@ -182,7 +177,6 @@ export async function getDirectoryProfileDetail(
     headline: row.short_bio ?? '',
     shortBio: row.short_bio ?? '',
     specialties: row.specialties ?? [],
-    verificationStatus: row.verification_status,
     experiences: row.experiences ?? [],
   }
 }

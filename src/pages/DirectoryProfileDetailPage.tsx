@@ -5,17 +5,6 @@ import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getDirectoryProfileDetail } from '../features/directory/api'
 import type { DirectoryProfileDetail } from '../features/directory/types'
 
-function verificationLabel(status: DirectoryProfileDetail['verificationStatus']) {
-  switch (status) {
-    case 'verified':
-      return 'Verificado'
-    case 'pending':
-      return 'Verificación pendiente'
-    default:
-      return 'Sin verificar'
-  }
-}
-
 export function DirectoryProfileDetailPage() {
   const { profileId = '' } = useParams()
   const [profile, setProfile] = useState<DirectoryProfileDetail | null>(null)
@@ -104,9 +93,6 @@ export function DirectoryProfileDetailPage() {
               {profile.yearsExperience !== null ? (
                 <span className="user-badge">{profile.yearsExperience} años</span>
               ) : null}
-              <span className="user-badge">
-                {verificationLabel(profile.verificationStatus)}
-              </span>
             </div>
           </div>
         </div>

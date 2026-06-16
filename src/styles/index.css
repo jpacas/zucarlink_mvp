@@ -1807,25 +1807,6 @@ fieldset.field {
   }
 }
 
-/* ─── Directory: verified filter toggle ──────────────────────────────────── */
-
-.directory-verified-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  align-self: flex-end;
-  padding-bottom: 4px;
-}
-
-.directory-verified-toggle input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--brand);
-  cursor: pointer;
-}
-
 /* ─── Skeleton loader ─────────────────────────────────────────────────────── */
 
 @keyframes skeleton-shimmer {

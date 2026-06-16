@@ -11,10 +11,6 @@ const emptyFilters: DirectoryFilters = {
   specialty: '',
 }
 
-interface ExtendedFilters extends DirectoryFilters {
-  onlyVerified: boolean
-}
-
 const searchDebounceMs = 300
 
 function toSpecialtySlug(name: string) {
@@ -27,7 +23,7 @@ function toSpecialtySlug(name: string) {
 }
 
 export function AppDirectoryPage() {
-  const [filters, setFilters] = useState<ExtendedFilters>({ ...emptyFilters, onlyVerified: false })
+  const [filters, setFilters] = useState<DirectoryFilters>({ ...emptyFilters })
   const [searchInput, setSearchInput] = useState('')
   const [debouncedSearchText, setDebouncedSearchText] = useState('')
   const [allProfiles, setAllProfiles] = useState<DirectoryProfileCardData[]>([])
@@ -87,8 +83,7 @@ export function AppDirectoryPage() {
     })
       .then((rows) => {
         if (isMounted) {
-          const filtered = filters.onlyVerified ? rows.filter((p) => p.isVerified) : rows
-          setProfiles(filtered)
+          setProfiles(rows)
           setErrorMessage(null)
         }
       })
@@ -109,7 +104,7 @@ export function AppDirectoryPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearchText, filters.country, filters.specialty, filters.onlyVerified, retryToken])
+  }, [debouncedSearchText, filters.country, filters.specialty, retryToken])
 
   const countries = useMemo(
     () =>
@@ -192,16 +187,6 @@ export function AppDirectoryPage() {
             ))}
           </select>
         </div>
-        <label className="directory-verified-toggle">
-          <input
-            type="checkbox"
-            checked={filters.onlyVerified}
-            onChange={(event) =>
-              setFilters((current) => ({ ...current, onlyVerified: event.target.checked }))
-            }
-          />
-          <span>Solo verificados</span>
-        </label>
       </div>
 
       {errorMessage ? (
@@ -228,19 +213,8 @@ export function AppDirectoryPage() {
         <section className="directory-empty">
           <h3>Sin resultados</h3>
           <p className="helper-text">
-            {filters.onlyVerified
-              ? 'No hay perfiles verificados con esos filtros. Prueba quitando el filtro de verificación.'
-              : 'Ajusta búsqueda o filtros para encontrar otro perfil técnico.'}
+            Ajusta búsqueda o filtros para encontrar otro perfil técnico.
           </p>
-          {filters.onlyVerified ? (
-            <button
-              type="button"
-              className="button button--ghost"
-              onClick={() => setFilters((f) => ({ ...f, onlyVerified: false }))}
-            >
-              Mostrar todos los perfiles
-            </button>
-          ) : null}
         </section>
       ) : null}
 
