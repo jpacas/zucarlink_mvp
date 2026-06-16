@@ -15,7 +15,7 @@ import {
   saveExperience,
   saveProfileDraft,
 } from '../features/profile/api'
-import { isProfileComplete } from '../features/profile/profile-status'
+import { getProfileCompleteness } from '../features/profile/profile-status'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import type {
   ExperienceInput,
@@ -89,10 +89,11 @@ export function ProfileEditPage() {
     initializedProfileIdRef.current = profile.id
   }, [profile])
 
-  const profileComplete = useMemo(
-    () => isProfileComplete(draft, selectedSpecialtyIds.map((id) => ({ id }))),
+  const completeness = useMemo(
+    () => getProfileCompleteness(draft, selectedSpecialtyIds.map((id) => ({ id }))),
     [draft, selectedSpecialtyIds],
   )
+  const profileComplete = completeness.missingFields.length === 0
 
   if (!user) {
     return <Navigate to="/login" replace />
@@ -282,9 +283,24 @@ export function ProfileEditPage() {
             <button className="button" type="button" disabled={isSubmitting} onClick={() => void persistProfile()}>
               {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
             </button>
-            <span className="helper-text">
-              Estado del perfil: {profileComplete ? 'completo' : 'incompleto'}
-            </span>
+            <div className="completeness-status">
+              {profileComplete ? (
+                <span className="helper-text">Perfil completo.</span>
+              ) : (
+                <div className="completeness-missing">
+                  <p className="helper-text">
+                    Perfil {completeness.percent}% completo. Para llegar al 100%, completa:
+                  </p>
+                  <ul className="completeness-missing__list">
+                    {completeness.missingFields.map((field) => (
+                      <li key={field.editPath} className="completeness-missing__item">
+                        {field.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </>
       ) : null}

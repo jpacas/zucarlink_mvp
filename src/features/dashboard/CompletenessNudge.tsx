@@ -1,6 +1,14 @@
 import { Link } from 'react-router-dom'
 
-export function CompletenessNudge({ percent }: { percent: number }) {
+import type { ProfileCompletenessResult } from '../profile/profile-status'
+
+export function CompletenessNudge({
+  percent,
+  missingFields,
+}: {
+  percent: number
+  missingFields: ProfileCompletenessResult['missingFields']
+}) {
   return (
     <section className="content-card dashboard-nudge">
       <div className="dashboard-nudge__body">
@@ -10,6 +18,18 @@ export function CompletenessNudge({ percent }: { percent: number }) {
             Complétalo para aparecer en el directorio y participar en el foro.
           </span>
         </p>
+        {missingFields.length > 0 ? (
+          <div className="completeness-missing">
+            <p className="helper-text">Para llegar al 100%, completa:</p>
+            <ul className="completeness-missing__list">
+              {missingFields.map((field) => (
+                <li key={field.editPath} className="completeness-missing__item">
+                  {field.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div
           className="profile-completeness__bar-wrap"
           role="progressbar"

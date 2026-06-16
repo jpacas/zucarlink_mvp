@@ -53,7 +53,7 @@ export function AppHomePage() {
       </section>
 
       {showCompletenessNudge && completeness ? (
-        <CompletenessNudge percent={completeness.percent} />
+        <CompletenessNudge percent={completeness.percent} missingFields={completeness.missingFields} />
       ) : null}
       {showProviderNudge ? <ProviderStatusNudge /> : null}
 
