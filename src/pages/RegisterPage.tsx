@@ -123,6 +123,7 @@ export function RegisterPage() {
             minLength={6}
             required
           />
+          <p className="helper-text">Mínimo 6 caracteres.</p>
         </div>
         {feedback ? (
           <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>{feedback.message}</p>
