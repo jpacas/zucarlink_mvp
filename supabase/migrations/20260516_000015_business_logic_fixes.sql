@@ -67,8 +67,16 @@ end;
 $$;
 
 -- Step 2: add unique constraint so the upsert_company function can rely on ON CONFLICT.
-alter table public.companies
-  add constraint if not exists companies_name_unique unique (name);
+-- PostgreSQL no admite `ADD CONSTRAINT IF NOT EXISTS`; se usa un bloque guardado idempotente.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'companies_name_unique'
+  ) then
+    alter table public.companies
+      add constraint companies_name_unique unique (name);
+  end if;
+end$$;
 
 -- Step 3: atomic upsert function — inserts or returns existing company id.
 create or replace function public.upsert_company(
