@@ -1696,25 +1696,29 @@ label {
 .activity-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px 40px;
-  padding: 20px 0 0;
+  gap: 24px 48px;
+  padding: 24px 0 0;
   border-top: 1px solid rgba(32, 23, 71, 0.10);
 }
 
 .activity-strip__item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .activity-strip__value {
-  font-size: 1.6rem;
-  font-weight: 800;
+  font-family: "Cirka", serif;
+  font-size: 2.2rem;
+  font-weight: 700;
   color: var(--brand);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .activity-strip__label {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
+  font-weight: 500;
   color: var(--text-soft);
+  margin-top: 2px;
 }
