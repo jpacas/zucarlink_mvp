@@ -1,5 +1,3 @@
-import type { VerificationStatus } from '../profile/types'
-
 export interface ForumCategory {
   id: string
   slug: string
@@ -13,7 +11,6 @@ export interface ForumAuthor {
   roleTitle: string
   companyName: string
   avatarUrl: string | null
-  verificationStatus: VerificationStatus
 }
 
 export interface ForumThreadCard {

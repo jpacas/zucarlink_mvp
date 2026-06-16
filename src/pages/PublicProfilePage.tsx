@@ -6,17 +6,6 @@ import { getProfileForumActivity, getPublicMemberProfile } from '../features/pro
 import type { PublicMemberProfile, PublicProfileForumActivity } from '../features/profile/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
-function verificationLabel(status: PublicMemberProfile['verificationStatus']) {
-  switch (status) {
-    case 'verified':
-      return 'Verificado'
-    case 'pending':
-      return 'Verificación pendiente'
-    default:
-      return 'Sin verificar'
-  }
-}
-
 export function PublicProfilePage() {
   const { profileId = '' } = useParams()
   const [profile, setProfile] = useState<PublicMemberProfile | null>(null)
@@ -120,7 +109,6 @@ export function PublicProfilePage() {
             </p>
             <div className="actions">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
-              <span className="user-badge">{verificationLabel(profile.verificationStatus)}</span>
             </div>
           </div>
         </div>

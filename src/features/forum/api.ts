@@ -15,8 +15,6 @@ interface ForumAuthorRow {
   avatar_url?: string | null
   avatarPath?: string | null
   avatar_path?: string | null
-  verificationStatus?: 'unverified' | 'pending' | 'verified'
-  verification_status?: 'unverified' | 'pending' | 'verified'
 }
 
 interface ForumCategoryRow {
@@ -93,8 +91,6 @@ async function mapAuthor(author: ForumAuthorRow) {
     companyName:
       author.companyName ?? author.company_name ?? author.organization_name ?? '',
     avatarUrl: await resolveAvatarUrl(author),
-    verificationStatus:
-      author.verificationStatus ?? author.verification_status ?? 'unverified',
   }
 }
 

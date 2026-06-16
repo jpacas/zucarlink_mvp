@@ -4,8 +4,6 @@ export interface AdminDashboardKpis {
   providerUsers: number
   completeProfiles: number
   incompleteProfiles: number
-  verifiedProfiles: number
-  pendingProfiles: number
   forumTopics: number
   forumReplies: number
   activeProviders: number
@@ -38,11 +36,6 @@ export interface CountByProfileStatus {
   userCount: number
 }
 
-export interface CountByVerificationStatus {
-  verificationStatus: string
-  userCount: number
-}
-
 export interface RecentUser {
   id: string
   fullName: string
@@ -50,7 +43,6 @@ export interface RecentUser {
   country: string
   companyName: string
   profileStatus: string
-  verificationStatus: string
   createdAt: string
 }
 
@@ -103,7 +95,6 @@ export interface AdminOperationalDashboard {
   countries: CountByCountry[]
   companies: CountByCompany[]
   profileStatuses: CountByProfileStatus[]
-  verificationStatuses: CountByVerificationStatus[]
   recentUsers: RecentUser[]
   forumCategories: ForumCategoryMetric[]
   recentForumTopics: RecentForumTopic[]

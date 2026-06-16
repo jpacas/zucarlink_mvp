@@ -14,7 +14,6 @@ export interface ProviderCard {
   shortDescription: string
   countries: string[]
   category: ProviderCategory
-  isVerified: boolean
 }
 
 export interface ProviderDetail extends ProviderCard {
@@ -45,7 +44,6 @@ export interface CurrentProviderProfile extends ProviderProfileDraft {
   slug: string
   ownerId: string
   logoUrl: string | null
-  isVerified: boolean
   status: ProviderStatus
   category: ProviderCategory | null
 }

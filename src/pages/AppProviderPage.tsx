@@ -58,7 +58,6 @@ export function AppProviderPage() {
           <div className="actions">
             {provider.category ? <span className="user-badge">{provider.category.name}</span> : null}
             <span className="user-badge">{provider.status}</span>
-            {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
           </div>
         </div>
         <Link className="button button--secondary" to="/app/provider/edit">

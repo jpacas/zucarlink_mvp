@@ -25,7 +25,6 @@ interface ProviderCardRow {
   logo_url: string | null
   short_description: string | null
   countries: string[] | null
-  is_verified: boolean
   category: ProviderCategoryRow
 }
 
@@ -54,7 +53,6 @@ interface ProviderRow {
   products_services: string[] | null
   website: string | null
   contact_email: string | null
-  is_verified: boolean
   status: ProviderStatus
 }
 
@@ -95,7 +93,6 @@ function mapCard(row: ProviderCardRow): ProviderCard {
     shortDescription: row.short_description ?? '',
     countries: row.countries ?? [],
     category: mapCategory(row.category),
-    isVerified: row.is_verified,
   }
 }
 
@@ -192,7 +189,7 @@ export async function getCurrentProviderProfile(
   const { data, error } = await client
     .from('providers')
     .select(
-      'id, owner_id, slug, company_name, logo_url, short_description, long_description, category_id, countries, products_services, website, contact_email, is_verified, status',
+      'id, owner_id, slug, company_name, logo_url, short_description, long_description, category_id, countries, products_services, website, contact_email, status',
     )
     .eq('owner_id', user.id)
     .maybeSingle()
@@ -238,7 +235,6 @@ export async function getCurrentProviderProfile(
     productsServices: (provider.products_services ?? []).join(', '),
     website: provider.website ?? '',
     contactEmail: provider.contact_email ?? user.email ?? '',
-    isVerified: provider.is_verified,
     status: provider.status,
   }
 }

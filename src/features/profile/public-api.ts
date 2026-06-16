@@ -11,7 +11,6 @@ interface PublicMemberProfileRow {
   organization_name: string | null
   country: string | null
   short_bio: string | null
-  verification_status: 'unverified' | 'pending' | 'verified'
 }
 
 interface PublicProfileForumActivityRow {
@@ -65,7 +64,6 @@ export async function getPublicMemberProfile(profileId: string): Promise<PublicM
     organizationName: row.organization_name ?? '',
     country: row.country ?? '',
     shortBio: row.short_bio ?? '',
-    verificationStatus: row.verification_status,
   }
 }
 

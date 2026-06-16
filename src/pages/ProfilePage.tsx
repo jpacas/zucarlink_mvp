@@ -7,17 +7,6 @@ import { getProfileForumActivity } from '../features/profile/public-api'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import type { PublicProfileForumActivity } from '../features/profile/types'
 
-function verificationLabel(status: 'unverified' | 'pending' | 'verified') {
-  switch (status) {
-    case 'verified':
-      return 'Verificado'
-    case 'pending':
-      return 'Verificación pendiente'
-    default:
-      return 'Sin verificar'
-  }
-}
-
 export function ProfilePage() {
   const { user } = useAuth()
   const { profile, isLoading, errorMessage } = useCurrentProfile(user)
@@ -116,9 +105,6 @@ export function ProfilePage() {
               {profile.yearsExperience !== null ? (
                 <span className="user-badge">{profile.yearsExperience} años</span>
               ) : null}
-              <span className="user-badge">
-                {verificationLabel(profile.verificationStatus)}
-              </span>
             </div>
           </div>
         </div>

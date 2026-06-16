@@ -122,7 +122,6 @@ export function AdminProvidersPage() {
                   <div className="actions">
                     <span className="user-badge">{provider.category.name}</span>
                     <span className="user-badge">{provider.status}</span>
-                    {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
                   </div>
                 </div>
               </div>

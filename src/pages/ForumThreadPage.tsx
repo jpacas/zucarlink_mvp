@@ -18,17 +18,6 @@ function formatForumDate(value: string) {
   }).format(new Date(value))
 }
 
-function verificationLabel(status: 'unverified' | 'pending' | 'verified') {
-  switch (status) {
-    case 'verified':
-      return 'Verificado'
-    case 'pending':
-      return 'Pendiente'
-    default:
-      return 'Sin verificar'
-  }
-}
-
 function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
   const [hasAvatarError, setHasAvatarError] = useState(false)
   const canRenderAvatar = Boolean(author.avatarUrl) && !hasAvatarError
@@ -176,7 +165,6 @@ export function ForumThreadPage() {
           <ForumAuthorSummary author={thread.author} />
           <span>{formatForumDate(thread.createdAt)}</span>
           <span>{thread.replyCount} respuestas</span>
-          <span>{verificationLabel(thread.author.verificationStatus)}</span>
         </div>
       </div>
 

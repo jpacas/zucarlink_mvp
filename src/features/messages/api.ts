@@ -17,7 +17,6 @@ interface ThreadRow {
   other_profile_id: string
   other_full_name: string
   other_avatar_path: string | null
-  other_verification_status: string
   last_message_body: string
   last_message_at: string | null
   unread_count: number
@@ -52,7 +51,6 @@ export async function listMyThreads(): Promise<MessageThread[]> {
       otherProfileId: row.other_profile_id,
       otherFullName: row.other_full_name,
       otherAvatarPath: await resolveAvatarUrl(row.other_avatar_path),
-      otherVerificationStatus: (row.other_verification_status as MessageThread['otherVerificationStatus']) ?? 'unverified',
       lastMessageBody: row.last_message_body,
       lastMessageAt: row.last_message_at,
       unreadCount: row.unread_count,

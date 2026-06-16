@@ -3,7 +3,6 @@ export interface MessageThread {
   otherProfileId: string
   otherFullName: string
   otherAvatarPath: string | null
-  otherVerificationStatus: 'unverified' | 'pending' | 'verified'
   lastMessageBody: string
   lastMessageAt: string | null
   unreadCount: number

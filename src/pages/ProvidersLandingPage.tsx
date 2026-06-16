@@ -63,9 +63,6 @@ export function ProvidersLandingPage() {
           <span className="user-badge">
             {new Set(providers.flatMap((provider) => provider.countries)).size} países
           </span>
-          <span className="user-badge">
-            {providers.filter((provider) => provider.isVerified).length} verificados
-          </span>
         </div>
       </section>
     </div>

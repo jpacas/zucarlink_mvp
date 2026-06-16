@@ -1,7 +1,6 @@
 import type { AccountType } from '../../types/auth'
 
 export type ProfileStatus = 'incomplete' | 'complete'
-export type VerificationStatus = 'unverified' | 'pending' | 'verified'
 
 export interface ProfileSpecialty {
   id: string
@@ -36,7 +35,6 @@ export interface CurrentProfile {
   whatsapp: string
   linkedinUrl: string
   profileStatus: ProfileStatus
-  verificationStatus: VerificationStatus
   specialties: ProfileSpecialty[]
   experiences: ProfileExperience[]
 }
@@ -72,7 +70,6 @@ export interface PublicMemberProfile {
   organizationName: string
   country: string
   shortBio: string
-  verificationStatus: VerificationStatus
 }
 
 export interface PublicProfileForumActivity {

@@ -68,7 +68,6 @@ export function ProviderDetailPage() {
             <h2>{provider.companyName}</h2>
             <div className="actions">
               <span className="user-badge">{provider.category.name}</span>
-              {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
             </div>
           </div>
         </div>

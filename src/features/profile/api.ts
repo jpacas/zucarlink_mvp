@@ -30,7 +30,6 @@ interface ProfileRow {
   whatsapp: string | null
   linkedin_url: string | null
   profile_status: 'incomplete' | 'complete'
-  verification_status: 'unverified' | 'pending' | 'verified'
 }
 
 interface CompanyRow {
@@ -202,7 +201,7 @@ export async function getCurrentProfile(user: User): Promise<CurrentProfile | nu
   const { data, error } = await client
     .from('profiles')
     .select(
-      'id, account_type, full_name, country, role_title, current_company_id, years_experience, short_bio, avatar_path, phone, whatsapp, linkedin_url, profile_status, verification_status',
+      'id, account_type, full_name, country, role_title, current_company_id, years_experience, short_bio, avatar_path, phone, whatsapp, linkedin_url, profile_status',
     )
     .eq('id', user.id)
     .maybeSingle()
@@ -255,7 +254,6 @@ export async function getCurrentProfile(user: User): Promise<CurrentProfile | nu
     whatsapp: profile.whatsapp ?? '',
     linkedinUrl: profile.linkedin_url ?? '',
     profileStatus: profile.profile_status,
-    verificationStatus: profile.verification_status,
     specialties,
     experiences: experiences.map((experience) => mapExperience(experience, companies)),
   }

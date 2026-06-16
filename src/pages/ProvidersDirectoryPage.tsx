@@ -138,7 +138,6 @@ export function ProvidersDirectoryPage() {
                   <h3>{provider.companyName}</h3>
                   <div className="actions">
                     <span className="user-badge">{provider.category.name}</span>
-                    {provider.isVerified ? <span className="user-badge">Verificado</span> : null}
                   </div>
                 </div>
               </div>

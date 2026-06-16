@@ -420,9 +420,6 @@ export function MessagesPage() {
                 />
                 <div className="stack stack--compact">
                   <strong>{selectedThread.otherFullName}</strong>
-                  {selectedThread.otherVerificationStatus === 'verified' ? (
-                    <span className="user-badge user-badge--sm">Verificado</span>
-                  ) : null}
                 </div>
                 <Link
                   className="button button--secondary"
