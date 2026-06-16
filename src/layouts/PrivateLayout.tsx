@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { useUnreadCount } from '../features/messages/useUnreadCount'
 import { SiteFooter } from '../components/SiteFooter'
 import { ZucarLogo } from '../components/ZucarLogo'
 
@@ -18,15 +19,16 @@ export function PrivateLayout() {
   const primaryLinks =
     accountType === 'provider'
       ? [
-          { to: '/app', label: 'Panel' },
-          { to: '/proveedores/directorio', label: 'Directorio' },
-          { to: '/app/provider', label: 'Perfil comercial' },
+          { to: '/app', label: 'Panel', external: false },
+          { to: '/proveedores/directorio', label: 'Directorio', external: true },
+          { to: '/app/provider', label: 'Perfil comercial', external: false },
+          { to: '/app/messages', label: 'Mensajes', external: false },
         ]
       : [
-          { to: '/app', label: 'Panel' },
-          { to: '/app/directory', label: 'Directorio' },
-          { to: '/forum', label: 'Foro' },
-          { to: '/app/messages', label: 'Mensajes' },
+          { to: '/app', label: 'Panel', external: false },
+          { to: '/app/directory', label: 'Directorio', external: false },
+          { to: '/forum', label: 'Foro', external: true },
+          { to: '/app/messages', label: 'Mensajes', external: false },
         ]
 
   const userMenuLinks =
@@ -47,6 +49,7 @@ export function PrivateLayout() {
         ]
 
   const initials = (user?.email ?? '?')[0].toUpperCase()
+  const unreadCount = useUnreadCount(accountType !== 'provider')
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -101,6 +104,23 @@ export function PrivateLayout() {
                 onClick={() => setNavOpen(false)}
               >
                 {link.label}
+                {link.external ? (
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    aria-hidden="true"
+                    style={{ marginLeft: 4, opacity: 0.55, flexShrink: 0 }}
+                  >
+                    <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : null}
+                {link.to === '/app/messages' && unreadCount > 0 ? (
+                  <span className="nav-unread-badge" aria-label={`${unreadCount} no leídos`}>
+                    {unreadCount}
+                  </span>
+                ) : null}
               </NavLink>
             ))}
           </nav>
