@@ -968,6 +968,24 @@ fieldset.field {
   font-weight: 700;
 }
 
+/* Etiqueta de solo lectura: tag compacto, sin apariencia de botón */
+.chip--tag {
+  min-height: 0;
+  padding: 4px 11px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--brand-soft);
+  border-color: rgba(0, 41, 226, 0.18);
+  color: var(--brand);
+  cursor: default;
+}
+
+.chip--tag:hover {
+  transform: none;
+  border-color: rgba(0, 41, 226, 0.18);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1047,10 +1065,10 @@ fieldset.field {
 
 .directory-card .avatar-image,
 .directory-card .avatar-fallback {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  font-size: 1.25rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 1.1rem;
 }
 
 .directory-toolbar {
@@ -1067,8 +1085,16 @@ fieldset.field {
 
 .directory-card {
   display: grid;
-  gap: 12px;
-  padding: 18px;
+  gap: 10px;
+  padding: 16px;
+}
+
+.directory-card__header {
+  gap: 14px;
+}
+
+.directory-card .chip-grid {
+  gap: 8px;
 }
 
 .forum-thread-list .info-card {
@@ -1821,7 +1847,7 @@ fieldset.field {
 
 .directory-card--public {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .directory-card__public-cta {

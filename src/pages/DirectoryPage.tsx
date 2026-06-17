@@ -64,14 +64,27 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
             {profile.roleTitle || 'Cargo pendiente'}
             {profile.organizationName ? ` · ${profile.organizationName}` : ''}
           </p>
-          {profile.country ? <span className="route-chip">{profile.country}</span> : null}
+          {profile.country ? (
+            <span className="directory-card__country">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M8 1.5c-2.49 0-4.5 2-4.5 4.47C3.5 9.3 8 14.5 8 14.5s4.5-5.2 4.5-8.53C12.5 3.5 10.49 1.5 8 1.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  strokeLinejoin="round"
+                />
+                <circle cx="8" cy="6" r="1.6" stroke="currentColor" strokeWidth="1.3" />
+              </svg>
+              {profile.country}
+            </span>
+          ) : null}
         </div>
       </div>
 
       {profile.specialties.length > 0 ? (
         <div className="chip-grid">
           {profile.specialties.slice(0, 3).map((specialty) => (
-            <span key={specialty} className="chip chip--active">
+            <span key={specialty} className="chip chip--tag">
               {specialty}
             </span>
           ))}
@@ -79,7 +92,7 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
       ) : null}
 
       <div className="directory-card__public-cta">
-        <Link className="button" to="/register">
+        <Link className="button button--sm" to="/register">
           Conectar →
         </Link>
       </div>
