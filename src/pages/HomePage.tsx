@@ -6,6 +6,7 @@ import { listFeaturedContent } from '../features/content/api'
 import type { ContentItem } from '../features/content/types'
 import { listForumThreads } from '../features/forum/api'
 import type { ForumThreadCard } from '../features/forum/types'
+import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
 
 export function HomePage() {
   const [forumPreview, setForumPreview] = useState<ForumThreadCard[]>([])
@@ -164,9 +165,18 @@ export function HomePage() {
                   <Link className="forum-thread-link" to={`/forum/thread/${thread.slug}`}>
                     {thread.title}
                   </Link>
-                  <div className="forum-meta-row">
-                    <span>{thread.category.name}</span>
-                    <span>{thread.replyCount} respuestas</span>
+                  <div className="forum-card__footer">
+                    <span className="route-chip">{thread.category.name}</span>
+                    <div className="forum-stats">
+                      <span className="forum-stat" title={`${thread.replyCount} respuestas`}>
+                        <ReplyIcon />
+                        <span>{thread.replyCount}</span>
+                      </span>
+                      <span className="forum-stat" title={`${thread.likeCount} me gusta`}>
+                        <HeartIcon />
+                        <span>{thread.likeCount}</span>
+                      </span>
+                    </div>
                   </div>
                 </article>
               ))}

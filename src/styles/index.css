@@ -1445,9 +1445,221 @@ fieldset.field {
   gap: 20px;
 }
 
-.forum-thread-header {
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+.forum-post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.forum-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(32, 23, 71, 0.07);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.forum-action:hover {
+  background: rgba(32, 23, 71, 0.12);
+}
+
+.forum-action:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.forum-action svg {
+  width: 18px;
+  height: 18px;
+}
+
+.forum-action__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.forum-action--liked {
+  background: var(--role-proveedor-soft);
+  color: var(--role-proveedor);
+}
+
+.forum-action--liked:hover {
+  background: var(--role-proveedor-soft);
+}
+
+.forum-action--sm {
+  min-height: 32px;
+  padding: 5px 11px;
+  font-size: 0.84rem;
+}
+
+.forum-action--sm svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ─── Acciones directas en la tarjeta del listado ────────────────────────── */
+.forum-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forum-quick-reply {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.forum-quick-reply textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+/* ─── Tarjetas del listado: pie con autor + estadísticas ─────────────────── */
+.forum-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.forum-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.forum-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.forum-stat svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.75;
+}
+
+/* ─── Mensaje original: tarjeta prominente ───────────────────────────────── */
+.forum-original__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.forum-original .eyebrow {
+  margin: 0;
+}
+
+.forum-original__body {
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+/* ─── Respuestas: claramente subordinadas y anidadas ─────────────────────── */
+.forum-replies__title {
+  margin: 0;
+}
+
+.forum-thread-replies {
+  padding-left: 18px;
+  border-left: 2px solid var(--line);
+}
+
+.forum-reply {
+  position: relative;
+  padding: 16px 18px;
+  border: 1px solid rgba(32, 23, 71, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.forum-reply__context {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.forum-reply__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.forum-reply__reply {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+
+.forum-reply__reply svg {
+  width: 16px;
+  height: 16px;
+}
+
+.forum-reply__reply:hover {
+  color: var(--brand-strong);
+  text-decoration: underline;
+}
+
+.forum-reply__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid rgba(32, 23, 71, 0.14);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.forum-reply__toggle:hover {
+  background: rgba(32, 23, 71, 0.06);
+  color: var(--text);
+}
+
+/* Respuestas a respuestas: anidadas e indentadas bajo su respuesta directa. */
+.forum-reply__children {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+  padding-left: 16px;
+  border-left: 2px solid var(--line);
 }
 
 .forum-author {

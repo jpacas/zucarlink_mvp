@@ -2,10 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
-import { listForumCategories, listForumThreads } from '../features/forum/api'
+import {
+  createForumReply,
+  listForumCategories,
+  listForumThreads,
+  toggleForumTopicLike,
+} from '../features/forum/api'
 import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/forum/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
+import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
 
 function formatForumDate(value: string) {
   if (!value) {
@@ -53,6 +59,82 @@ export function ForumPage() {
   const [threads, setThreads] = useState<ForumThreadCard[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [pendingLike, setPendingLike] = useState<string | null>(null)
+  const [composeSlug, setComposeSlug] = useState<string | null>(null)
+  const [composeBody, setComposeBody] = useState('')
+  const [composeSubmitting, setComposeSubmitting] = useState(false)
+  const [composeError, setComposeError] = useState<string | null>(null)
+  const [flashSlug, setFlashSlug] = useState<string | null>(null)
+
+  function updateThread(slug: string, patch: Partial<ForumThreadCard>) {
+    setThreads((current) =>
+      current.map((thread) => (thread.slug === slug ? { ...thread, ...patch } : thread)),
+    )
+  }
+
+  async function handleToggleLike(thread: ForumThreadCard) {
+    if (pendingLike === thread.slug) {
+      return
+    }
+
+    const nextLiked = !thread.viewerLiked
+    setPendingLike(thread.slug)
+    // Actualización optimista de la tarjeta.
+    updateThread(thread.slug, {
+      viewerLiked: nextLiked,
+      likeCount: thread.likeCount + (nextLiked ? 1 : -1),
+    })
+
+    try {
+      const state = await toggleForumTopicLike(thread.slug)
+      updateThread(thread.slug, { viewerLiked: state.viewerLiked, likeCount: state.likeCount })
+    } catch {
+      updateThread(thread.slug, {
+        viewerLiked: thread.viewerLiked,
+        likeCount: thread.likeCount,
+      })
+    } finally {
+      setPendingLike(null)
+    }
+  }
+
+  function toggleCompose(slug: string) {
+    setComposeError(null)
+    setComposeBody('')
+    setComposeSlug((current) => (current === slug ? null : slug))
+  }
+
+  async function handleComposeSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+    thread: ForumThreadCard,
+  ) {
+    event.preventDefault()
+
+    if (!composeBody.trim()) {
+      return
+    }
+
+    setComposeSubmitting(true)
+
+    try {
+      await createForumReply({ threadSlug: thread.slug, body: composeBody, parentReplyId: null })
+      updateThread(thread.slug, { replyCount: thread.replyCount + 1 })
+      setComposeSlug(null)
+      setComposeBody('')
+      setComposeError(null)
+      setFlashSlug(thread.slug)
+      window.setTimeout(
+        () => setFlashSlug((current) => (current === thread.slug ? null : current)),
+        2500,
+      )
+    } catch (error) {
+      setComposeError(
+        error instanceof Error ? error.message : 'No fue posible publicar la respuesta.',
+      )
+    } finally {
+      setComposeSubmitting(false)
+    }
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -166,7 +248,7 @@ export function ForumPage() {
             )
           ) : (
             <Link className="button" to="/register">
-              Crear cuenta para participar
+              Crear cuenta
             </Link>
           )}
         </div>
@@ -192,20 +274,109 @@ export function ForumPage() {
           {threads.map((thread) => (
             <article key={thread.id} className="info-card stack">
               <div className="forum-meta-row">
-                <Link className="inline-link" to={`/forum/category/${thread.category.slug}`}>
+                <Link className="route-chip" to={`/forum/category/${thread.category.slug}`}>
                   {thread.category.name}
                 </Link>
-                <span>{thread.replyCount} respuestas</span>
-                <span>Última actividad {formatForumDate(thread.lastActivityAt)}</span>
+                <span>Actividad {formatForumDate(thread.lastActivityAt)}</span>
               </div>
               <Link className="forum-thread-link" to={`/forum/thread/${thread.slug}`}>
                 {thread.title}
               </Link>
               <p>{thread.excerpt}</p>
-              <div className="forum-meta-row">
+              <div className="forum-card__footer">
                 <ForumAuthorSummary author={thread.author} />
-                <span>{formatForumDate(thread.createdAt)}</span>
+                <div className="forum-card__actions">
+                  {user ? (
+                    <button
+                      type="button"
+                      className={
+                        thread.viewerLiked
+                          ? 'forum-action forum-action--sm forum-action--liked'
+                          : 'forum-action forum-action--sm'
+                      }
+                      onClick={() => handleToggleLike(thread)}
+                      disabled={pendingLike === thread.slug}
+                      aria-pressed={thread.viewerLiked}
+                      aria-label={thread.viewerLiked ? 'Quitar me gusta' : 'Me gusta'}
+                      title={`${thread.likeCount} me gusta`}
+                    >
+                      <HeartIcon filled={thread.viewerLiked} />
+                      <span className="forum-action__count">{thread.likeCount}</span>
+                    </button>
+                  ) : (
+                    <Link
+                      className="forum-action forum-action--sm"
+                      to="/login"
+                      aria-label="Inicia sesión para reaccionar"
+                      title={`${thread.likeCount} me gusta`}
+                    >
+                      <HeartIcon filled={false} />
+                      <span className="forum-action__count">{thread.likeCount}</span>
+                    </Link>
+                  )}
+
+                  {user ? (
+                    <button
+                      type="button"
+                      className="forum-action forum-action--sm"
+                      onClick={() => toggleCompose(thread.slug)}
+                      aria-expanded={composeSlug === thread.slug}
+                      aria-label="Responder"
+                      title={`${thread.replyCount} respuestas`}
+                    >
+                      <ReplyIcon />
+                      <span>Responder</span>
+                      <span className="forum-action__count">{thread.replyCount}</span>
+                    </button>
+                  ) : (
+                    <Link
+                      className="forum-action forum-action--sm"
+                      to="/login"
+                      aria-label="Responder"
+                      title={`${thread.replyCount} respuestas`}
+                    >
+                      <ReplyIcon />
+                      <span>Responder</span>
+                      <span className="forum-action__count">{thread.replyCount}</span>
+                    </Link>
+                  )}
+                </div>
               </div>
+
+              {flashSlug === thread.slug ? (
+                <p className="helper-text" role="status">
+                  Respuesta publicada.
+                </p>
+              ) : null}
+
+              {composeSlug === thread.slug ? (
+                <form
+                  className="forum-quick-reply stack"
+                  onSubmit={(event) => handleComposeSubmit(event, thread)}
+                >
+                  <textarea
+                    aria-label={`Responder a ${thread.title}`}
+                    rows={3}
+                    value={composeBody}
+                    onChange={(event) => setComposeBody(event.target.value)}
+                    placeholder="Escribe tu respuesta…"
+                    required
+                  />
+                  {composeError ? <p className="error-text">{composeError}</p> : null}
+                  <div className="actions">
+                    <button className="button button--sm" type="submit" disabled={composeSubmitting}>
+                      {composeSubmitting ? 'Publicando…' : 'Publicar respuesta'}
+                    </button>
+                    <button
+                      className="button button--ghost button--sm"
+                      type="button"
+                      onClick={() => toggleCompose(thread.slug)}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              ) : null}
             </article>
           ))}
         </div>
@@ -223,19 +394,19 @@ export function ForumPage() {
                 className="button"
                 to={activeCategory ? `/forum/new?category=${activeCategory.slug}` : '/forum/new'}
               >
-                Abrir el primer debate
+                Abrir debate
               </Link>
             </div>
           ) : user ? (
             <div className="actions">
               <Link className="button button--secondary" to="/app/profile/edit">
-                Completa tu perfil para participar
+                Completar perfil
               </Link>
             </div>
           ) : (
             <div className="actions">
               <Link className="button button--secondary" to="/register">
-                Crear cuenta para participar
+                Crear cuenta
               </Link>
             </div>
           )}

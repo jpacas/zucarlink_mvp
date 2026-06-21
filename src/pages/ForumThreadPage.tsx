@@ -1,11 +1,46 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
-import { createForumReply, getForumThread } from '../features/forum/api'
-import type { ForumAuthor, ForumThreadDetail } from '../features/forum/types'
+import {
+  createForumReply,
+  getForumThread,
+  getForumTopicLikeState,
+  toggleForumTopicLike,
+} from '../features/forum/api'
+import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import { HeartIcon, ReplyIcon, ShareIcon } from '../components/ForumIcons'
+
+interface ReplyNode {
+  reply: ForumReply
+  children: ReplyNode[]
+}
+
+// Construye el árbol de respuestas. Las respuestas directas al tema (sin padre)
+// son las raíces visibles; las respuestas a respuestas quedan como hijas.
+function buildReplyTree(replies: ForumReply[]): ReplyNode[] {
+  const nodes = new Map<string, ReplyNode>()
+  replies.forEach((reply) => nodes.set(reply.id, { reply, children: [] }))
+
+  const roots: ReplyNode[] = []
+  replies.forEach((reply) => {
+    const node = nodes.get(reply.id)
+    if (!node) {
+      return
+    }
+
+    const parent = reply.parentReplyId ? nodes.get(reply.parentReplyId) : undefined
+    if (parent) {
+      parent.children.push(node)
+    } else {
+      roots.push(node)
+    }
+  })
+
+  return roots
+}
 
 function formatForumDate(value: string) {
   if (!value) {
@@ -55,6 +90,26 @@ export function ForumThreadPage() {
   const [replyBody, setReplyBody] = useState('')
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+  const [viewerLiked, setViewerLiked] = useState(false)
+  const [isLiking, setIsLiking] = useState(false)
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null)
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(() => new Set())
+  const replyTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const replyTree = useMemo(() => buildReplyTree(thread?.replies ?? []), [thread])
+
+  function toggleExpanded(replyId: string) {
+    setExpandedReplies((current) => {
+      const next = new Set(current)
+      if (next.has(replyId)) {
+        next.delete(replyId)
+      } else {
+        next.add(replyId)
+      }
+      return next
+    })
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -83,10 +138,87 @@ export function ForumThreadPage() {
         }
       })
 
+    // El estado de likes es secundario: un fallo aquí no debe tumbar el tema.
+    void getForumTopicLikeState(threadSlug)
+      .then((state) => {
+        if (!isMounted) {
+          return
+        }
+
+        setLikeCount(state.likeCount)
+        setViewerLiked(state.viewerLiked)
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return
+        }
+
+        setLikeCount(0)
+        setViewerLiked(false)
+      })
+
     return () => {
       isMounted = false
     }
   }, [threadSlug])
+
+  async function handleToggleLike() {
+    if (!thread || isLiking) {
+      return
+    }
+
+    const previous = { likeCount, viewerLiked }
+    // Actualización optimista.
+    setViewerLiked(!previous.viewerLiked)
+    setLikeCount(previous.likeCount + (previous.viewerLiked ? -1 : 1))
+    setIsLiking(true)
+
+    try {
+      const state = await toggleForumTopicLike(thread.slug)
+      setLikeCount(state.likeCount)
+      setViewerLiked(state.viewerLiked)
+    } catch {
+      setLikeCount(previous.likeCount)
+      setViewerLiked(previous.viewerLiked)
+    } finally {
+      setIsLiking(false)
+    }
+  }
+
+  async function handleShare() {
+    if (!thread) {
+      return
+    }
+
+    const url = window.location.href
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: thread.title, url })
+        return
+      } catch {
+        // Cancelado o no disponible: caemos al portapapeles.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareFeedback('Enlace copiado')
+      window.setTimeout(() => setShareFeedback(null), 2500)
+    } catch {
+      setShareFeedback('No fue posible copiar el enlace')
+      window.setTimeout(() => setShareFeedback(null), 2500)
+    }
+  }
+
+  function handleFocusReply() {
+    setReplyTarget(null)
+    const textarea = replyTextareaRef.current
+    if (textarea) {
+      textarea.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      textarea.focus()
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -116,6 +248,58 @@ export function ForumThreadPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  function renderReplyNode(node: ReplyNode, depth: number) {
+    const { reply, children } = node
+    const isExpanded = expandedReplies.has(reply.id)
+
+    return (
+      <article key={reply.id} className="forum-reply stack">
+        {reply.parentAuthorName ? (
+          <span className="forum-reply__context">↳ En respuesta a {reply.parentAuthorName}</span>
+        ) : null}
+        <div className="forum-meta-row">
+          <ForumAuthorSummary author={reply.author} />
+          <span>{formatForumDate(reply.createdAt)}</span>
+        </div>
+        <p>{reply.body}</p>
+        <div className="forum-reply__actions">
+          {user ? (
+            <button
+              className="forum-reply__reply"
+              type="button"
+              onClick={() =>
+                setReplyTarget({
+                  id: reply.id,
+                  authorName: reply.author.fullName,
+                })
+              }
+            >
+              <ReplyIcon />
+              Responder
+            </button>
+          ) : null}
+          {children.length > 0 ? (
+            <button
+              className="forum-reply__toggle"
+              type="button"
+              onClick={() => toggleExpanded(reply.id)}
+              aria-expanded={isExpanded}
+            >
+              {isExpanded
+                ? `Ocultar ${children.length === 1 ? 'respuesta' : 'respuestas'}`
+                : `Ver ${children.length} ${children.length === 1 ? 'respuesta' : 'respuestas'}`}
+            </button>
+          ) : null}
+        </div>
+        {children.length > 0 && isExpanded ? (
+          <div className="forum-reply__children">
+            {children.map((child) => renderReplyNode(child, depth + 1))}
+          </div>
+        ) : null}
+      </article>
+    )
   }
 
   if (isLoading) {
@@ -153,9 +337,9 @@ export function ForumThreadPage() {
         { label: thread.category.name, to: `/forum/category/${thread.category.slug}` },
         { label: thread.title },
       ]} />
-      <section className="content-card stack">
-      <div className="forum-thread-header stack">
-        <div className="actions">
+      <article className="content-card content-card--ingenio stack forum-original">
+        <div className="forum-original__head">
+          <p className="eyebrow">Tema original</p>
           <Link className="route-chip" to={`/forum/category/${thread.category.slug}`}>
             {thread.category.name}
           </Link>
@@ -164,55 +348,62 @@ export function ForumThreadPage() {
         <div className="forum-meta-row">
           <ForumAuthorSummary author={thread.author} />
           <span>{formatForumDate(thread.createdAt)}</span>
-          <span>{thread.replyCount} respuestas</span>
         </div>
-      </div>
+        <p className="forum-original__body">{thread.body}</p>
+        <div className="forum-post-actions">
+          {user ? (
+            <button
+              type="button"
+              className={viewerLiked ? 'forum-action forum-action--liked' : 'forum-action'}
+              onClick={handleToggleLike}
+              disabled={isLiking}
+              aria-pressed={viewerLiked}
+              aria-label={viewerLiked ? 'Quitar me gusta' : 'Me gusta'}
+            >
+              <HeartIcon filled={viewerLiked} />
+              <span className="forum-action__count">{likeCount}</span>
+            </button>
+          ) : (
+            <Link className="forum-action" to="/login" aria-label="Inicia sesión para reaccionar">
+              <HeartIcon filled={false} />
+              <span className="forum-action__count">{likeCount}</span>
+            </Link>
+          )}
 
-      <article className="info-card stack">
-        <p>{thread.body}</p>
+          <button type="button" className="forum-action" onClick={handleShare} aria-label="Compartir">
+            <ShareIcon />
+            <span>Compartir</span>
+          </button>
+
+          {user ? (
+            <button type="button" className="forum-action" onClick={handleFocusReply} aria-label="Responder">
+              <ReplyIcon />
+              <span>Responder</span>
+            </button>
+          ) : (
+            <Link className="forum-action" to="/login" aria-label="Responder">
+              <ReplyIcon />
+              <span>Responder</span>
+            </Link>
+          )}
+
+          {shareFeedback ? (
+            <span className="helper-text" role="status">
+              {shareFeedback}
+            </span>
+          ) : null}
+        </div>
       </article>
 
-      <section className="stack">
-        <div className="split-header">
-          <div className="stack stack--compact">
-            <h3>Respuestas</h3>
-            <p className="helper-text">
-              La conversación es pública; participar requiere iniciar sesión.
-            </p>
-          </div>
-        </div>
+      <section className="stack forum-thread-replies">
+        <h3 className="forum-replies__title">Respuestas ({thread.replyCount})</h3>
 
-        {thread.replies.length > 0 ? (
+        {replyTree.length > 0 ? (
           <div className="forum-replies">
-            {thread.replies.map((reply) => (
-              <article key={reply.id} className="info-card stack">
-                <div className="forum-meta-row">
-                  <ForumAuthorSummary author={reply.author} />
-                  <span>{formatForumDate(reply.createdAt)}</span>
-                  {reply.parentAuthorName ? (
-                    <span>Responde a {reply.parentAuthorName}</span>
-                  ) : null}
-                </div>
-                <p>{reply.body}</p>
-                {user ? (
-                  <button
-                    className="button button--secondary"
-                    type="button"
-                    onClick={() =>
-                      setReplyTarget({
-                        id: reply.id,
-                        authorName: reply.author.fullName,
-                      })
-                    }
-                  >
-                    Responder
-                  </button>
-                ) : null}
-              </article>
-            ))}
+            {replyTree.map((node) => renderReplyNode(node, 0))}
           </div>
         ) : (
-          <p className="helper-text">Todavía no hay respuestas en este tema.</p>
+          <p className="helper-text">Todavía no hay respuestas. Sé el primero en aportar.</p>
         )}
       </section>
 
@@ -227,7 +418,7 @@ export function ForumThreadPage() {
             </div>
             {replyTarget ? (
               <button
-                className="button button--ghost"
+                className="button button--ghost button--sm"
                 type="button"
                 onClick={() => setReplyTarget(null)}
               >
@@ -239,6 +430,7 @@ export function ForumThreadPage() {
             <label htmlFor="forum-reply-body">Tu respuesta</label>
             <textarea
               id="forum-reply-body"
+              ref={replyTextareaRef}
               rows={5}
               value={replyBody}
               onChange={(event) => setReplyBody(event.target.value)}
@@ -260,7 +452,7 @@ export function ForumThreadPage() {
           </p>
           <div className="actions">
             <Link className="button" to="/login">
-              Ingresar para responder
+              Iniciar sesión
             </Link>
             <Link className="button button--secondary" to="/register">
               Crear cuenta
@@ -268,7 +460,6 @@ export function ForumThreadPage() {
           </div>
         </section>
       )}
-    </section>
     </div>
   )
 }

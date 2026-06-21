@@ -1,6 +1,12 @@
 import { createAvatarSignedUrl } from '../../lib/avatar-storage'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
-import type { ForumCategory, ForumReply, ForumThreadCard, ForumThreadDetail } from './types'
+import type {
+  ForumCategory,
+  ForumReply,
+  ForumThreadCard,
+  ForumThreadDetail,
+  ForumTopicLikeState,
+} from './types'
 
 interface ForumAuthorRow {
   id: string
@@ -37,6 +43,10 @@ interface ForumThreadRow {
   author: ForumAuthorRow
   replyCount?: number
   reply_count?: number
+  likeCount?: number
+  like_count?: number
+  viewerLiked?: boolean
+  viewer_liked?: boolean
   createdAt?: string
   created_at?: string
   lastActivityAt?: string
@@ -104,6 +114,8 @@ async function mapThread(row: ForumThreadRow): Promise<ForumThreadCard> {
     category: row.category,
     author: await mapAuthor(row.author),
     replyCount: Number(row.replyCount ?? row.reply_count ?? 0),
+    likeCount: Number(row.likeCount ?? row.like_count ?? 0),
+    viewerLiked: Boolean(row.viewerLiked ?? row.viewer_liked ?? false),
     createdAt: row.createdAt ?? row.created_at ?? '',
     lastActivityAt: row.lastActivityAt ?? row.last_activity_at ?? '',
   }
@@ -208,4 +220,43 @@ export async function createForumReply(payload: {
   }
 
   return data
+}
+
+interface ForumTopicLikeStateRow {
+  like_count?: number | null
+  viewer_liked?: boolean | null
+}
+
+function mapLikeState(data: unknown): ForumTopicLikeState {
+  const row = (Array.isArray(data) ? data[0] : data) as ForumTopicLikeStateRow | null
+  return {
+    likeCount: Number(row?.like_count ?? 0),
+    viewerLiked: Boolean(row?.viewer_liked),
+  }
+}
+
+export async function getForumTopicLikeState(threadSlug: string): Promise<ForumTopicLikeState> {
+  const client = getClient()
+  const { data, error } = await client.rpc('get_forum_topic_like_state', {
+    thread_slug: threadSlug,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return mapLikeState(data)
+}
+
+export async function toggleForumTopicLike(threadSlug: string): Promise<ForumTopicLikeState> {
+  const client = getClient()
+  const { data, error } = await client.rpc('toggle_forum_topic_like', {
+    thread_slug: threadSlug,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return mapLikeState(data)
 }

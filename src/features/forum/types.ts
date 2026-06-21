@@ -22,6 +22,8 @@ export interface ForumThreadCard {
   category: Pick<ForumCategory, 'slug' | 'name'>
   author: ForumAuthor
   replyCount: number
+  likeCount: number
+  viewerLiked: boolean
   createdAt: string
   lastActivityAt: string
 }
@@ -37,6 +39,11 @@ export interface ForumReply {
 
 export interface ForumThreadDetail extends ForumThreadCard {
   replies: ForumReply[]
+}
+
+export interface ForumTopicLikeState {
+  likeCount: number
+  viewerLiked: boolean
 }
 
 export interface ForumContribution {

@@ -45,6 +45,7 @@ const forumThreads = [
       avatarUrl: null,
     },
     replyCount: 3,
+    likeCount: 12,
     createdAt: '2026-04-15T10:00:00.000Z',
     lastActivityAt: '2026-04-15T14:00:00.000Z',
   },
@@ -96,7 +97,8 @@ it('renders the public forum listing with categories and thread metadata', async
         '¿Vale la pena invertir en automatización cuando la mano de obra en Latinoamérica sigue siendo barata?',
     }),
   ).toBeInTheDocument()
-  expect(await screen.findByText('3 respuestas')).toBeInTheDocument()
+  expect(await screen.findByTitle('3 respuestas')).toHaveTextContent('3')
+  expect(screen.getByTitle('12 me gusta')).toHaveTextContent('12')
   expect(screen.getByRole('link', { name: 'Ana Mejía' })).toHaveAttribute(
     'href',
     '/directory/profile-ana',
@@ -122,6 +124,9 @@ it('shows the public thread detail and asks anonymous visitors to sign in before
       get_forum_thread: {
         data: threadDetail,
       },
+      get_forum_topic_like_state: {
+        data: [{ like_count: 5, viewer_liked: false }],
+      },
     },
   })
 
@@ -138,9 +143,228 @@ it('shows the public thread detail and asks anonymous visitors to sign in before
   expect(screen.getByText('Inicia sesión para comentar')).toBeInTheDocument()
   expect(screen.getByText('C')).toBeInTheDocument()
   expect(
-    screen.getByRole('link', { name: 'Ingresar para responder' }),
+    screen.getByRole('link', { name: 'Iniciar sesión' }),
   ).toHaveAttribute('href', '/login')
   expect(screen.queryByRole('button', { name: 'Publicar respuesta' })).not.toBeInTheDocument()
+  // Visitantes anónimos ven el conteo de likes pero el control lleva a iniciar sesión.
+  const anonLike = await screen.findByRole('link', { name: 'Inicia sesión para reaccionar' })
+  expect(anonLike).toHaveAttribute('href', '/login')
+  expect(anonLike).toHaveTextContent('5')
+})
+
+it('lets an authenticated member like and unlike the thread', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'liker@example.com',
+    userMetadata: {
+      full_name: 'Lectora Activa',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const toggleLike = vi
+    .fn()
+    .mockReturnValueOnce({ data: [{ like_count: 6, viewer_liked: true }] })
+    .mockReturnValueOnce({ data: [{ like_count: 5, viewer_liked: false }] })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      get_forum_thread: {
+        data: threadDetail,
+      },
+      get_forum_topic_like_state: {
+        data: [{ like_count: 5, viewer_liked: false }],
+      },
+      toggle_forum_topic_like: toggleLike,
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/forum/thread/automatizacion-mano-de-obra-barata',
+    supabase,
+  })
+
+  const likeButton = await screen.findByRole('button', { name: 'Me gusta' })
+  expect(likeButton).toHaveTextContent('5')
+
+  await user.click(likeButton)
+
+  await waitFor(() => {
+    expect(toggleLike).toHaveBeenCalledWith({
+      thread_slug: 'automatizacion-mano-de-obra-barata',
+    })
+  })
+  const likedButton = await screen.findByRole('button', { name: 'Quitar me gusta' })
+  expect(likedButton).toHaveTextContent('6')
+
+  await user.click(likedButton)
+  expect(await screen.findByRole('button', { name: 'Me gusta' })).toHaveTextContent('5')
+})
+
+it('copies the thread link when sharing without native share support', async () => {
+  const user = userEvent.setup()
+
+  const writeText = vi.fn(() => Promise.resolve())
+  Object.defineProperty(navigator, 'clipboard', {
+    value: { writeText },
+    configurable: true,
+  })
+  Object.defineProperty(navigator, 'share', { value: undefined, configurable: true })
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      get_forum_thread: {
+        data: threadDetail,
+      },
+      get_forum_topic_like_state: {
+        data: [{ like_count: 0, viewer_liked: false }],
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/forum/thread/automatizacion-mano-de-obra-barata',
+    supabase,
+  })
+
+  await user.click(await screen.findByRole('button', { name: 'Compartir' }))
+
+  await waitFor(() => {
+    expect(writeText).toHaveBeenCalledWith(window.location.href)
+  })
+  expect(await screen.findByText('Enlace copiado')).toBeInTheDocument()
+})
+
+it('lets an authenticated member like a thread from the listing', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'lister@example.com',
+    userMetadata: {
+      full_name: 'Lectora Lista',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const toggleLike = vi.fn(() => ({ data: [{ like_count: 13, viewer_liked: true }] }))
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      list_forum_threads: { data: forumThreads },
+      toggle_forum_topic_like: toggleLike,
+    },
+  })
+
+  await renderApp({ initialRoute: '/forum', supabase })
+
+  const likeButton = await screen.findByRole('button', { name: 'Me gusta' })
+  expect(likeButton).toHaveTextContent('12')
+
+  await user.click(likeButton)
+
+  await waitFor(() => {
+    expect(toggleLike).toHaveBeenCalledWith({
+      thread_slug: 'automatizacion-mano-de-obra-barata',
+    })
+  })
+  expect(await screen.findByRole('button', { name: 'Quitar me gusta' })).toHaveTextContent('13')
+})
+
+it('lets an authenticated member reply to a thread directly from the listing', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'replier@example.com',
+    userMetadata: {
+      full_name: 'Respondón Directo',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const createReply = vi.fn(() => ({ data: [{ id: 'reply-new' }] }))
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      list_forum_threads: { data: forumThreads },
+      create_forum_reply: createReply,
+    },
+  })
+
+  await renderApp({ initialRoute: '/forum', supabase })
+
+  await user.click(await screen.findByRole('button', { name: 'Responder' }))
+  await user.type(
+    await screen.findByLabelText(/Responder a/),
+    'Aporte rápido desde el listado.',
+  )
+  await user.click(screen.getByRole('button', { name: 'Publicar respuesta' }))
+
+  await waitFor(() => {
+    expect(createReply).toHaveBeenCalledWith({
+      thread_slug: 'automatizacion-mano-de-obra-barata',
+      body_text: 'Aporte rápido desde el listado.',
+      parent_reply_id: null,
+    })
+  })
+  expect(await screen.findByText('Respuesta publicada.')).toBeInTheDocument()
+})
+
+it('collapses replies to replies until expanded', async () => {
+  const nestedDetail = {
+    ...forumThreads[0],
+    replies: [
+      {
+        id: 'reply-direct',
+        body: 'Respuesta directa al tema del foro.',
+        createdAt: '2026-04-15T14:00:00.000Z',
+        parentReplyId: null,
+        parentAuthorName: null,
+        author: {
+          id: 'profile-carlos',
+          fullName: 'Carlos Ruiz',
+          roleTitle: 'Supervisor de calderas',
+          companyName: 'Ingenio San Miguel',
+          avatarUrl: null,
+        },
+      },
+      {
+        id: 'reply-nested',
+        body: 'Esta es una respuesta a la respuesta.',
+        createdAt: '2026-04-15T15:00:00.000Z',
+        parentReplyId: 'reply-direct',
+        parentAuthorName: 'Carlos Ruiz',
+        author: {
+          id: 'profile-diana',
+          fullName: 'Diana López',
+          roleTitle: 'Ingeniera de procesos',
+          companyName: 'Ingenio La Cabaña',
+          avatarUrl: null,
+        },
+      },
+    ],
+  }
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      get_forum_thread: { data: nestedDetail },
+      get_forum_topic_like_state: { data: [{ like_count: 0, viewer_liked: false }] },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/forum/thread/automatizacion-mano-de-obra-barata',
+    supabase,
+  })
+
+  expect(await screen.findByText('Respuesta directa al tema del foro.')).toBeInTheDocument()
+  // La respuesta anidada permanece oculta hasta expandir.
+  expect(screen.queryByText('Esta es una respuesta a la respuesta.')).not.toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: 'Ver 1 respuesta' }))
+
+  expect(await screen.findByText('Esta es una respuesta a la respuesta.')).toBeInTheDocument()
 })
 
 it('blocks incomplete profiles from creating new threads', async () => {
