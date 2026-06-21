@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { expect, it, vi } from 'vitest'
@@ -843,7 +843,7 @@ it('renders an information preview on the home page', async () => {
   })
 
   await screen.findByRole('heading', {
-    name: 'La red profesional de la industria azucarera en un solo lugar',
+    name: 'Conecta con técnicos y especialistas del sector azucarero',
   })
   expect(screen.getByRole('heading', { name: 'Conversaciones técnicas activas' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Lecturas y señales del sector' })).toBeInTheDocument()
@@ -864,7 +864,7 @@ it('uses neutral public fallbacks when editorial previews cannot load', async ()
   })
 
   await screen.findByRole('heading', {
-    name: 'La red profesional de la industria azucarera en un solo lugar',
+    name: 'Conecta con técnicos y especialistas del sector azucarero',
   })
   expect(screen.getByText('La selección editorial se actualizará aquí pronto.')).toBeInTheDocument()
   expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument()
@@ -912,7 +912,7 @@ it('sets basic metadata for the information hub page', async () => {
   })
 
   await screen.findByRole('heading', { name: 'Información para seguirle el pulso al sector' })
-  expect(document.title).toContain('Información')
+  await waitFor(() => expect(document.title).toContain('Información'))
   expect(
     document.querySelector('meta[name="description"]')?.getAttribute('content')?.toLowerCase(),
   ).toContain('noticias, análisis, eventos e indicadores')
@@ -947,7 +947,8 @@ it('sets basic metadata for a content detail page', async () => {
   })
 
   await screen.findByRole('heading', { name: 'Detalle con metadata' })
-  expect(document.title).toContain('Detalle con metadata')
+  // El título/metadata se aplican en un efecto tras cargar el item (async).
+  await waitFor(() => expect(document.title).toContain('Detalle con metadata'))
   expect(
     document.querySelector('meta[name="description"]')?.getAttribute('content'),
   ).toContain('Resumen para metadata.')
