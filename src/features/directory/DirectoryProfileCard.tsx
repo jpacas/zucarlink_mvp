@@ -68,7 +68,11 @@ export function DirectoryProfileCard({ profile }: DirectoryProfileCardProps) {
           </svg>
           Mensaje
         </Link>
-        <Link className="button button--secondary button--sm" to={`/app/directory/${profile.id}`}>
+        <Link
+          className="button button--secondary button--sm"
+          to={`/app/directory/${profile.id}`}
+          aria-label={`Ver perfil de ${profile.fullName}`}
+        >
           Ver perfil →
         </Link>
       </div>

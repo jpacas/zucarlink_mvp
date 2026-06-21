@@ -60,6 +60,9 @@ it('renders the public directory summary without exposing member cards', async (
           total_specialties: 12,
         },
       },
+      list_public_preview_profiles: {
+        data: [],
+      },
     },
   })
 
@@ -73,7 +76,7 @@ it('renders the public directory summary without exposing member cards', async (
   expect(screen.getByText('Países activos')).toBeInTheDocument()
   expect(await screen.findByText('10')).toBeInTheDocument()
   expect(await screen.findByText('6')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Crear cuenta para explorar perfiles' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Crear mi perfil técnico' })).toBeInTheDocument()
   expect(screen.queryByText('Ana Mejía')).not.toBeInTheDocument()
 })
 
@@ -283,6 +286,9 @@ it('allows retrying the public directory summary after a recoverable error', asy
   const supabase = createSupabaseAuthFake({
     rpc: {
       get_public_directory_summary: getPublicSummary,
+      list_public_preview_profiles: {
+        data: [],
+      },
     },
   })
   const user = userEvent.setup()

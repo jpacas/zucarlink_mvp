@@ -242,7 +242,7 @@ export function DirectoryPage() {
                 className="button button--ghost"
                 onClick={() => setRetryToken((current) => current + 1)}
               >
-                Reintentar
+                Reintentar resumen
               </button>
             </div>
           </div>
