@@ -127,6 +127,9 @@ it('keeps edited contact values while saving an experience entry', async () => {
       specialties: [{ id: 'molinos', name: 'Molinos', slug: 'molinos' }],
       profileSpecialties: [{ profile_id: authState.user.id, specialty_id: 'molinos' }],
     },
+    rpc: {
+      upsert_company: () => ({ data: 'company-ingenio-del-norte' }),
+    },
   })
   const user = userEvent.setup()
 
@@ -171,11 +174,12 @@ it('logs out from the private layout and returns home', async () => {
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
-  await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
+  await screen.findByRole('heading', { name: 'Hola, Logout' })
+  await user.click(screen.getByRole('button', { name: 'Menú de usuario' }))
+  await user.click(screen.getByRole('menuitem', { name: 'Cerrar sesión' }))
 
   await screen.findByRole('heading', {
-    name: 'La red profesional de la industria azucarera en un solo lugar',
+    name: 'Conecta con técnicos y especialistas del sector azucarero',
   })
 
   expect(supabase.calls.signOut).toHaveLength(1)
@@ -193,18 +197,22 @@ it('renders a productized app home instead of internal implementation copy', asy
     session: authState.session,
     user: authState.user,
   })
+  const user = userEvent.setup()
 
   await renderApp({
     initialRoute: '/app',
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
+  await screen.findByRole('heading', { name: 'Hola, Panel' })
   expect(screen.queryByText(/user_metadata/i)).not.toBeInTheDocument()
   expect(screen.queryByText(/rutas bajo/i)).not.toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Actualizar perfil' })).toHaveAttribute(
+
+  // La gestión del perfil vive en el menú de usuario del encabezado.
+  await user.click(screen.getByRole('button', { name: 'Menú de usuario' }))
+  expect(screen.getByRole('menuitem', { name: 'Mi perfil' })).toHaveAttribute(
     'href',
-    '/app/profile/edit',
+    '/app/profile',
   )
 })
 
@@ -235,7 +243,8 @@ it('renders messages and settings as minimal product surfaces without placeholde
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Cuenta y acceso' })
+  await screen.findByRole('heading', { name: 'Ajustes' })
   expect(screen.queryByText(/próximas fases/i)).not.toBeInTheDocument()
-  expect(screen.getAllByRole('button', { name: 'Cerrar sesión' }).length).toBeGreaterThan(0)
+  // El cierre de sesión vive en el menú de usuario del encabezado.
+  expect(screen.getAllByRole('button', { name: 'Menú de usuario' }).length).toBeGreaterThan(0)
 })

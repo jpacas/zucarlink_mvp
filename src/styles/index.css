@@ -61,7 +61,51 @@
   --accent-green-soft: rgba(13, 219, 137, 0.12);
   --danger: #cc3722;
   --danger-soft: rgba(204, 55, 34, 0.12);
-  --shadow: 0 18px 48px rgba(32, 23, 71, 0.10);
+
+  /* Color semántico por audiencia (inspirado en el logo / molécula de sacarosa).
+     Azul = ingenios/productores · Verde = técnicos · Naranja = proveedores ·
+     Cían = información/datos. */
+  --role-ingenio: var(--brand);
+  --role-ingenio-soft: var(--brand-soft);
+  --role-tecnico: var(--accent-green);
+  --role-tecnico-soft: var(--accent-green-soft);
+  --role-tecnico-strong: #0bb371;
+  --role-tecnico-ink: #0a8f59; /* verde legible sobre fondo claro (texto) */
+  --role-proveedor: var(--accent-orange);
+  --role-proveedor-soft: var(--accent-orange-soft);
+  --role-proveedor-strong: #e85b34;
+  --role-info: var(--accent-cyan);
+  --role-info-soft: var(--accent-cyan-soft);
+  --role-info-ink: #0a7ea6; /* cían legible sobre fondo claro (texto) */
+
+  /* Escala de espaciado */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 64px;
+
+  /* Escala de radios */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* Elevación */
+  --shadow-sm: 0 6px 18px rgba(32, 23, 71, 0.06);
+  --shadow-md: 0 18px 48px rgba(32, 23, 71, 0.10);
+  --shadow-lg: 0 28px 64px rgba(32, 23, 71, 0.16);
+  --shadow: var(--shadow-md);
+
+  /* Fuente de títulos de display (marca) */
+  --font-display: "Cirka", "Neurial Grotesk", serif;
+
   --focus: #0029E2;
 }
 
@@ -79,9 +123,12 @@ body {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(0, 41, 226, 0.07), transparent 28%),
-    radial-gradient(circle at top right, rgba(32, 23, 71, 0.06), transparent 24%),
+    radial-gradient(circle at top left, rgba(0, 41, 226, 0.08), transparent 30%),
+    radial-gradient(circle at 78% 8%, rgba(0, 201, 255, 0.07), transparent 26%),
+    radial-gradient(circle at 12% 92%, rgba(13, 219, 137, 0.06), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(255, 114, 75, 0.05), transparent 28%),
     linear-gradient(180deg, #f4f4f6 0%, #eeeff4 100%);
+  background-attachment: fixed;
 }
 
 a {
@@ -351,9 +398,28 @@ label {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(140deg, rgba(0, 41, 226, 0.04), transparent 35%),
-    linear-gradient(320deg, rgba(32, 23, 71, 0.04), transparent 45%);
+    radial-gradient(circle at top right, var(--hero-accent, rgba(0, 41, 226, 0.10)), transparent 42%),
+    linear-gradient(140deg, rgba(0, 41, 226, 0.05), transparent 38%),
+    linear-gradient(320deg, rgba(32, 23, 71, 0.05), transparent 48%);
   pointer-events: none;
+}
+
+/* Tinte de héroe por rol de la página (--hero-accent alimenta el destello superior) */
+.hero-card--tecnico {
+  --hero-accent: rgba(13, 219, 137, 0.16);
+  --eyebrow-color: var(--role-tecnico-ink);
+}
+.hero-card--proveedor {
+  --hero-accent: rgba(255, 114, 75, 0.16);
+  --eyebrow-color: var(--role-proveedor-strong);
+}
+.hero-card--info {
+  --hero-accent: rgba(0, 201, 255, 0.16);
+  --eyebrow-color: var(--role-info-ink);
+}
+.hero-card--ingenio {
+  --hero-accent: rgba(0, 41, 226, 0.14);
+  --eyebrow-color: var(--role-ingenio);
 }
 
 .hero-card > * {
@@ -364,10 +430,20 @@ label {
 .hero-card h2 {
   margin-top: 8px;
   margin-bottom: 12px;
-  max-width: 13ch;
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: clamp(2.4rem, 5vw, 4.2rem);
-  line-height: 0.96;
-  letter-spacing: -0.045em;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Encabezados de sección en la fuente de display de marca */
+.content-card h2,
+.section-heading h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .hero-card p {
@@ -402,6 +478,45 @@ label {
   width: min(680px, 100%);
   margin: 10vh auto 0;
   text-align: left;
+}
+
+/* ─── Acento de tarjeta por rol ──────────────────────────────────────────────
+   Borde superior de color + eyebrow teñido. Codifica la audiencia de la sección:
+   técnicos (verde), proveedores (naranja), ingenios/foro (azul), info (cían). */
+.content-card--tecnico,
+.content-card--proveedor,
+.content-card--ingenio,
+.content-card--info {
+  position: relative;
+  overflow: hidden;
+}
+
+.content-card--tecnico::before,
+.content-card--proveedor::before,
+.content-card--ingenio::before,
+.content-card--info::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--role-accent);
+}
+
+.content-card--tecnico {
+  --role-accent: var(--role-tecnico);
+  --eyebrow-color: var(--role-tecnico-ink);
+}
+.content-card--proveedor {
+  --role-accent: var(--role-proveedor);
+  --eyebrow-color: var(--role-proveedor-strong);
+}
+.content-card--ingenio {
+  --role-accent: var(--role-ingenio);
+  --eyebrow-color: var(--role-ingenio);
+}
+.content-card--info {
+  --role-accent: var(--role-info);
+  --eyebrow-color: var(--role-info-ink);
 }
 
 .route-chip {
@@ -630,6 +745,42 @@ fieldset.field {
   letter-spacing: 0.01em;
 }
 
+/* CTAs contextuales por audiencia: relleno sólido del color de rol.
+   El azul (--button por defecto) sigue siendo el primario global. */
+.button--tecnico {
+  background: var(--role-tecnico);
+  color: #06301f;
+}
+.button--tecnico:hover {
+  background: var(--role-tecnico-strong);
+  color: #06301f;
+}
+.button--proveedor {
+  background: var(--role-proveedor);
+  color: #ffffff;
+}
+.button--proveedor:hover {
+  background: var(--role-proveedor-strong);
+}
+
+/* Variante secundaria (contorno) por rol */
+.button--secondary.button--tecnico {
+  background: transparent;
+  color: var(--role-tecnico-ink);
+  border-color: var(--role-tecnico);
+}
+.button--secondary.button--tecnico:hover {
+  background: var(--role-tecnico-soft);
+}
+.button--secondary.button--proveedor {
+  background: transparent;
+  color: var(--role-proveedor-strong);
+  border-color: var(--role-proveedor);
+}
+.button--secondary.button--proveedor:hover {
+  background: var(--role-proveedor-soft);
+}
+
 .status,
 .error-text,
 .helper-text {
@@ -816,6 +967,19 @@ fieldset.field {
   font-weight: 700;
 }
 
+.user-badge--tecnico {
+  background: var(--role-tecnico-soft);
+  color: var(--role-tecnico-ink);
+}
+.user-badge--proveedor {
+  background: var(--role-proveedor-soft);
+  color: var(--role-proveedor-strong);
+}
+.user-badge--info {
+  background: var(--role-info-soft);
+  color: var(--role-info-ink);
+}
+
 /* ─── Nav user menu (avatar + dropdown) ─────────────────────────────────── */
 
 .nav-user-menu {
@@ -916,11 +1080,24 @@ fieldset.field {
 }
 
 .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.78rem;
   font-weight: 800;
-  color: var(--brand);
+  color: var(--eyebrow-color, var(--brand));
+}
+
+/* Punto de color antes del eyebrow — refuerza el código de color por rol */
+.eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
 .profile-grid,
@@ -984,6 +1161,37 @@ fieldset.field {
 .chip--tag:hover {
   transform: none;
   border-color: rgba(0, 41, 226, 0.18);
+}
+
+/* Tags/chips por rol — reusan el fondo suave del acento y un texto legible */
+.chip--tecnico {
+  background: var(--role-tecnico-soft);
+  border-color: rgba(13, 219, 137, 0.30);
+  color: var(--role-tecnico-ink);
+}
+.chip--proveedor {
+  background: var(--role-proveedor-soft);
+  border-color: rgba(255, 114, 75, 0.30);
+  color: var(--role-proveedor-strong);
+}
+.chip--info {
+  background: var(--role-info-soft);
+  border-color: rgba(0, 201, 255, 0.32);
+  color: var(--role-info-ink);
+}
+.chip--tag.chip--tecnico:hover {
+  border-color: rgba(13, 219, 137, 0.30);
+}
+.chip--tag.chip--proveedor:hover {
+  border-color: rgba(255, 114, 75, 0.30);
+}
+.chip--tag.chip--info:hover {
+  border-color: rgba(0, 201, 255, 0.32);
+}
+
+/* Hover de cían sobre chips de categoría seleccionables (foro) */
+.chip:not(.chip--tag):not(.chip--active):hover {
+  border-color: rgba(0, 201, 255, 0.45);
 }
 
 .sr-only {
@@ -1087,6 +1295,25 @@ fieldset.field {
   display: grid;
   gap: 10px;
   padding: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+/* Acento verde técnico: barra superior sutil que identifica al directorio de técnicos */
+.directory-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--role-tecnico);
+  opacity: 0.9;
+}
+
+.directory-card:hover {
+  border-color: rgba(13, 219, 137, 0.35);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
 }
 
 .directory-card__header {
@@ -1182,6 +1409,19 @@ fieldset.field {
   color: var(--brand);
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+.tag-badge--tecnico {
+  background: var(--role-tecnico-soft);
+  color: var(--role-tecnico-ink);
+}
+.tag-badge--proveedor {
+  background: var(--role-proveedor-soft);
+  color: var(--role-proveedor-strong);
+}
+.tag-badge--info {
+  background: var(--role-info-soft);
+  color: var(--role-info-ink);
 }
 
 .price-item-card__value {
@@ -2040,12 +2280,22 @@ fieldset.field {
 }
 
 .activity-strip__value {
-  font-family: "Cirka", serif;
+  font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--value-color, var(--brand));
   line-height: 1;
   letter-spacing: -0.02em;
+}
+
+.activity-strip__value--tecnico {
+  --value-color: var(--role-tecnico-ink);
+}
+.activity-strip__value--info {
+  --value-color: var(--role-info-ink);
+}
+.activity-strip__value--ingenio {
+  --value-color: var(--role-ingenio);
 }
 
 .activity-strip__label {

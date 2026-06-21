@@ -109,7 +109,8 @@ it('lets an admin open the operational dashboard and switch the reporting period
     supabase,
   })
 
-  await user.click(await screen.findByRole('link', { name: 'Dashboard gerencial' }))
+  await user.click(await screen.findByRole('button', { name: 'Menú de usuario' }))
+  await user.click(await screen.findByRole('menuitem', { name: 'Dashboard' }))
   await screen.findByText('Usuarios nuevos')
 
   expect(screen.getByText('Últimos 30 días')).toBeInTheDocument()
@@ -148,8 +149,8 @@ it('keeps the operational dashboard hidden from non-admin users', async () => {
     supabase,
   })
 
-  await screen.findByRole('heading', { name: 'Tu espacio en Zucarlink' })
-  expect(screen.queryByRole('link', { name: 'Dashboard gerencial' })).not.toBeInTheDocument()
+  await screen.findByRole('heading', { name: 'Hola, Técnico' })
+  expect(screen.queryByRole('link', { name: 'Dashboard' })).not.toBeInTheDocument()
   expect(screen.queryByRole('heading', { name: 'Dashboard gerencial' })).not.toBeInTheDocument()
 })
 
@@ -178,7 +179,7 @@ it('shows a useful dashboard error when the admin RPC fails', async () => {
   })
 
   await screen.findByRole('heading', { name: 'Dashboard gerencial' })
-  expect(screen.getByText('Permisos insuficientes')).toBeInTheDocument()
+  expect(await screen.findByText('Permisos insuficientes')).toBeInTheDocument()
 })
 
 it('renders empty operational dashboard states without breaking', async () => {

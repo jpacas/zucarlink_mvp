@@ -14,7 +14,7 @@ export function ProvidersLandingPage() {
 
   return (
     <div className="stack">
-      <section className="hero-card stack">
+      <section className="hero-card hero-card--proveedor stack">
         <p className="eyebrow">Proveedores</p>
         <h2>Proveedores con presencia útil dentro del sector azucarero</h2>
         <p>
@@ -23,20 +23,20 @@ export function ProvidersLandingPage() {
         </p>
         <div className="actions">
           <Link
-            className="button"
+            className="button button--proveedor"
             to="/register"
             onClick={() => trackEvent('providers_landing_cta_clicked', { destination: 'register' })}
           >
             Solicitar activación comercial
           </Link>
-          <Link className="button button--secondary" to="/proveedores/directorio">
+          <Link className="button button--secondary button--proveedor" to="/proveedores/directorio">
             Ver directorio de proveedores
           </Link>
         </div>
       </section>
 
       <section className="section-grid">
-        <article className="content-card stack">
+        <article className="content-card content-card--proveedor stack">
           <p className="eyebrow">Presencia</p>
           <h3>Una ficha clara y permanente</h3>
           <p>
@@ -45,7 +45,7 @@ export function ProvidersLandingPage() {
           </p>
         </article>
 
-        <article className="content-card stack">
+        <article className="content-card content-card--proveedor stack">
           <p className="eyebrow">Contacto</p>
           <h3>Primer contacto dentro de la plataforma</h3>
           <p>
@@ -55,12 +55,12 @@ export function ProvidersLandingPage() {
         </article>
       </section>
 
-      <section className="content-card stack">
+      <section className="content-card content-card--info stack">
         <p className="eyebrow">Cobertura visible</p>
         <h2>Señales actuales del directorio</h2>
         <div className="actions">
-          <span className="user-badge">{providers.length} perfiles activos</span>
-          <span className="user-badge">
+          <span className="user-badge user-badge--proveedor">{providers.length} perfiles activos</span>
+          <span className="user-badge user-badge--info">
             {new Set(providers.flatMap((provider) => provider.countries)).size} países
           </span>
         </div>
