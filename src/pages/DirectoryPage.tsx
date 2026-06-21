@@ -18,26 +18,31 @@ const summaryCards = [
     key: 'totalMembers',
     label: 'Miembros visibles',
     description: 'Perfiles técnicos completos listos para descubrimiento privado.',
+    accent: 'tecnico',
   },
   {
     key: 'totalCountries',
     label: 'Países activos',
     description: 'Presencia regional actual dentro de la red.',
+    accent: 'info',
   },
   {
     key: 'totalCompanies',
     label: 'Ingenios y empresas',
     description: 'Organizaciones representadas con perfiles completos.',
+    accent: 'ingenio',
   },
   {
     key: 'totalSpecialties',
     label: 'Especialidades',
     description: 'Áreas técnicas visibles para explorar después de iniciar sesión.',
+    accent: 'proveedor',
   },
 ] satisfies Array<{
   key: keyof DirectoryAggregateSnapshot
   label: string
   description: string
+  accent: 'tecnico' | 'info' | 'ingenio' | 'proveedor'
 }>
 
 function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
@@ -84,7 +89,7 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
       {profile.specialties.length > 0 ? (
         <div className="chip-grid">
           {profile.specialties.slice(0, 3).map((specialty) => (
-            <span key={specialty} className="chip chip--tag">
+            <span key={specialty} className="chip chip--tag chip--tecnico">
               {specialty}
             </span>
           ))}
@@ -145,7 +150,7 @@ export function DirectoryPage() {
 
   return (
     <div className="stack">
-      <section className="hero-card stack">
+      <section className="hero-card hero-card--tecnico stack">
         <p className="eyebrow">Directorio público</p>
         <h2>Directorio de la industria azucarera</h2>
         <p>
@@ -170,7 +175,7 @@ export function DirectoryPage() {
 
       <section className="section-grid section-grid--directory">
         {summaryCards.map((card) => (
-          <article key={card.key} className="content-card stack">
+          <article key={card.key} className={`content-card content-card--${card.accent} stack`}>
             <p className="eyebrow">{card.label}</p>
             <h3 className="metric-value">
               {isLoading ? '...' : summary[card.key].toLocaleString('es-SV')}
@@ -182,7 +187,7 @@ export function DirectoryPage() {
 
       {/* Public profile preview */}
       {(isLoading || previewProfiles.length > 0) ? (
-        <section className="content-card stack">
+        <section className="content-card content-card--tecnico stack">
           <div className="split-header">
             <div className="stack stack--compact">
               <p className="eyebrow">Vista previa</p>

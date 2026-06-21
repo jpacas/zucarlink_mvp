@@ -51,7 +51,7 @@ export function DirectoryProfileCard({ profile }: DirectoryProfileCardProps) {
       {profile.specialties.length > 0 ? (
         <div className="chip-grid">
           {profile.specialties.slice(0, 3).map((specialty) => (
-            <span key={specialty} className="chip chip--tag">
+            <span key={specialty} className="chip chip--tag chip--tecnico">
               {specialty}
             </span>
           ))}

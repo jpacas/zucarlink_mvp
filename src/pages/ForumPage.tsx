@@ -139,7 +139,7 @@ export function ForumPage() {
   }
 
   return (
-    <section className="content-card stack">
+    <section className="content-card content-card--ingenio stack">
       <div className="split-header">
         <div className="stack stack--compact">
           <p className="eyebrow">Público</p>

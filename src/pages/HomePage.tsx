@@ -97,19 +97,19 @@ export function HomePage() {
           <div className="activity-strip">
             {members !== null && members > 0 ? (
               <div className="activity-strip__item">
-                <span className="activity-strip__value">{members.toLocaleString('es-SV')}</span>
+                <span className="activity-strip__value activity-strip__value--tecnico">{members.toLocaleString('es-SV')}</span>
                 <span className="activity-strip__label">Miembros activos</span>
               </div>
             ) : null}
             {countries !== null && countries > 0 ? (
               <div className="activity-strip__item">
-                <span className="activity-strip__value">{countries}</span>
+                <span className="activity-strip__value activity-strip__value--info">{countries}</span>
                 <span className="activity-strip__label">Países representados</span>
               </div>
             ) : null}
             {activeThreads !== null && activeThreads > 0 ? (
               <div className="activity-strip__item">
-                <span className="activity-strip__value">{activeThreads}+</span>
+                <span className="activity-strip__value activity-strip__value--ingenio">{activeThreads}+</span>
                 <span className="activity-strip__label">Debates recientes</span>
               </div>
             ) : null}
@@ -118,7 +118,7 @@ export function HomePage() {
       </section>
 
       <section className="section-grid">
-        <article className="content-card stack">
+        <article className="content-card content-card--tecnico stack">
           <p className="eyebrow">Para técnicos</p>
           <h2>Criterio, contactos y contexto sectorial</h2>
           <p>
@@ -135,7 +135,7 @@ export function HomePage() {
           </div>
         </article>
 
-        <article className="content-card stack">
+        <article className="content-card content-card--proveedor stack">
           <p className="eyebrow">Para proveedores</p>
           <h2>Presencia útil frente a una audiencia especializada</h2>
           <p>
@@ -154,7 +154,7 @@ export function HomePage() {
       </section>
 
       <section className="section-grid">
-        <article className="content-card stack">
+        <article className="content-card content-card--ingenio stack">
           <p className="eyebrow">Foro</p>
           <h2>Conversaciones técnicas activas</h2>
           {forumPreview.length > 0 ? (
@@ -183,7 +183,7 @@ export function HomePage() {
           </div>
         </article>
 
-        <article className="content-card stack">
+        <article className="content-card content-card--info stack">
           <p className="eyebrow">Información</p>
           <h2>Lecturas y señales del sector</h2>
           {hasContentPreviewIssue ? (
