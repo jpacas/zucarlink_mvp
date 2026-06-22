@@ -1440,6 +1440,102 @@ fieldset.field {
   color: var(--brand);
 }
 
+/* ─── Tarjeta de contenido clicable (stretched link, igual que el foro) ───── */
+.content-card--link {
+  position: relative;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.content-card--link:hover {
+  border-color: rgba(0, 41, 226, 0.28);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+/* El enlace del título se extiende sobre toda la tarjeta. z-index: 1 lo mantiene
+   por encima de los hermanos flex posteriores (resumen, tags), que de lo contrario
+   se pintarían encima y bloquearían el click en esas zonas. */
+.content-card--link .content-item-card__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* ─── Tarjetas de módulo del hub de Información ───────────────────────────── */
+.module-card {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+/* Acento superior por rol/audiencia (igual que .directory-card::before). */
+.module-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0.9;
+}
+
+.module-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+/* Toda la tarjeta es clicable a través del enlace del título. z-index: 1 lo
+   mantiene por encima de los hermanos flex posteriores (descripción, flecha). */
+.module-card .module-card__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.module-card__icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+}
+
+.module-card__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.module-card__arrow {
+  align-self: flex-end;
+  margin-top: auto;
+  color: var(--accent);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 140ms ease;
+}
+
+.module-card:hover .module-card__arrow {
+  transform: translateX(4px);
+}
+
+/* Acentos por rol/audiencia (molécula de sacarosa del logo). */
+.module-card--ingenio {
+  --accent: var(--role-ingenio);
+}
+.module-card--info {
+  --accent: var(--role-info);
+}
+.module-card--proveedor {
+  --accent: var(--role-proveedor);
+}
+.module-card--tecnico {
+  --accent: var(--role-tecnico);
+}
+
 .content-filters {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);

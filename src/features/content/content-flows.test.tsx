@@ -384,10 +384,6 @@ it('renders a content card with title, summary, source, date, tag and call to ac
   expect(screen.getByText('Resumen curado para técnicos y líderes de operación.')).toBeInTheDocument()
   expect(screen.getByText('Reuters')).toBeInTheDocument()
   expect(screen.getByText('azúcar')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Ver más' })).toHaveAttribute(
-    'href',
-    '/informacion/nueva-referencia-mercado-azucar',
-  )
 })
 
 it('renders an event card with date, location, organizer and external source', () => {

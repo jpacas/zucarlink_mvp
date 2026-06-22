@@ -15,7 +15,7 @@ interface ContentCardProps {
 
 export function ContentCard({ item }: ContentCardProps) {
   return (
-    <article className="content-item-card stack">
+    <article className="content-item-card stack content-card--link">
       <div className="content-item-card__meta">
         <span>{formatContentDate(item.publishedAt)}</span>
         {item.sourceName ? <span>{item.sourceName}</span> : null}
@@ -30,9 +30,6 @@ export function ContentCard({ item }: ContentCardProps) {
             <TagBadge key={tag} label={tag} />
           ))}
         </div>
-        <Link className="inline-link" to={`/informacion/${item.slug}`}>
-          Ver más
-        </Link>
       </div>
     </article>
   )

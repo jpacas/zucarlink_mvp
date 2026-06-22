@@ -6,27 +6,47 @@ import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listFeaturedContent } from '../features/content/api'
 import type { ContentItem } from '../features/content/types'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { BlogIcon, EventIcon, NewsIcon, PriceIcon } from '../components/InfoIcons'
+import type { ReactNode } from 'react'
 
-const informationSections = [
+type ModuleRole = 'ingenio' | 'info' | 'proveedor' | 'tecnico'
+
+interface InformationSection {
+  title: string
+  description: string
+  to: string
+  role: ModuleRole
+  icon: ReactNode
+}
+
+const informationSections: InformationSection[] = [
   {
     title: 'Noticias',
     description: 'Actualización curada del sector con foco práctico para ingenios y proveedores.',
     to: '/informacion/noticias',
+    role: 'ingenio',
+    icon: <NewsIcon />,
   },
   {
     title: 'Blog',
     description: 'Análisis, contexto y lecturas rápidas para convertir ruido en criterio útil.',
     to: '/informacion/blog',
+    role: 'info',
+    icon: <BlogIcon />,
   },
   {
     title: 'Eventos',
     description: 'Agenda simple de congresos y encuentros relevantes para la industria.',
     to: '/informacion/eventos',
+    role: 'proveedor',
+    icon: <EventIcon />,
   },
   {
     title: 'Precios',
     description: 'Indicadores seleccionados para seguir mercado, energía y etanol sin complejidad extra.',
     to: '/informacion/precios',
+    role: 'tecnico',
+    icon: <PriceIcon />,
   },
 ]
 
@@ -98,12 +118,20 @@ export function InformationHubPage() {
         />
         <div className="content-card-grid">
           {informationSections.map((section) => (
-            <article key={section.to} className="content-item-card stack">
-              <h3 className="content-item-card__heading">{section.title}</h3>
-              <p>{section.description}</p>
-              <Link className="inline-link" to={section.to}>
+            <article
+              key={section.to}
+              className={`content-item-card stack module-card module-card--${section.role}`}
+            >
+              <span className="module-card__icon" aria-hidden="true">
+                {section.icon}
+              </span>
+              <Link className="module-card__title content-item-card__heading" to={section.to}>
                 {section.title}
               </Link>
+              <p>{section.description}</p>
+              <span className="module-card__arrow" aria-hidden="true">
+                →
+              </span>
             </article>
           ))}
         </div>
