@@ -106,6 +106,100 @@ it('renders the public forum listing with categories and thread metadata', async
   expect(screen.getByText('A')).toBeInTheDocument()
 })
 
+it('filters the forum listing by keyword (accent-insensitive)', async () => {
+  const user = userEvent.setup()
+  const searchThreads = [
+    {
+      id: 'thread-vapor',
+      slug: 'optimizacion-de-vapor',
+      title: 'Optimización de vapor en calderas',
+      excerpt: 'Ajustes de presión y purgas para estabilizar el vapor.',
+      body: 'Ajustes de presión y purgas para estabilizar el vapor.',
+      category: { slug: 'automatizacion', name: 'Automatización' },
+      author: {
+        id: 'profile-ana',
+        fullName: 'Ana Mejía',
+        roleTitle: 'Jefa de automatización',
+        companyName: 'Ingenio El Carmen',
+        avatarUrl: null,
+      },
+      replyCount: 2,
+      likeCount: 4,
+      createdAt: '2026-04-15T10:00:00.000Z',
+      lastActivityAt: '2026-04-15T14:00:00.000Z',
+    },
+    {
+      id: 'thread-molienda',
+      slug: 'preparacion-de-cana',
+      title: 'Preparación de caña en molienda',
+      excerpt: 'Cuchillas y desfibradoras para mejorar la extracción.',
+      body: 'Cuchillas y desfibradoras para mejorar la extracción.',
+      category: { slug: 'molienda', name: 'Molienda' },
+      author: {
+        id: 'profile-carlos',
+        fullName: 'Carlos Ruiz',
+        roleTitle: 'Supervisor de molinos',
+        companyName: 'Ingenio San Miguel',
+        avatarUrl: null,
+      },
+      replyCount: 1,
+      likeCount: 1,
+      createdAt: '2026-04-14T10:00:00.000Z',
+      lastActivityAt: '2026-04-14T12:00:00.000Z',
+    },
+  ]
+
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      list_forum_threads: { data: searchThreads },
+    },
+  })
+
+  await renderApp({ initialRoute: '/forum', supabase })
+
+  // Ambos hilos visibles al inicio.
+  expect(
+    await screen.findByRole('link', { name: 'Optimización de vapor en calderas' }),
+  ).toBeInTheDocument()
+  expect(
+    screen.getByRole('link', { name: 'Preparación de caña en molienda' }),
+  ).toBeInTheDocument()
+
+  const searchInput = screen.getByLabelText('Buscar por palabra clave')
+
+  // Filtra por palabra clave: solo el hilo de molienda permanece.
+  await user.type(searchInput, 'molienda')
+  expect(
+    screen.getByRole('link', { name: 'Preparación de caña en molienda' }),
+  ).toBeInTheDocument()
+  expect(
+    screen.queryByRole('link', { name: 'Optimización de vapor en calderas' }),
+  ).not.toBeInTheDocument()
+  expect(screen.getByText('1 resultado para «molienda»')).toBeInTheDocument()
+
+  // Búsqueda sin acentos encuentra el título acentuado.
+  await user.clear(searchInput)
+  await user.type(searchInput, 'optimizacion')
+  expect(
+    screen.getByRole('link', { name: 'Optimización de vapor en calderas' }),
+  ).toBeInTheDocument()
+  expect(
+    screen.queryByRole('link', { name: 'Preparación de caña en molienda' }),
+  ).not.toBeInTheDocument()
+
+  // Sin coincidencias: estado vacío con opción de limpiar.
+  await user.clear(searchInput)
+  await user.type(searchInput, 'zzzznoexiste')
+  expect(
+    screen.getByRole('heading', { name: 'Sin resultados para «zzzznoexiste»' }),
+  ).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Limpiar búsqueda' }))
+  expect(
+    screen.getByRole('link', { name: 'Optimización de vapor en calderas' }),
+  ).toBeInTheDocument()
+})
+
 it('keeps the public forum shareable when forum data cannot load', async () => {
   await renderApp({
     initialRoute: '/forum',
@@ -228,6 +322,7 @@ it('copies the thread link when sharing without native share support', async () 
   })
 
   await user.click(await screen.findByRole('button', { name: 'Compartir' }))
+  await user.click(await screen.findByRole('menuitem', { name: 'Copiar enlace' }))
 
   await waitFor(() => {
     expect(writeText).toHaveBeenCalledWith(window.location.href)

@@ -12,16 +12,14 @@ import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/fo
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
 import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
+import { ShareMenu } from '../components/ShareMenu'
+import { formatForumDate, formatRelativeDate } from '../features/forum/format'
 
-function formatForumDate(value: string) {
-  if (!value) {
-    return ''
-  }
-
-  return new Intl.DateTimeFormat('es-SV', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 }
 
 function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
@@ -43,7 +41,7 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
         </div>
       )}
       <div className="forum-author__copy">
-        <Link className="inline-link" to={`/directory/${author.id}`}>
+        <Link className="forum-author__name" to={`/directory/${author.id}`}>
           {author.fullName}
         </Link>
         <span>{author.roleTitle || 'Miembro'}</span>
@@ -65,6 +63,7 @@ export function ForumPage() {
   const [composeSubmitting, setComposeSubmitting] = useState(false)
   const [composeError, setComposeError] = useState<string | null>(null)
   const [flashSlug, setFlashSlug] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   function updateThread(slug: string, patch: Partial<ForumThreadCard>) {
     setThreads((current) =>
@@ -178,6 +177,21 @@ export function ForumPage() {
     [categories, categorySlug],
   )
 
+  const filteredThreads = useMemo(() => {
+    const normalizedQuery = normalizeText(query.trim())
+    if (!normalizedQuery) {
+      return threads
+    }
+
+    return threads.filter((thread) =>
+      normalizeText(
+        `${thread.title} ${thread.excerpt} ${thread.body} ${thread.author.fullName} ${thread.category.name}`,
+      ).includes(normalizedQuery),
+    )
+  }, [threads, query])
+
+  const hasActiveQuery = query.trim().length > 0
+
   if (isLoading) {
     return (
       <section className="content-card stack">
@@ -254,6 +268,17 @@ export function ForumPage() {
         </div>
       </div>
 
+      <div className="field forum-search">
+        <label htmlFor="forum-search">Buscar por palabra clave</label>
+        <input
+          id="forum-search"
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Ej. clarificación, vapor, molienda, autor…"
+        />
+      </div>
+
       <div className="chip-grid">
         <Link className={activeCategory ? 'chip' : 'chip chip--active'} to="/forum">
           Todo
@@ -269,15 +294,29 @@ export function ForumPage() {
         ))}
       </div>
 
-      {threads.length > 0 ? (
+      {hasActiveQuery && threads.length > 0 ? (
+        <p className="helper-text" role="status" aria-live="polite">
+          {filteredThreads.length === 1
+            ? `1 resultado para «${query.trim()}»`
+            : `${filteredThreads.length} resultados para «${query.trim()}»`}
+        </p>
+      ) : null}
+
+      {filteredThreads.length > 0 ? (
         <div className="forum-thread-list" data-testid="forum-thread-list">
-          {threads.map((thread) => (
-            <article key={thread.id} className="info-card stack">
-              <div className="forum-meta-row">
+          {filteredThreads.map((thread) => (
+            <article key={thread.id} className="info-card stack forum-card--link">
+              <div className="forum-meta-row forum-meta-row--split">
                 <Link className="route-chip" to={`/forum/category/${thread.category.slug}`}>
                   {thread.category.name}
                 </Link>
-                <span>Actividad {formatForumDate(thread.lastActivityAt)}</span>
+                <time
+                  className="forum-meta-row__time"
+                  dateTime={thread.lastActivityAt}
+                  title={`Actividad ${formatForumDate(thread.lastActivityAt)}`}
+                >
+                  {formatRelativeDate(thread.lastActivityAt)}
+                </time>
               </div>
               <Link className="forum-thread-link" to={`/forum/thread/${thread.slug}`}>
                 {thread.title}
@@ -340,6 +379,11 @@ export function ForumPage() {
                       <span className="forum-action__count">{thread.replyCount}</span>
                     </Link>
                   )}
+
+                  <ShareMenu
+                    url={`${window.location.origin}/forum/thread/${thread.slug}`}
+                    title={thread.title}
+                  />
                 </div>
               </div>
 
@@ -380,6 +424,19 @@ export function ForumPage() {
             </article>
           ))}
         </div>
+      ) : hasActiveQuery && threads.length > 0 ? (
+        <section className="info-card stack">
+          <h3>Sin resultados para «{query.trim()}»</h3>
+          <p className="helper-text">
+            No encontramos temas que coincidan con tu búsqueda
+            {activeCategory ? ` en ${activeCategory.name}` : ''}. Prueba con otra palabra clave.
+          </p>
+          <div className="actions">
+            <button type="button" className="button button--ghost" onClick={() => setQuery('')}>
+              Limpiar búsqueda
+            </button>
+          </div>
+        </section>
       ) : (
         <section className="info-card stack">
           <h3>{activeCategory ? `Sin temas en ${activeCategory.name}` : 'Sin temas aún'}</h3>

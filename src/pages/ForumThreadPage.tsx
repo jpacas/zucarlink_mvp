@@ -10,8 +10,10 @@ import {
   toggleForumTopicLike,
 } from '../features/forum/api'
 import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
+import { formatForumDate, formatRelativeDate } from '../features/forum/format'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
-import { HeartIcon, ReplyIcon, ShareIcon } from '../components/ForumIcons'
+import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
+import { ShareMenu } from '../components/ShareMenu'
 
 interface ReplyNode {
   reply: ForumReply
@@ -42,17 +44,6 @@ function buildReplyTree(replies: ForumReply[]): ReplyNode[] {
   return roots
 }
 
-function formatForumDate(value: string) {
-  if (!value) {
-    return ''
-  }
-
-  return new Intl.DateTimeFormat('es-SV', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
-}
-
 function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
   const [hasAvatarError, setHasAvatarError] = useState(false)
   const canRenderAvatar = Boolean(author.avatarUrl) && !hasAvatarError
@@ -72,7 +63,7 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
         </div>
       )}
       <div className="forum-author__copy">
-        <Link className="inline-link" to={`/directory/${author.id}`}>
+        <Link className="forum-author__name" to={`/directory/${author.id}`}>
           {author.fullName}
         </Link>
         <span>{author.roleTitle || 'Miembro'}</span>
@@ -93,7 +84,6 @@ export function ForumThreadPage() {
   const [likeCount, setLikeCount] = useState(0)
   const [viewerLiked, setViewerLiked] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
-  const [shareFeedback, setShareFeedback] = useState<string | null>(null)
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(() => new Set())
   const replyTextareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -185,32 +175,6 @@ export function ForumThreadPage() {
     }
   }
 
-  async function handleShare() {
-    if (!thread) {
-      return
-    }
-
-    const url = window.location.href
-
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      try {
-        await navigator.share({ title: thread.title, url })
-        return
-      } catch {
-        // Cancelado o no disponible: caemos al portapapeles.
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(url)
-      setShareFeedback('Enlace copiado')
-      window.setTimeout(() => setShareFeedback(null), 2500)
-    } catch {
-      setShareFeedback('No fue posible copiar el enlace')
-      window.setTimeout(() => setShareFeedback(null), 2500)
-    }
-  }
-
   function handleFocusReply() {
     setReplyTarget(null)
     const textarea = replyTextareaRef.current
@@ -259,9 +223,15 @@ export function ForumThreadPage() {
         {reply.parentAuthorName ? (
           <span className="forum-reply__context">↳ En respuesta a {reply.parentAuthorName}</span>
         ) : null}
-        <div className="forum-meta-row">
+        <div className="forum-meta-row forum-meta-row--split">
           <ForumAuthorSummary author={reply.author} />
-          <span>{formatForumDate(reply.createdAt)}</span>
+          <time
+            className="forum-meta-row__time"
+            dateTime={reply.createdAt}
+            title={formatForumDate(reply.createdAt)}
+          >
+            {formatRelativeDate(reply.createdAt)}
+          </time>
         </div>
         <p>{reply.body}</p>
         <div className="forum-reply__actions">
@@ -345,9 +315,15 @@ export function ForumThreadPage() {
           </Link>
         </div>
         <h2>{thread.title}</h2>
-        <div className="forum-meta-row">
+        <div className="forum-meta-row forum-meta-row--split">
           <ForumAuthorSummary author={thread.author} />
-          <span>{formatForumDate(thread.createdAt)}</span>
+          <time
+            className="forum-meta-row__time"
+            dateTime={thread.createdAt}
+            title={formatForumDate(thread.createdAt)}
+          >
+            {formatRelativeDate(thread.createdAt)}
+          </time>
         </div>
         <p className="forum-original__body">{thread.body}</p>
         <div className="forum-post-actions">
@@ -370,10 +346,7 @@ export function ForumThreadPage() {
             </Link>
           )}
 
-          <button type="button" className="forum-action" onClick={handleShare} aria-label="Compartir">
-            <ShareIcon />
-            <span>Compartir</span>
-          </button>
+          <ShareMenu className="forum-action" url={window.location.href} title={thread.title} />
 
           {user ? (
             <button type="button" className="forum-action" onClick={handleFocusReply} aria-label="Responder">
@@ -386,12 +359,6 @@ export function ForumThreadPage() {
               <span>Responder</span>
             </Link>
           )}
-
-          {shareFeedback ? (
-            <span className="helper-text" role="status">
-              {shareFeedback}
-            </span>
-          ) : null}
         </div>
       </article>
 
