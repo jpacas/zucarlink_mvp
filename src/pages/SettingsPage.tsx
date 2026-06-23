@@ -45,12 +45,12 @@ export function SettingsPage() {
         </article>
 
         <article className="info-card stack">
-          <div className="stack stack--compact">
-            <h3>Notificaciones</h3>
-            <span className="tag-badge" style={{ alignSelf: 'flex-start' }}>Próximamente</span>
-          </div>
+          <h3>Notificaciones</h3>
           <p className="helper-text">
-            Pronto podrás controlar qué correos recibes: mensajes directos, respuestas en el foro y novedades de la plataforma.
+            Te enviamos un correo cuando recibes un mensaje directo, cuando alguien responde a un tema que abriste en el foro y cuando un proveedor recibe una solicitud de contacto.
+          </p>
+          <p className="helper-text">
+            El control para elegir qué correos recibir llegará pronto.
           </p>
         </article>
       </div>
