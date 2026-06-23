@@ -236,6 +236,56 @@ it('submits a provider lead from the public detail when the user is authenticate
   })
 })
 
+it('lets an anonymous visitor submit a provider lead without logging in', async () => {
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      get_provider_by_slug: {
+        data: {
+          id: 'provider-automation',
+          slug: 'tecno-control',
+          company_name: 'Tecno Control',
+          logo_url: null,
+          short_description: 'Automatización industrial para ingenios.',
+          long_description: 'Automatización, instrumentación y soporte remoto.',
+          countries: ['Guatemala', 'El Salvador'],
+          products_services: ['PLC', 'SCADA'],
+          website: null,
+          contact_email: 'contacto@tecnocontrol.example.com',
+          status: 'active',
+          category: providerCategories[0],
+        },
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/proveedores/tecno-control',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Tecno Control' })
+  // The contact action is a button (not a login redirect) even when logged out
+  await user.click(screen.getByRole('button', { name: 'Contactar proveedor' }))
+
+  await user.type(screen.getByLabelText('Nombre'), 'Visitante Anónimo')
+  await user.type(screen.getByLabelText('Email'), 'visitante@ingenio.com')
+  await user.type(screen.getByLabelText('Mensaje'), 'Quiero información sin crear cuenta.')
+  await user.click(screen.getByRole('button', { name: 'Enviar solicitud' }))
+
+  await screen.findByText('Tu solicitud fue enviada al proveedor.')
+  expect(supabase.calls.rpc).toContainEqual({
+    fn: 'create_provider_lead',
+    args: {
+      provider_id: 'provider-automation',
+      name_text: 'Visitante Anónimo',
+      email_text: 'visitante@ingenio.com',
+      company_text: null,
+      message_text: 'Quiero información sin crear cuenta.',
+    },
+  })
+})
+
 it('renders provider lead validation errors with error styling', async () => {
   const authState = createAuthenticatedAuthState({
     email: 'validation@example.com',

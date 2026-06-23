@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
-import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ProviderLeadForm } from '../features/providers/ProviderLeadForm'
 import { ProviderLogo } from '../features/providers/ProviderLogo'
@@ -12,8 +11,6 @@ import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 export function ProviderDetailPage() {
   const { slug = '' } = useParams()
-  const location = useLocation()
-  const { user } = useAuth()
   const [provider, setProvider] = useState<ProviderDetail | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showLeadForm, setShowLeadForm] = useState(false)
@@ -109,29 +106,18 @@ export function ProviderDetailPage() {
           <div className="stack">
             <h3>Contacto interno</h3>
             <p className="helper-text">
-              El primer contacto se registra dentro de Zucarlink sin exponer datos sensibles.
+              El primer contacto se registra dentro de Zucarlink sin exponer datos sensibles. No necesitas una cuenta para escribir.
             </p>
           </div>
-          {user ? (
-            <button
-              className="button"
-              type="button"
-              onClick={() => setShowLeadForm((current) => !current)}
-            >
-              Contactar proveedor
-            </button>
-          ) : (
-            <Link
-              className="button"
-              role="button"
-              to="/login"
-              state={{ from: location }}
-            >
-              Contactar proveedor
-            </Link>
-          )}
+          <button
+            className="button"
+            type="button"
+            onClick={() => setShowLeadForm((current) => !current)}
+          >
+            Contactar proveedor
+          </button>
         </div>
-        {user && showLeadForm ? (
+        {showLeadForm ? (
           <ProviderLeadForm
             providerId={provider.id}
             onSubmitted={() => trackEvent('provider_lead_submitted', { providerSlug: provider.slug })}
