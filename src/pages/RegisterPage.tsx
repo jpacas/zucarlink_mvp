@@ -120,10 +120,10 @@ export function RegisterPage() {
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            minLength={6}
+            minLength={8}
             required
           />
-          <p className="helper-text">Mínimo 6 caracteres.</p>
+          <p className="helper-text">Mínimo 8 caracteres.</p>
         </div>
         {feedback ? (
           <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>{feedback.message}</p>
