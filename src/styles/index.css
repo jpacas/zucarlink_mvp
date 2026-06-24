@@ -2024,6 +2024,7 @@ fieldset.field {
   }
 
   .app-header {
+    position: relative;
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 24px;
@@ -2041,15 +2042,24 @@ fieldset.field {
   }
 
   .main-nav {
-    order: 10;
-    width: 100%;
     display: none;
-    flex-basis: 100%;
-    flex-direction: column;
   }
 
   .main-nav--open {
     display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    width: auto;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(32, 23, 71, 0.14);
+    padding: 12px;
+    z-index: 150;
   }
 
   .nav-link {
