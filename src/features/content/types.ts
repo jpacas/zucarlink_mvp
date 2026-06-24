@@ -49,16 +49,36 @@ export interface EventItem {
   status: ContentStatus
 }
 
+export interface PriceMarketSummarySource {
+  label: string
+  url: string
+}
+
 export interface PriceItem {
   id: string
   label: string
   value: string
+  valueNumeric?: number
   observedAt: string
   status: ContentStatus
   unit?: string
   sourceName?: string
   sourceUrl?: string
   notes?: string
+  featured?: boolean
+  marketSummary?: string
+  marketSummarySources?: PriceMarketSummarySource[]
+  marketSummaryUpdatedAt?: string
+}
+
+export interface PriceSeries {
+  label: string
+  history: PriceItem[]
+}
+
+export interface GroupedPriceItems {
+  featured: PriceSeries[]
+  others: PriceItem[]
 }
 
 export interface ContentListFilters {

@@ -8,6 +8,7 @@ import { ContentCard } from './components/ContentCard'
 import { ContentFilters } from './components/ContentFilters'
 import { EventCard } from './components/EventCard'
 import { FeaturedContent } from './components/FeaturedContent'
+import { FeaturedPriceCard } from './components/FeaturedPriceCard'
 import { PriceCard } from './components/PriceCard'
 import { SectionHeader } from './components/SectionHeader'
 import { TagBadge } from './components/TagBadge'
@@ -307,6 +308,94 @@ it('lists published price items ordered by observed date descending', async () =
   const items = await listPublishedPrices()
 
   expect(items.map((item) => item.label)).toEqual(['Etanol', 'Azúcar crudo'])
+})
+
+it('groups featured price series with full history and keeps the rest as flat items', async () => {
+  const { groupPriceSeries } = await import('./api')
+
+  const result = groupPriceSeries([
+    {
+      id: 'price-2',
+      label: 'Azúcar crudo',
+      value: '23.50',
+      valueNumeric: 23.5,
+      observedAt: '2026-04-16',
+      status: 'published',
+      featured: true,
+    },
+    {
+      id: 'price-1',
+      label: 'Azúcar crudo',
+      value: '23.10',
+      valueNumeric: 23.1,
+      observedAt: '2026-04-14',
+      status: 'published',
+      featured: true,
+    },
+    {
+      id: 'price-3',
+      label: 'Etanol',
+      value: '2.40',
+      observedAt: '2026-04-16',
+      status: 'published',
+      featured: false,
+    },
+  ])
+
+  expect(result.featured).toEqual([
+    {
+      label: 'Azúcar crudo',
+      history: [
+        expect.objectContaining({ id: 'price-1', observedAt: '2026-04-14' }),
+        expect.objectContaining({ id: 'price-2', observedAt: '2026-04-16' }),
+      ],
+    },
+  ])
+  expect(result.others.map((item) => item.id)).toEqual(['price-3'])
+})
+
+it('renders a featured price card with trend delta and market summary sources', () => {
+  render(
+    <FeaturedPriceCard
+      label="Azúcar crudo"
+      history={[
+        {
+          id: 'price-1',
+          label: 'Azúcar crudo',
+          value: '23.10',
+          valueNumeric: 23.1,
+          unit: 'USD/lb',
+          observedAt: '2026-04-14',
+          status: 'published',
+          featured: true,
+        },
+        {
+          id: 'price-2',
+          label: 'Azúcar crudo',
+          value: '23.50',
+          valueNumeric: 23.5,
+          unit: 'USD/lb',
+          observedAt: '2026-04-16',
+          status: 'published',
+          featured: true,
+          marketSummary: 'Suben las referencias por menor oferta en Brasil.',
+          marketSummarySources: [{ label: 'Reuters', url: 'https://example.com/reuters' }],
+          marketSummaryUpdatedAt: '2026-04-16',
+        },
+      ]}
+    />,
+  )
+
+  expect(screen.getByText('Azúcar crudo')).toBeInTheDocument()
+  expect(screen.getByText('23.50 USD/lb')).toBeInTheDocument()
+  expect(screen.getByText(/1\.7%/)).toBeInTheDocument()
+  expect(
+    screen.getByText('Suben las referencias por menor oferta en Brasil.'),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Reuters' })).toHaveAttribute(
+    'href',
+    'https://example.com/reuters',
+  )
 })
 
 it('lists featured published content only', async () => {

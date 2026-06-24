@@ -1,5 +1,12 @@
 import { getSupabaseBrowserClient } from '../../lib/supabase'
-import type { ContentItem, ContentListFilters, EventItem, PriceItem } from './types'
+import type {
+  ContentItem,
+  ContentListFilters,
+  EventItem,
+  GroupedPriceItems,
+  PriceItem,
+  PriceMarketSummarySource,
+} from './types'
 
 interface ContentItemRow {
   id: string
@@ -39,12 +46,17 @@ interface PriceItemRow {
   id: string
   label: string
   value: string
+  value_numeric?: number | string | null
   unit?: string | null
   observed_at: string
   source_name?: string | null
   source_url?: string | null
   notes?: string | null
   status: 'draft' | 'published'
+  featured?: boolean | null
+  market_summary?: string | null
+  market_summary_sources?: PriceMarketSummarySource[] | null
+  market_summary_updated_at?: string | null
 }
 
 function getClient() {
@@ -96,16 +108,26 @@ function mapEventItem(row: EventItemRow): EventItem {
 }
 
 function mapPriceItem(row: PriceItemRow): PriceItem {
+  const valueNumeric =
+    row.value_numeric === null || row.value_numeric === undefined
+      ? undefined
+      : Number(row.value_numeric)
+
   return {
     id: row.id,
     label: row.label,
     value: row.value,
+    valueNumeric: valueNumeric !== undefined && Number.isFinite(valueNumeric) ? valueNumeric : undefined,
     unit: row.unit ?? undefined,
     observedAt: row.observed_at,
     sourceName: row.source_name ?? undefined,
     sourceUrl: row.source_url ?? undefined,
     notes: row.notes ?? undefined,
     status: row.status,
+    featured: row.featured ?? false,
+    marketSummary: row.market_summary ?? undefined,
+    marketSummarySources: row.market_summary_sources ?? undefined,
+    marketSummaryUpdatedAt: row.market_summary_updated_at ?? undefined,
   }
 }
 
@@ -213,4 +235,37 @@ export async function listFeaturedContent(limitCount?: number): Promise<ContentI
   const rows = (data ?? []) as ContentItemRow[]
   const limitedRows = typeof limitCount === 'number' ? rows.slice(0, limitCount) : rows
   return limitedRows.map(mapContentItem)
+}
+
+export function groupPriceSeries(items: PriceItem[]): GroupedPriceItems {
+  const byLabel = new Map<string, PriceItem[]>()
+
+  for (const item of items) {
+    const group = byLabel.get(item.label)
+    if (group) {
+      group.push(item)
+    } else {
+      byLabel.set(item.label, [item])
+    }
+  }
+
+  const featured: GroupedPriceItems['featured'] = []
+  const others: GroupedPriceItems['others'] = []
+
+  for (const [label, group] of byLabel) {
+    const mostRecent = group.reduce((latest, item) =>
+      item.observedAt > latest.observedAt ? item : latest,
+    )
+
+    if (mostRecent.featured) {
+      const history = [...group].sort((a, b) => a.observedAt.localeCompare(b.observedAt))
+      featured.push({ label, history })
+    } else {
+      others.push(...group)
+    }
+  }
+
+  others.sort((a, b) => b.observedAt.localeCompare(a.observedAt))
+
+  return { featured, others }
 }

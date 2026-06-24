@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { FeaturedPriceCard } from '../features/content/components/FeaturedPriceCard'
 import { PriceCard } from '../features/content/components/PriceCard'
 import { SectionHeader } from '../features/content/components/SectionHeader'
-import { listPublishedPrices } from '../features/content/api'
+import { groupPriceSeries, listPublishedPrices } from '../features/content/api'
 import type { PriceItem } from '../features/content/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
@@ -50,6 +51,7 @@ export function PricesPage() {
   }, [])
 
   const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+  const { featured, others } = useMemo(() => groupPriceSeries(items), [items])
 
   return (
     <section className="content-card stack">
@@ -66,11 +68,28 @@ export function PricesPage() {
       ) : errorMessage ? (
         <p className="error-text">{errorMessage}</p>
       ) : items.length > 0 ? (
-        <div className="content-card-grid">
-          {items.map((item) => (
-            <PriceCard key={item.id} item={item} />
-          ))}
-        </div>
+        <>
+          {featured.length > 0 ? (
+            <div className="stack">
+              <SectionHeader eyebrow="Mercado" title="Precios clave" />
+              <div className="content-card-grid">
+                {featured.map((series) => (
+                  <FeaturedPriceCard key={series.label} label={series.label} history={series.history} />
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {others.length > 0 ? (
+            <div className="stack">
+              {featured.length > 0 ? <SectionHeader eyebrow="Mercado" title="Otros indicadores" /> : null}
+              <div className="content-card-grid">
+                {others.map((item) => (
+                  <PriceCard key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </>
       ) : (
         <p className="helper-text">Todavía no hay indicadores visibles.</p>
       )}
