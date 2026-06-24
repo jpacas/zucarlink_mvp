@@ -115,6 +115,10 @@ export function AppHeader() {
 
   return (
     <header className="app-header">
+      {navOpen ? (
+        <div className="nav-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />
+      ) : null}
+
       <Link to="/" aria-label="Ir al inicio">
         <ZucarLogo height={36} />
       </Link>
