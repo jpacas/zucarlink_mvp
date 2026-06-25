@@ -1401,7 +1401,7 @@ fieldset.field {
 
 .content-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
 }
 
@@ -1585,6 +1585,87 @@ fieldset.field {
   position: absolute;
   inset: 0;
   z-index: 1;
+}
+
+/* ─── Tarjeta editorial de noticias / blog ────────────────────────────────── */
+/* Columna flexible de altura completa: el resumen crece y empuja meta + pie al
+   fondo, de modo que las tarjetas de una misma fila quedan alineadas. */
+.content-news-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.content-news-card__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.content-news-card__category::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.content-news-card__category--info {
+  color: var(--role-info-ink);
+}
+.content-news-card__category--tecnico {
+  color: var(--role-tecnico-ink);
+}
+.content-news-card__category--proveedor {
+  color: var(--role-proveedor-strong);
+}
+
+.content-news-card .content-item-card__title {
+  transition: color 140ms ease;
+}
+
+.content-card--link:hover .content-item-card__title {
+  color: var(--brand);
+}
+
+/* Resumen recortado a 3 líneas para igualar el cuerpo de todas las tarjetas. */
+.content-news-card__summary {
+  flex: 1 1 auto;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--text-soft);
+}
+
+.content-news-card__meta {
+  font-size: 0.82rem;
+}
+
+.content-news-card__footer {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  align-items: center;
+}
+
+.content-news-card__more {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand);
+  transition: transform 140ms ease;
+}
+
+.content-card--link:hover .content-news-card__more {
+  transform: translateX(3px);
 }
 
 /* ─── Tarjetas de módulo del hub de Información ───────────────────────────── */
