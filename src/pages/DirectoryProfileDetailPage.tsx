@@ -75,7 +75,15 @@ export function DirectoryProfileDetailPage() {
       <div className="split-header">
         <div className="profile-header">
           {profile.avatarUrl ? (
-            <img className="avatar-image" src={profile.avatarUrl} alt={profile.fullName} />
+            <img
+              className="avatar-image"
+              src={profile.avatarUrl}
+              alt={profile.fullName}
+              width={88}
+              height={88}
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <div className="avatar-fallback" aria-hidden="true">
               {profile.fullName.slice(0, 1).toUpperCase() || 'Z'}

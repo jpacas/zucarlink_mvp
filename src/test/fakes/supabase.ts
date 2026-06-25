@@ -513,7 +513,11 @@ class QueryBuilder {
 let authSequence = 0
 let tableSequence = 0
 
-function createFakeUser(email: string, userMetadata: Record<string, unknown> = {}): User {
+function createFakeUser(
+  email: string,
+  userMetadata: Record<string, unknown> = {},
+  emailConfirmed = true,
+): User {
   const now = new Date().toISOString()
   const id = `user_${++authSequence}`
 
@@ -523,6 +527,8 @@ function createFakeUser(email: string, userMetadata: Record<string, unknown> = {
     email,
     created_at: now,
     updated_at: now,
+    email_confirmed_at: emailConfirmed ? now : undefined,
+    confirmed_at: emailConfirmed ? now : undefined,
     app_metadata: {
       provider: 'email',
       providers: ['email'],
@@ -590,8 +596,13 @@ function createProfileRow(user: User): ProfileRow {
 export function createAuthenticatedAuthState(options: {
   email: string
   userMetadata?: Record<string, unknown>
+  emailConfirmed?: boolean
 }): { session: Session; user: User } {
-  const user = createFakeUser(options.email, options.userMetadata)
+  const user = createFakeUser(
+    options.email,
+    options.userMetadata,
+    options.emailConfirmed ?? true,
+  )
   const session = createFakeSession(user)
 
   return {

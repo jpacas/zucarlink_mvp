@@ -197,7 +197,14 @@ export function AppHeader() {
               onClick={() => setMenuOpen((o) => !o)}
             >
               {avatarUrl ? (
-                <img src={avatarUrl} alt="" aria-hidden="true" />
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  aria-hidden="true"
+                  width={40}
+                  height={40}
+                  decoding="async"
+                />
               ) : (
                 initials
               )}

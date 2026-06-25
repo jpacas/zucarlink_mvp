@@ -33,6 +33,10 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
           className="forum-author__avatar"
           src={author.avatarUrl ?? undefined}
           alt={author.fullName}
+          width={36}
+          height={36}
+          loading="lazy"
+          decoding="async"
           onError={() => setHasAvatarError(true)}
         />
       ) : (
@@ -53,6 +57,8 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
 export function ForumPage() {
   const { categorySlug } = useParams()
   const { user } = useAuth()
+  // Cualquier miembro de Zucarlink con el correo confirmado puede participar.
+  const canParticipate = Boolean(user?.email_confirmed_at)
   const [categories, setCategories] = useState<ForumCategory[]>([])
   const [threads, setThreads] = useState<ForumThreadCard[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -246,17 +252,17 @@ export function ForumPage() {
         </div>
         <div className="actions">
           {user ? (
-            user.user_metadata?.profile_status === 'complete' ? (
+            canParticipate ? (
               <Link className="button" to="/forum/new">
                 Crear tema
               </Link>
             ) : (
               <div className="stack stack--compact">
-                <button type="button" className="button" disabled title="Completa tu perfil para crear temas">
+                <button type="button" className="button" disabled title="Confirma tu correo para crear temas">
                   Crear tema
                 </button>
                 <p className="helper-text" style={{ fontSize: '0.8rem' }}>
-                  <Link to="/app/profile/edit">Completa tu perfil</Link> para participar
+                  Confirma tu correo para participar
                 </p>
               </div>
             )
@@ -361,7 +367,12 @@ export function ForumPage() {
                       onClick={() => toggleCompose(thread.slug)}
                       aria-expanded={composeSlug === thread.slug}
                       aria-label="Responder"
-                      title={`${thread.replyCount} respuestas`}
+                      title={
+                        canParticipate
+                          ? `${thread.replyCount} respuestas`
+                          : 'Confirma tu correo para responder'
+                      }
+                      disabled={!canParticipate}
                     >
                       <ReplyIcon />
                       <span>Responder</span>
@@ -445,7 +456,7 @@ export function ForumPage() {
               ? 'Todavía no hay conversaciones visibles en esta categoría. ¡Sé el primero!'
               : 'El foro todavía no tiene conversaciones públicas visibles.'}
           </p>
-          {user && user.user_metadata?.profile_status === 'complete' ? (
+          {user && canParticipate ? (
             <div className="actions">
               <Link
                 className="button"
@@ -455,11 +466,7 @@ export function ForumPage() {
               </Link>
             </div>
           ) : user ? (
-            <div className="actions">
-              <Link className="button button--secondary" to="/app/profile/edit">
-                Completar perfil
-              </Link>
-            </div>
+            <p className="helper-text">Confirma tu correo para participar en el foro.</p>
           ) : (
             <div className="actions">
               <Link className="button button--secondary" to="/register">

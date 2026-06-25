@@ -93,6 +93,10 @@ export function PublicProfilePage() {
               className="avatar-image"
               src={profile.avatarUrl}
               alt={profile.fullName}
+              width={88}
+              height={88}
+              loading="lazy"
+              decoding="async"
               onError={() => setHasAvatarError(true)}
             />
           ) : (

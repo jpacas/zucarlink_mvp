@@ -55,6 +55,10 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
           className="forum-author__avatar"
           src={author.avatarUrl ?? undefined}
           alt={author.fullName}
+          width={36}
+          height={36}
+          loading="lazy"
+          decoding="async"
           onError={() => setHasAvatarError(true)}
         />
       ) : (
@@ -75,6 +79,8 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
 export function ForumThreadPage() {
   const { threadSlug = '' } = useParams()
   const { user } = useAuth()
+  // Cualquier miembro de Zucarlink con el correo confirmado puede responder.
+  const canParticipate = Boolean(user?.email_confirmed_at)
   const [thread, setThread] = useState<ForumThreadDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -349,7 +355,14 @@ export function ForumThreadPage() {
           <ShareMenu className="forum-action" url={window.location.href} title={thread.title} />
 
           {user ? (
-            <button type="button" className="forum-action" onClick={handleFocusReply} aria-label="Responder">
+            <button
+              type="button"
+              className="forum-action"
+              onClick={handleFocusReply}
+              aria-label="Responder"
+              disabled={!canParticipate}
+              title={canParticipate ? undefined : 'Confirma tu correo para responder'}
+            >
               <ReplyIcon />
               <span>Responder</span>
             </button>
@@ -374,7 +387,7 @@ export function ForumThreadPage() {
         )}
       </section>
 
-      {user ? (
+      {user && canParticipate ? (
         <form className="info-card stack" onSubmit={handleSubmit}>
           <div className="split-header">
             <div className="stack stack--compact">
@@ -411,6 +424,14 @@ export function ForumThreadPage() {
             </button>
           </div>
         </form>
+      ) : user ? (
+        <section className="info-card stack">
+          <h3>Confirma tu correo para responder</h3>
+          <p className="helper-text">
+            Revisa tu bandeja de entrada y confirma tu correo electrónico para participar en el
+            foro.
+          </p>
+        </section>
       ) : (
         <section className="info-card stack">
           <h3>Inicia sesión para comentar</h3>

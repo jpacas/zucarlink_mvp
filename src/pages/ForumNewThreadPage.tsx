@@ -4,7 +4,6 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumTopic, listForumCategories } from '../features/forum/api'
 import type { ForumCategory } from '../features/forum/types'
-import { getSupabaseBrowserClient } from '../lib/supabase'
 
 export function ForumNewThreadPage() {
   const { user, isLoading: isAuthLoading } = useAuth()
@@ -13,8 +12,8 @@ export function ForumNewThreadPage() {
   const [title, setTitle] = useState('')
   const [categorySlug, setCategorySlug] = useState('')
   const [body, setBody] = useState('')
-  const [canCreateTopic, setCanCreateTopic] = useState(false)
-  const [isResolvingProfile, setIsResolvingProfile] = useState(Boolean(user))
+  // Basta con ser miembro de Zucarlink con el correo confirmado.
+  const canCreateTopic = Boolean(user?.email_confirmed_at)
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -49,72 +48,6 @@ export function ForumNewThreadPage() {
     }
   }, [])
 
-  useEffect(() => {
-    let isMounted = true
-
-    if (!user) {
-      setCanCreateTopic(false)
-      setIsResolvingProfile(false)
-      return
-    }
-
-    setIsResolvingProfile(true)
-
-    const metadataStatus = user.user_metadata.profile_status
-
-    if (metadataStatus === 'complete' || metadataStatus === 'incomplete') {
-      setCanCreateTopic(metadataStatus === 'complete')
-      setIsResolvingProfile(false)
-      return
-    }
-
-    const client = getSupabaseBrowserClient()
-
-    if (!client) {
-      setCanCreateTopic(false)
-      setIsResolvingProfile(false)
-      setErrorMessage('Supabase no está configurado.')
-      return
-    }
-
-    void (async () => {
-      try {
-        const { data, error } = await client
-          .from('profiles')
-          .select('profile_status')
-          .eq('id', user.id)
-          .maybeSingle()
-
-        if (!isMounted) {
-          return
-        }
-
-        if (error) {
-          throw error
-        }
-
-        setCanCreateTopic(data?.profile_status === 'complete')
-      } catch (error: unknown) {
-        if (!isMounted) {
-          return
-        }
-
-        setCanCreateTopic(false)
-        setErrorMessage(
-          error instanceof Error ? error.message : 'No fue posible validar el perfil.',
-        )
-      } finally {
-        if (isMounted) {
-          setIsResolvingProfile(false)
-        }
-      }
-    })()
-
-    return () => {
-      isMounted = false
-    }
-  }, [user])
-
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -142,7 +75,7 @@ export function ForumNewThreadPage() {
     }
   }
 
-  if (isAuthLoading || isResolvingProfile || isLoadingCategories) {
+  if (isAuthLoading || isLoadingCategories) {
     return (
       <section className="content-card stack">
         <h2>Crear tema</h2>
@@ -168,11 +101,8 @@ export function ForumNewThreadPage() {
     return (
       <section className="content-card stack">
         <h2>Crear tema</h2>
-        <p className="helper-text">Completa tu perfil para abrir un tema nuevo.</p>
+        <p className="helper-text">Confirma tu correo para abrir un tema nuevo.</p>
         <div className="actions">
-          <Link className="button" to="/onboarding">
-            Completar perfil
-          </Link>
           <Link className="button button--secondary" to="/forum">
             Volver al foro
           </Link>

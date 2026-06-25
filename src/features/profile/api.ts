@@ -1,7 +1,7 @@
 import type { User } from '@supabase/supabase-js'
 
 import {
-  createAvatarSignedUrl,
+  getAvatarPublicUrl,
   removeAvatar,
   uploadAvatar,
 } from '../../lib/avatar-storage'
@@ -193,7 +193,7 @@ export async function getMyAvatarUrl(user: User): Promise<string | null> {
     return null
   }
 
-  return createAvatarSignedUrl(data.avatar_path as string).catch(() => null)
+  return getAvatarPublicUrl(data.avatar_path as string)
 }
 
 export async function getCurrentProfile(user: User): Promise<CurrentProfile | null> {
@@ -233,7 +233,7 @@ export async function getCurrentProfile(user: User): Promise<CurrentProfile | nu
 
   const companies = await loadCompaniesByIds([...companyIds])
   const avatarUrl = profile.avatar_path
-    ? await createAvatarSignedUrl(profile.avatar_path).catch(() => null)
+    ? getAvatarPublicUrl(profile.avatar_path)
     : null
 
   return {
@@ -393,7 +393,7 @@ export async function saveAvatarForProfile(userId: string, file: File, currentPa
     throw new Error(error.message)
   }
 
-  return createAvatarSignedUrl(upload.path)
+  return getAvatarPublicUrl(upload.path)
 }
 
 export async function resolvePostAuthDestination(user: User) {

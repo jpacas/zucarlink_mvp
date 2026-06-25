@@ -1,4 +1,4 @@
-import { createAvatarSignedUrl } from '../../lib/avatar-storage'
+import { getAvatarPublicUrl } from '../../lib/avatar-storage'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type { Message, MessageThread } from './types'
 
@@ -32,7 +32,7 @@ interface MessageRow {
 
 async function resolveAvatarUrl(avatarPath: string | null): Promise<string | null> {
   if (!avatarPath) return null
-  return createAvatarSignedUrl(avatarPath).catch(() => null)
+  return getAvatarPublicUrl(avatarPath)
 }
 
 export async function listMyThreads(): Promise<MessageThread[]> {

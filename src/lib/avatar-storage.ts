@@ -34,7 +34,8 @@ export async function uploadAvatar(params: {
   const { error } = await client.storage
     .from(AVATAR_BUCKET)
     .upload(path, params.file, {
-      cacheControl: '3600',
+      // Las rutas son inmutables (nombre con UUID), así que cacheamos por 1 año.
+      cacheControl: '31536000',
       contentType: params.file.type,
       upsert: false,
     })
@@ -60,22 +61,26 @@ export async function removeAvatar(path: string) {
   }
 }
 
-export async function createAvatarSignedUrl(path: string, expiresIn = 3600) {
+// El bucket de avatares es público: devolvemos una URL pública estable (cacheable
+// por CDN, sin re-firmar en cada render) y pedimos un render redimensionado para
+// que las fotos de perfil pesen pocos KB. 176px cubre el avatar más grande (88px @2×).
+export function getAvatarPublicUrl(path: string, size = 176): string | null {
   const client = getSupabaseBrowserClient()
 
   if (!client) {
-    throw new Error('Supabase no está configurado.')
+    return null
   }
 
-  const { data, error } = await client.storage
-    .from(AVATAR_BUCKET)
-    .createSignedUrl(path, expiresIn)
+  const { data } = client.storage.from(AVATAR_BUCKET).getPublicUrl(path, {
+    transform: {
+      width: size,
+      height: size,
+      resize: 'cover',
+      quality: 80,
+    },
+  })
 
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return data.signedUrl
+  return data.publicUrl
 }
 
 function getFileExtension(file: File) {

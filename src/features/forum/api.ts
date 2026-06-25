@@ -1,4 +1,4 @@
-import { createAvatarSignedUrl } from '../../lib/avatar-storage'
+import { getAvatarPublicUrl } from '../../lib/avatar-storage'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type {
   ForumCategory,
@@ -90,7 +90,7 @@ async function resolveAvatarUrl(author: ForumAuthorRow) {
     return null
   }
 
-  return createAvatarSignedUrl(avatarPath).catch(() => null)
+  return getAvatarPublicUrl(avatarPath)
 }
 
 async function mapAuthor(author: ForumAuthorRow) {

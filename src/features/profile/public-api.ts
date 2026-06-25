@@ -1,4 +1,4 @@
-import { createAvatarSignedUrl } from '../../lib/avatar-storage'
+import { getAvatarPublicUrl } from '../../lib/avatar-storage'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type { ForumContribution } from '../forum/types'
 import type { PublicMemberProfile, PublicProfileForumActivity } from './types'
@@ -52,9 +52,7 @@ export async function getPublicMemberProfile(profileId: string): Promise<PublicM
     throw new Error('Perfil no encontrado.')
   }
 
-  const avatarUrl = row.avatar_path
-    ? await createAvatarSignedUrl(row.avatar_path).catch(() => null)
-    : null
+  const avatarUrl = row.avatar_path ? getAvatarPublicUrl(row.avatar_path) : null
 
   return {
     id: row.id,

@@ -1,4 +1,4 @@
-import { createAvatarSignedUrl } from '../../lib/avatar-storage'
+import { getAvatarPublicUrl } from '../../lib/avatar-storage'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type {
   DirectoryAggregateSnapshot,
@@ -46,7 +46,7 @@ async function resolveAvatarUrl(avatarPath: string | null) {
     return null
   }
 
-  return createAvatarSignedUrl(avatarPath).catch(() => null)
+  return getAvatarPublicUrl(avatarPath)
 }
 
 async function mapDirectoryProfile(row: DirectoryProfileRow): Promise<DirectoryProfileCard> {

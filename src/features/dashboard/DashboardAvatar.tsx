@@ -9,6 +9,10 @@ export function DashboardAvatar({ url, name }: { url: string | null; name: strin
         className="avatar-image avatar-image--sm"
         src={url}
         alt=""
+        width={40}
+        height={40}
+        loading="lazy"
+        decoding="async"
         onError={() => setError(true)}
       />
     )

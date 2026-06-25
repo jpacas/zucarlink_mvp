@@ -56,6 +56,10 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
             className="avatar-image"
             src={profile.avatarUrl}
             alt={profile.fullName}
+            width={48}
+            height={48}
+            loading="lazy"
+            decoding="async"
             onError={() => setHasAvatarError(true)}
           />
         ) : (

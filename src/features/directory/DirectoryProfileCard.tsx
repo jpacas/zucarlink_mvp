@@ -15,6 +15,10 @@ export function DirectoryProfileCard({ profile }: DirectoryProfileCardProps) {
             className="avatar-image"
             src={profile.avatarUrl}
             alt={profile.fullName}
+            width={48}
+            height={48}
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="avatar-fallback" aria-hidden="true">

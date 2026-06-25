@@ -201,7 +201,15 @@ export function AvatarUploader({
   return (
     <div className="avatar-card">
       {currentUrl ? (
-        <img className="avatar-image" src={currentUrl} alt={currentName} />
+        <img
+          className="avatar-image"
+          src={currentUrl}
+          alt={currentName}
+          width={88}
+          height={88}
+          loading="lazy"
+          decoding="async"
+        />
       ) : (
         <div className="avatar-fallback" aria-hidden="true">
           {currentName.slice(0, 1).toUpperCase() || 'Z'}

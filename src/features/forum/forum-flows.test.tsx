@@ -462,37 +462,18 @@ it('collapses replies to replies until expanded', async () => {
   expect(await screen.findByText('Esta es una respuesta a la respuesta.')).toBeInTheDocument()
 })
 
-it('blocks incomplete profiles from creating new threads', async () => {
+it('blocks members with an unconfirmed email from creating new threads', async () => {
   const authState = createAuthenticatedAuthState({
-    email: 'incomplete@example.com',
+    email: 'unconfirmed@example.com',
+    emailConfirmed: false,
     userMetadata: {
-      full_name: 'Perfil Incompleto',
+      full_name: 'Correo Sin Confirmar',
       account_type: 'technician',
-      profile_status: 'incomplete',
     },
   })
   const supabase = createSupabaseAuthFake({
     session: authState.session,
     user: authState.user,
-    data: {
-      profiles: [
-        {
-          id: authState.user.id,
-          account_type: 'technician',
-          full_name: 'Perfil Incompleto',
-          country: 'El Salvador',
-          role_title: '',
-          current_company_id: null,
-          years_experience: null,
-          short_bio: '',
-          avatar_path: null,
-          phone: null,
-          whatsapp: null,
-          linkedin_url: null,
-          profile_status: 'incomplete',
-        },
-      ],
-    },
     rpc: {
       list_forum_categories: {
         data: forumCategories,
@@ -505,11 +486,8 @@ it('blocks incomplete profiles from creating new threads', async () => {
     supabase,
   })
 
-  await screen.findByText('Completa tu perfil para abrir un tema nuevo.')
-  expect(screen.getByRole('link', { name: 'Completar perfil' })).toHaveAttribute(
-    'href',
-    '/onboarding',
-  )
+  await screen.findByText('Confirma tu correo para abrir un tema nuevo.')
+  expect(screen.getByRole('link', { name: 'Volver al foro' })).toHaveAttribute('href', '/forum')
   expect(screen.queryByLabelText('Título')).not.toBeInTheDocument()
 })
 
