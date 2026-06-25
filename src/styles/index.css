@@ -1476,6 +1476,89 @@ fieldset.field {
   color: var(--role-info-ink);
 }
 
+/* ─── Tarjeta de evento (agenda) ──────────────────────────────────────────── */
+.event-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.event-card__date {
+  flex: 0 0 auto;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  text-align: center;
+}
+
+.event-card__date-month {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.event-card__date-day {
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.event-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-card__location {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.event-card--featured {
+  border-color: rgba(0, 41, 226, 0.22);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--brand-soft) 140%);
+  box-shadow: var(--shadow-sm);
+}
+
+.event-card--featured .event-card__date {
+  width: 80px;
+  padding: 16px 10px;
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.event-card--featured .event-card__date-day {
+  font-size: 1.6rem;
+}
+
+.event-card--featured .content-item-card__heading {
+  font-size: 1.35rem;
+}
+
+@media (max-width: 540px) {
+  .event-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .event-card__date {
+    flex-direction: row;
+    width: auto;
+    align-self: flex-start;
+    gap: 8px;
+    padding: 8px 14px;
+  }
+}
+
 .price-item-card__value {
   font-size: 1.1rem;
   color: var(--brand);

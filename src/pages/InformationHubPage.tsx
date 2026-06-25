@@ -36,7 +36,7 @@ const informationSections: InformationSection[] = [
   },
   {
     title: 'Eventos',
-    description: 'Agenda simple de congresos y encuentros relevantes para la industria.',
+    description: 'Agenda curada de congresos y ferias para planificar la asistencia de los técnicos.',
     to: '/informacion/eventos',
     role: 'proveedor',
     icon: <EventIcon />,

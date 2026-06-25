@@ -15,7 +15,7 @@ export function EventsPage() {
   usePageMetadata({
     title: 'Congresos y eventos',
     description:
-      'Agenda pública y simple de congresos y eventos relevantes para la industria azucarera.',
+      'Agenda curada de congresos y ferias de la industria azucarera para planificar la asistencia de los técnicos.',
   })
 
   useEffect(() => {
@@ -56,6 +56,7 @@ export function EventsPage() {
       items.filter((item) => item.startDate < today),
     ]
   }, [items])
+  const [nextEvent, ...restUpcoming] = upcoming
   const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
   return (
@@ -64,7 +65,7 @@ export function EventsPage() {
         as="h1"
         eyebrow="Agenda"
         title="Congresos y eventos"
-        description="Un listado simple para identificar encuentros relevantes sin perderse en un calendario complejo."
+        description="Agenda curada de los encuentros más relevantes de la industria azucarera para planificar la asistencia de los técnicos."
       />
 
       {isLoading ? <p className="helper-text">Cargando eventos.</p> : null}
@@ -75,14 +76,27 @@ export function EventsPage() {
         <p className="error-text">{errorMessage}</p>
       ) : null}
 
+      {!isLoading && !errorMessage && nextEvent ? (
+        <div className="stack stack--compact">
+          <p className="eyebrow">Próximo evento</p>
+          <EventCard item={nextEvent} featured />
+        </div>
+      ) : null}
+
       <div className="stack">
         <h3>Próximos</h3>
         {isLoading || errorMessage ? null : upcoming.length > 0 ? (
-          <div className="content-card-grid">
-            {upcoming.map((item) => (
-              <EventCard key={item.id} item={item} />
-            ))}
-          </div>
+          restUpcoming.length > 0 ? (
+            <div className="content-card-grid">
+              {restUpcoming.map((item) => (
+                <EventCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <p className="helper-text">
+              Por ahora solo hay un evento próximo confirmado, destacado arriba.
+            </p>
+          )
         ) : (
           <p className="helper-text">Aún no hay eventos confirmados para esta agenda.</p>
         )}
