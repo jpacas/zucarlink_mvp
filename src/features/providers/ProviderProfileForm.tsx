@@ -120,6 +120,7 @@ export function ProviderProfileForm({
     try {
       const meta = await fetchSiteMeta(url)
       // Solo prellenamos lo que está vacío: nunca pisamos lo que el proveedor ya escribió.
+      const hadEmptyTargets = !draft.companyName.trim() || !draft.description.trim()
       const next = { ...draft }
       let filled = false
       if (!next.companyName.trim() && meta.title) {
@@ -134,6 +135,9 @@ export function ProviderProfileForm({
       if (filled) {
         onChange(next)
         setSiteMessage('Prellenamos lo que encontramos en tu sitio. Revísalo y ajústalo.')
+      } else if (hadEmptyTargets) {
+        // Había campos por llenar pero el sitio no devolvió datos aprovechables.
+        setSiteMessage('No encontramos datos aprovechables en tu sitio. Complétalos manualmente.')
       } else {
         setSiteMessage('Leímos tu sitio, pero ya tenías esos campos completos.')
       }

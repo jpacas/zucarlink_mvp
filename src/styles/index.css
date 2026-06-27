@@ -982,6 +982,41 @@ fieldset.field {
   margin: 0;
 }
 
+.provider-summary {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.provider-summary__row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 8px 16px;
+  align-items: baseline;
+}
+
+.provider-summary__row dt {
+  margin: 0;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.provider-summary__row dd {
+  margin: 0;
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .provider-summary__row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .provider-summary__row dt {
+    font-size: 0.85rem;
+    color: rgba(32, 23, 71, 0.6);
+  }
+}
+
 .ranking-list,
 .compact-table {
   display: grid;
@@ -1074,6 +1109,14 @@ fieldset.field {
 .user-badge--info {
   background: var(--role-info-soft);
   color: var(--role-info-ink);
+}
+.user-badge--success {
+  background: var(--accent-green-soft);
+  color: var(--role-tecnico-ink);
+}
+.user-badge--muted {
+  background: rgba(32, 23, 71, 0.06);
+  color: rgba(32, 23, 71, 0.6);
 }
 
 /* ─── Nav user menu (avatar + dropdown) ─────────────────────────────────── */

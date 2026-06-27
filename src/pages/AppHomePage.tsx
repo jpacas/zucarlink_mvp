@@ -10,6 +10,7 @@ import { useDashboardData } from '../features/dashboard/useDashboardData'
 import { getProfileCompleteness } from '../features/profile/profile-status'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import { isProviderDraftComplete } from '../features/providers/api'
+import { getProviderStatusMeta } from '../features/providers/status'
 import { useCurrentProviderProfile } from '../features/providers/useCurrentProviderProfile'
 
 export function AppHomePage() {
@@ -39,6 +40,7 @@ export function AppHomePage() {
 
   const showCompletenessNudge = completeness ? completeness.percent < 100 : false
   const showProviderNudge = isProvider && provider ? !isProviderDraftComplete(provider) : false
+  const providerStatusMeta = provider ? getProviderStatusMeta(provider.status) : null
 
   return (
     <div className="stack">
@@ -64,9 +66,17 @@ export function AppHomePage() {
           <article className="content-card stack dashboard-widget">
             <p className="eyebrow">Presencia comercial</p>
             <h3>Tu ficha en el directorio</h3>
+            {providerStatusMeta ? (
+              <p>
+                <span className={`user-badge user-badge--sm ${providerStatusMeta.badgeClass}`}>
+                  {providerStatusMeta.label}
+                </span>
+              </p>
+            ) : null}
             <p>
-              Revisa cómo se ve tu marca ante un potencial cliente y mantén listo el canal de
-              contacto interno.
+              {providerStatusMeta && !providerStatusMeta.isPublic
+                ? providerStatusMeta.description
+                : 'Revisa cómo se ve tu marca ante un potencial cliente y mantén listo el canal de contacto interno.'}
             </p>
             <div className="dashboard-widget__footer actions">
               <Link className="inline-link" to="/app/provider">

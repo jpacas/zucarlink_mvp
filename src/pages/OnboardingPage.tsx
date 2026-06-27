@@ -11,11 +11,13 @@ import {
   saveProfileDraft,
 } from '../features/profile/api'
 import { ProviderProfileForm } from '../features/providers/ProviderProfileForm'
+import { ProviderLogoUploader } from '../features/providers/ProviderLogoUploader'
 import {
   createEmptyProviderDraft,
   getCurrentProviderProfile,
   isProviderDraftComplete,
   listProviderCategories,
+  saveLogoForProvider,
   saveProviderProfile,
 } from '../features/providers/api'
 import { isProfileComplete } from '../features/profile/profile-status'
@@ -72,6 +74,10 @@ export function OnboardingPage() {
     createEmptyProviderDraft(),
   )
   const [providerCategories, setProviderCategories] = useState<ProviderCategory[]>([])
+  const [providerExists, setProviderExists] = useState(false)
+  const [providerLogoUrl, setProviderLogoUrl] = useState<string | null>(null)
+  const [providerLogoPath, setProviderLogoPath] = useState<string | null>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
 
   useEffect(() => {
     void listSpecialties()
@@ -95,6 +101,9 @@ export function OnboardingPage() {
         setProviderCategories(categories)
 
         if (providerProfile) {
+          setProviderExists(true)
+          setProviderLogoUrl(providerProfile.logoUrl)
+          setProviderLogoPath(providerProfile.logoPath)
           setProviderDraft({
             companyName: providerProfile.companyName,
             categoryId: providerProfile.categoryId,
@@ -233,6 +242,8 @@ export function OnboardingPage() {
 
     try {
       await saveProviderProfile(currentUser, providerDraft, nextStep === 1 ? 'draft_profile' : 'lead')
+      // La fila de proveedor ya existe; habilita subir logo en el paso de confirmación.
+      setProviderExists(true)
 
       if (typeof nextStep === 'number') {
         setStep(nextStep)
@@ -241,6 +252,22 @@ export function OnboardingPage() {
       setFeedback(error instanceof Error ? error.message : 'No fue posible guardar el perfil comercial.')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function handleProviderLogoUpload(file: File) {
+    setIsUploadingLogo(true)
+
+    try {
+      const { path, publicUrl } = await saveLogoForProvider(
+        currentUser,
+        file,
+        providerLogoPath,
+      )
+      setProviderLogoUrl(publicUrl)
+      setProviderLogoPath(path)
+    } finally {
+      setIsUploadingLogo(false)
     }
   }
 
@@ -263,6 +290,15 @@ export function OnboardingPage() {
   }
 
   if (profile?.accountType === 'provider') {
+    const selectedProviderCategory = providerCategories.find(
+      (category) => category.id === providerDraft.categoryId,
+    )
+    const providerCoverage = providerDraft.countries
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .join(', ')
+
     return (
       <section className="content-card stack">
         <div className="split-header">
@@ -291,16 +327,46 @@ export function OnboardingPage() {
         {step === 1 ? (
           <div className="stack">
             <div className="info-card stack">
-              <h3>Solicitud de activación</h3>
+              <h3>Revisa tu ficha</h3>
               <p>
-                Tu perfil comercial ya tiene la base mínima. Al enviar la solicitud quedará listo
-                para revisión y activación manual.
+                Esto es lo que verá un técnico en el directorio. Al enviar quedará en revisión
+                para activación manual.
               </p>
-              <div className="actions">
-                <span className="user-badge">{providerDraft.companyName}</span>
-                {providerDraft.categoryId ? <span className="user-badge">Categoría definida</span> : null}
-              </div>
+              <dl className="provider-summary">
+                <div className="provider-summary__row">
+                  <dt>Empresa</dt>
+                  <dd>{providerDraft.companyName || '—'}</dd>
+                </div>
+                <div className="provider-summary__row">
+                  <dt>Categoría</dt>
+                  <dd>{selectedProviderCategory?.name ?? '—'}</dd>
+                </div>
+                <div className="provider-summary__row">
+                  <dt>Cobertura</dt>
+                  <dd>{providerCoverage || '—'}</dd>
+                </div>
+                {providerDraft.productsServices.trim() ? (
+                  <div className="provider-summary__row">
+                    <dt>Productos y servicios</dt>
+                    <dd>{providerDraft.productsServices}</dd>
+                  </div>
+                ) : null}
+                <div className="provider-summary__row">
+                  <dt>Descripción</dt>
+                  <dd>{providerDraft.description || '—'}</dd>
+                </div>
+              </dl>
             </div>
+
+            {providerExists ? (
+              <ProviderLogoUploader
+                companyName={providerDraft.companyName || 'Proveedor'}
+                currentLogoUrl={providerLogoUrl}
+                isSubmitting={isUploadingLogo}
+                onUpload={handleProviderLogoUpload}
+              />
+            ) : null}
+
             {feedback ? <p className="error-text">{feedback}</p> : null}
             <div className="actions">
               <button
@@ -327,8 +393,9 @@ export function OnboardingPage() {
           <div className="stack">
             <h3>Solicitud enviada</h3>
             <p>
-              Tu perfil comercial quedó registrado como lead. Puedes revisarlo o editarlo desde tu
-              área privada mientras se activa manualmente.
+              Tu ficha comercial quedó <strong>en revisión</strong>. Nuestro equipo la activa
+              manualmente y te avisaremos por correo cuando sea pública en el directorio de
+              proveedores. Mientras tanto puedes revisarla o editarla desde tu área privada.
             </p>
             <div className="actions">
               <Link className="button" to="/app/provider">

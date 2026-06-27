@@ -4,6 +4,8 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { updateProviderLeadStatus } from '../features/providers/api'
+import { getProviderStatusMeta } from '../features/providers/status'
+import { useCurrentProviderProfile } from '../features/providers/useCurrentProviderProfile'
 import { useProviderLeads } from '../features/providers/useProviderLeads'
 import type { ProviderLead, ProviderLeadStatus } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
@@ -34,8 +36,12 @@ function formatDate(value: string) {
 export function AppProviderLeadsPage() {
   const { user } = useAuth()
   const { leads, setLeads, isLoading, errorMessage } = useProviderLeads(user)
+  const { provider } = useCurrentProviderProfile(user)
   const [statusFilter, setStatusFilter] = useState<ProviderLeadStatus | ''>('')
   const [feedback, setFeedback] = useState<string | null>(null)
+
+  // Si aún no podemos leer el estado, asumimos pública para no introducir alarmas falsas.
+  const isFichaPublic = provider ? getProviderStatusMeta(provider.status).isPublic : true
 
   useEffect(() => {
     trackEvent('provider_leads_viewed')
@@ -88,7 +94,11 @@ export function AppProviderLeadsPage() {
           <div className="stack">
             <p className="eyebrow">Proveedor</p>
             <h2>Solicitudes de contacto</h2>
-            <p>Leads que llegaron desde tu ficha pública del directorio.</p>
+            <p>
+              {isFichaPublic
+                ? 'Solicitudes que llegan desde tu ficha pública en el directorio de proveedores.'
+                : 'Tu ficha aún no es pública. Cuando se active y alguien te contacte desde el directorio, las solicitudes aparecerán aquí.'}
+            </p>
           </div>
           {newCount > 0 ? (
             <span className="user-badge">{newCount} nuevas</span>
