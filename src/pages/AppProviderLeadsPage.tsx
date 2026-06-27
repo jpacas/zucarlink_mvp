@@ -105,21 +105,23 @@ export function AppProviderLeadsPage() {
           ) : null}
         </div>
 
-        <div className="field">
-          <label htmlFor="leads-status-filter">Filtrar por estado</label>
-          <select
-            id="leads-status-filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as ProviderLeadStatus | '')}
-          >
-            <option value="">Todas</option>
-            {STATUS_ORDER.map((status) => (
-              <option key={status} value={status}>
-                {STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
-        </div>
+        {leads.length > 0 ? (
+          <div className="field">
+            <label htmlFor="leads-status-filter">Filtrar por estado</label>
+            <select
+              id="leads-status-filter"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as ProviderLeadStatus | '')}
+            >
+              <option value="">Todas</option>
+              {STATUS_ORDER.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
 
         {feedback ? <p className="error-text">{feedback}</p> : null}
 

@@ -86,10 +86,13 @@ export function HomePage() {
           todo en una red privada pensada para la industria.
         </p>
         <div className="actions">
-          <Link className="button" to="/register">
+          <Link className="button" to="/register?tipo=tecnico">
             Crear mi perfil técnico
           </Link>
-          <Link className="button button--secondary" to="/directory">
+          <Link className="button button--secondary" to="/register?tipo=proveedor">
+            Registrar mi empresa
+          </Link>
+          <Link className="button button--ghost" to="/directory">
             Explorar directorio
           </Link>
         </div>
@@ -147,7 +150,7 @@ export function HomePage() {
             <Link className="inline-link" to="/proveedores/directorio">
               Ver directorio de proveedores
             </Link>
-            <Link className="inline-link" to="/register">
+            <Link className="inline-link" to="/register?tipo=proveedor">
               Solicitar activación
             </Link>
           </div>

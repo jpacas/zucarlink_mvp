@@ -15,8 +15,9 @@ import { useCurrentProviderProfile } from '../features/providers/useCurrentProvi
 
 export function AppHomePage() {
   const { user } = useAuth()
-  const fullName = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? 'Miembro'
-  const firstName = fullName.split(' ')[0]
+  const fullName = (user?.user_metadata?.full_name as string | undefined)?.trim()
+  // Saluda con el primer nombre; nunca muestra el correo crudo como si fuera un nombre.
+  const firstName = fullName ? fullName.split(' ')[0] : 'Miembro'
   const accountType = user?.user_metadata?.account_type as string | undefined
   const isProvider = accountType === 'provider'
 

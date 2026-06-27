@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
@@ -12,7 +12,11 @@ type FeedbackState = {
 } | null
 
 export function RegisterPage() {
-  const [accountType, setAccountType] = useState<AccountType>('technician')
+  const [searchParams] = useSearchParams()
+  // Permite que el inicio enlace directo al tipo de cuenta (?tipo=proveedor).
+  const initialAccountType: AccountType =
+    searchParams.get('tipo') === 'proveedor' ? 'provider' : 'technician'
+  const [accountType, setAccountType] = useState<AccountType>(initialAccountType)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

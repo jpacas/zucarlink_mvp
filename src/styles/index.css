@@ -982,6 +982,31 @@ fieldset.field {
   margin: 0;
 }
 
+.content-card--start {
+  align-content: start;
+}
+
+.onboarding-success {
+  justify-items: center;
+  text-align: center;
+  padding: 24px 0 8px;
+}
+
+.onboarding-success .actions {
+  justify-content: center;
+}
+
+.success-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--accent-green-soft);
+  color: var(--role-tecnico-ink);
+}
+
 .provider-summary {
   display: grid;
   gap: 12px;

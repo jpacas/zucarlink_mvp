@@ -300,14 +300,14 @@ export function OnboardingPage() {
       .join(', ')
 
     return (
-      <section className="content-card stack">
+      <section className={`content-card stack${step === 2 ? ' content-card--start' : ''}`}>
         <div className="split-header">
           <div className="stack">
             <p className="eyebrow">Proveedor</p>
             <h2>Activa tu perfil comercial</h2>
             <p>Completa la ficha mínima para dejar lista tu presencia comercial en Zucarlink.</p>
           </div>
-          <span className="route-chip">Paso {Math.min(step + 1, 2)} de 2</span>
+          <span className="route-chip">{step < 2 ? `Paso ${step + 1} de 2` : 'Listo'}</span>
         </div>
 
         {step === 0 ? (
@@ -390,7 +390,12 @@ export function OnboardingPage() {
         ) : null}
 
         {step === 2 ? (
-          <div className="stack">
+          <div className="stack stack--compact onboarding-success">
+            <span className="success-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
             <h3>Solicitud enviada</h3>
             <p>
               Tu ficha comercial quedó <strong>en revisión</strong>. Nuestro equipo la activa
