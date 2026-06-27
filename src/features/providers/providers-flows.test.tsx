@@ -552,7 +552,7 @@ it('validates the provider profile form on the client', async () => {
   expect(await screen.findByText('Ingresa el nombre de la empresa.')).toBeInTheDocument()
   expect(screen.getByText('Selecciona una categoría.')).toBeInTheDocument()
   expect(screen.getByText('Selecciona al menos un país.')).toBeInTheDocument()
-  expect(screen.getByText('Agrega una descripción corta.')).toBeInTheDocument()
+  expect(screen.getByText('Agrega una descripción de tu empresa.')).toBeInTheDocument()
   expect(supabase.calls.rpc).not.toContainEqual(
     expect.objectContaining({ fn: 'create_provider_lead' }),
   )
@@ -560,7 +560,7 @@ it('validates the provider profile form on the client', async () => {
   await user.type(screen.getByLabelText('Empresa'), 'Mi Empresa')
   await user.selectOptions(screen.getByLabelText('Categoría'), 'cat-automation')
   await user.click(screen.getByText('El Salvador'))
-  await user.type(screen.getByLabelText('Descripción corta'), 'Servicios industriales')
+  await user.type(screen.getByLabelText('Descripción'), 'Servicios industriales')
   await user.type(screen.getByLabelText('Email de contacto'), 'correo-malo')
   await user.type(screen.getByLabelText('Sitio web'), 'no-es-url')
   await user.click(screen.getByRole('button', { name: 'Guardar perfil comercial' }))

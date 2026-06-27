@@ -71,8 +71,13 @@ export function AppProviderPage() {
       </div>
 
       <div className="info-card stack">
-        <h3>Resumen comercial</h3>
-        <p>{provider.shortDescription || 'Agrega una descripción corta para explicar tu propuesta.'}</p>
+        <h3>Descripción</h3>
+        <p>{provider.description || 'Agrega una descripción para explicar tu propuesta.'}</p>
+      </div>
+
+      <div className="info-card stack">
+        <h3>Marcas que ofrece</h3>
+        <p>{provider.brands || 'Agrega las marcas que fabricas o representas.'}</p>
       </div>
 
       <div className="info-card stack">

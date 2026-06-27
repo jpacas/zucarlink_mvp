@@ -13,6 +13,7 @@ export interface ProviderCard {
   logoUrl: string | null
   shortDescription: string
   countries: string[]
+  brands: string[]
   category: ProviderCategory
 }
 
@@ -32,11 +33,19 @@ export interface ProviderProfileDraft {
   companyName: string
   categoryId: string
   countries: string
-  shortDescription: string
-  longDescription: string
+  // Descripción única (texto separado por comas no aplica aquí). Las marcas y los
+  // productos se manejan como cadenas separadas por comas, igual que `countries`.
+  description: string
+  brands: string
   productsServices: string
   website: string
   contactEmail: string
+}
+
+export interface SiteMeta {
+  title: string
+  description: string
+  image: string
 }
 
 export interface CurrentProviderProfile extends ProviderProfileDraft {

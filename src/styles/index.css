@@ -624,6 +624,98 @@ fieldset.field {
   resize: vertical;
 }
 
+/* Onboarding de proveedores: secciones, campos requeridos y utilidades de formulario */
+.provider-form > section {
+  padding-bottom: 4px;
+}
+
+.form-section-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--brand-primary);
+  margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.field-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.field-required {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-orange);
+}
+
+.input-with-action {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input-with-action input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input-with-action .button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  align-self: stretch;
+}
+
+.field-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.char-counter {
+  font-size: 0.78rem;
+  color: var(--text-soft, rgba(32, 23, 71, 0.5));
+  white-space: nowrap;
+}
+
+/* TagInput: chips editables para marcas y servicios */
+.tag-input {
+  display: grid;
+  gap: 8px;
+}
+
+.tag-input__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-input__remove {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.tag-input__remove:hover {
+  opacity: 1;
+}
+
+@media (max-width: 540px) {
+  .input-with-action {
+    flex-direction: column;
+  }
+}
+
 .radio-group {
   display: flex;
   flex-wrap: wrap;

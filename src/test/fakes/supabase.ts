@@ -139,6 +139,7 @@ interface ProviderRow {
   category_id: string | null
   countries: string[] | null
   products_services: string[] | null
+  brands?: string[] | null
   website: string | null
   contact_email: string | null
   status: 'lead' | 'draft_profile' | 'active' | 'inactive'

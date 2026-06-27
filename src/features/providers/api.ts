@@ -13,6 +13,7 @@ import type {
   ProviderLeadStatus,
   ProviderProfileDraft,
   ProviderStatus,
+  SiteMeta,
 } from './types'
 
 interface ProviderCategoryRow {
@@ -28,6 +29,7 @@ interface ProviderCardRow {
   logo_url: string | null
   short_description: string | null
   countries: string[] | null
+  brands: string[] | null
   category: ProviderCategoryRow
 }
 
@@ -55,6 +57,7 @@ interface ProviderRow {
   category_id: string | null
   countries: string[] | null
   products_services: string[] | null
+  brands: string[] | null
   website: string | null
   contact_email: string | null
   status: ProviderStatus
@@ -91,6 +94,25 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '')
 }
 
+// Recorta la descripci\u00f3n \u00fanica a un resumen para las tarjetas del directorio.
+// Corta en el \u00faltimo espacio antes del l\u00edmite para no partir palabras y agrega elipsis.
+export function buildExcerpt(text: string, maxLen = 160): string {
+  const clean = text.replace(/\s+/g, ' ').trim()
+  if (clean.length <= maxLen) {
+    return clean
+  }
+  const slice = clean.slice(0, maxLen)
+  const lastSpace = slice.lastIndexOf(' ')
+  return `${(lastSpace > 60 ? slice.slice(0, lastSpace) : slice).trimEnd()}\u2026`
+}
+
+function splitList(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
 function mapCategory(row: ProviderCategoryRow): ProviderCategory {
   return {
     id: row.id,
@@ -107,6 +129,7 @@ function mapCard(row: ProviderCardRow): ProviderCard {
     logoUrl: row.logo_url,
     shortDescription: row.short_description ?? '',
     countries: row.countries ?? [],
+    brands: row.brands ?? [],
     category: mapCategory(row.category),
   }
 }
@@ -217,7 +240,7 @@ export async function getCurrentProviderProfile(
   const { data, error } = await client
     .from('providers')
     .select(
-      'id, owner_id, slug, company_name, logo_url, logo_path, short_description, long_description, category_id, countries, products_services, website, contact_email, status',
+      'id, owner_id, slug, company_name, logo_url, logo_path, short_description, long_description, category_id, countries, products_services, brands, website, contact_email, status',
     )
     .eq('owner_id', user.id)
     .maybeSingle()
@@ -256,12 +279,14 @@ export async function getCurrentProviderProfile(
     companyName: provider.company_name,
     logoUrl: provider.logo_url,
     logoPath: provider.logo_path,
-    shortDescription: provider.short_description ?? '',
-    longDescription: provider.long_description ?? '',
+    // El campo único de descripción se rehidrata desde long_description (texto completo),
+    // con fallback a short_description para perfiles creados antes de la unificación.
+    description: provider.long_description || provider.short_description || '',
     categoryId: provider.category_id ?? '',
     category,
     countries: (provider.countries ?? []).join(', '),
     productsServices: (provider.products_services ?? []).join(', '),
+    brands: (provider.brands ?? []).join(', '),
     website: provider.website ?? '',
     contactEmail: provider.contact_email ?? user.email ?? '',
     status: provider.status,
@@ -274,22 +299,22 @@ export async function saveProviderProfile(
   nextStatus: ProviderStatus,
 ) {
   const client = getClient()
-  const cleanCountries = payload.countries
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean)
-  const cleanProducts = payload.productsServices
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean)
+  const cleanCountries = splitList(payload.countries)
+  const cleanProducts = splitList(payload.productsServices)
+  const cleanBrands = splitList(payload.brands)
+  const description = payload.description.trim()
   const baseRow = {
     owner_id: user.id,
     company_name: payload.companyName.trim(),
-    short_description: payload.shortDescription.trim() || null,
-    long_description: payload.longDescription.trim() || null,
+    // Campo único de descripción: guardamos el texto completo en long_description y
+    // un recorte automático en short_description, que es lo que leen las tarjetas,
+    // la búsqueda y el panel admin (evita tocar esas rutas de lectura).
+    short_description: description ? buildExcerpt(description) : null,
+    long_description: description || null,
     category_id: payload.categoryId || null,
     countries: cleanCountries,
     products_services: cleanProducts,
+    brands: cleanBrands,
     website: payload.website.trim() || null,
     contact_email: payload.contactEmail.trim() || null,
     status: nextStatus,
@@ -400,8 +425,8 @@ export function createEmptyProviderDraft(): ProviderProfileDraft {
     companyName: '',
     categoryId: '',
     countries: '',
-    shortDescription: '',
-    longDescription: '',
+    description: '',
+    brands: '',
     productsServices: '',
     website: '',
     contactEmail: '',
@@ -413,6 +438,30 @@ export function isProviderDraftComplete(payload: ProviderProfileDraft) {
     payload.companyName.trim() &&
       payload.categoryId &&
       payload.countries.trim() &&
-      payload.shortDescription.trim(),
+      payload.description.trim(),
   )
+}
+
+// Llama a la Edge Function que lee metadatos públicos del sitio (sin IA, sin credenciales)
+// para prellenar el onboarding. Devuelve título/descripción/imagen vacíos si no hay datos.
+export async function fetchSiteMeta(url: string): Promise<SiteMeta> {
+  const client = getClient()
+  const { data, error } = await client.functions.invoke<SiteMeta & { error?: string }>(
+    'fetch-site-meta',
+    { body: { url } },
+  )
+
+  if (error) {
+    throw new Error('No fue posible leer el sitio. Verifica la URL.')
+  }
+
+  if (!data || data.error) {
+    throw new Error(data?.error || 'No fue posible leer el sitio.')
+  }
+
+  return {
+    title: data.title ?? '',
+    description: data.description ?? '',
+    image: data.image ?? '',
+  }
 }

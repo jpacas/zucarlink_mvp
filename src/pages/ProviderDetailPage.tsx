@@ -82,6 +82,19 @@ export function ProviderDetailPage() {
         <p>{provider.longDescription || provider.shortDescription}</p>
       </div>
 
+      {provider.brands.length > 0 ? (
+        <div className="info-card stack">
+          <h3>Marcas que ofrece</h3>
+          <div className="chip-grid">
+            {provider.brands.map((item) => (
+              <span key={item} className="chip chip--info">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="info-card stack">
         <h3>Productos y servicios</h3>
         <div className="chip-grid">

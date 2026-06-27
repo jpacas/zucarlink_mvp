@@ -64,6 +64,7 @@ export function ProvidersDirectoryPage() {
             id="providers-search"
             type="search"
             value={searchText}
+            placeholder="Busca por empresa, marca o servicio"
             onChange={(event) => setSearchText(event.target.value)}
           />
         </div>
@@ -152,6 +153,15 @@ export function ProvidersDirectoryPage() {
               </div>
             </div>
             <p>{provider.shortDescription}</p>
+            {provider.brands.length > 0 ? (
+              <div className="chip-grid">
+                {provider.brands.slice(0, 6).map((item) => (
+                  <span key={item} className="chip chip--info chip--tag">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <div className="actions">
               <Link
                 className="button button--secondary"

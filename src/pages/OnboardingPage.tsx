@@ -99,8 +99,8 @@ export function OnboardingPage() {
             companyName: providerProfile.companyName,
             categoryId: providerProfile.categoryId,
             countries: providerProfile.countries,
-            shortDescription: providerProfile.shortDescription,
-            longDescription: providerProfile.longDescription,
+            description: providerProfile.description,
+            brands: providerProfile.brands,
             productsServices: providerProfile.productsServices,
             website: providerProfile.website,
             contactEmail:
@@ -223,7 +223,7 @@ export function OnboardingPage() {
   async function handleProviderSave(nextStep?: number) {
     if (!isProviderDraftComplete(providerDraft)) {
       setFeedback(
-        'Completa empresa, categoría, países donde operas y descripción corta.',
+        'Completa empresa, categoría, países donde operas y la descripción.',
       )
       return
     }
