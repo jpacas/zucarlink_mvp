@@ -14,6 +14,7 @@ const AdminDashboardPage = lazyNamed(
 )
 const AdminProvidersPage = lazyNamed(() => import('../pages/AdminProvidersPage'), 'AdminProvidersPage')
 const AppProviderEditPage = lazyNamed(() => import('../pages/AppProviderEditPage'), 'AppProviderEditPage')
+const AppProviderLeadsPage = lazyNamed(() => import('../pages/AppProviderLeadsPage'), 'AppProviderLeadsPage')
 const AppProviderPage = lazyNamed(() => import('../pages/AppProviderPage'), 'AppProviderPage')
 const AppDirectoryPage = lazyNamed(() => import('../pages/AppDirectoryPage'), 'AppDirectoryPage')
 const BlogListPage = lazyNamed(() => import('../pages/BlogListPage'), 'BlogListPage')
@@ -114,6 +115,7 @@ export function AppRouter() {
             <Route path="profile/edit" element={<ProfileEditPage />} />
             <Route path="provider" element={<AppProviderPage />} />
             <Route path="provider/edit" element={<AppProviderEditPage />} />
+            <Route path="provider/leads" element={<AppProviderLeadsPage />} />
             <Route path="admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="providers-admin" element={<AdminProvidersPage />} />
             <Route path="messages" element={<MessagesPage />} />

@@ -33,6 +33,7 @@ export function AppHeader() {
           { to: '/app', label: 'Panel' },
           { to: '/proveedores/directorio', label: 'Directorio' },
           { to: '/app/provider', label: 'Perfil comercial' },
+          { to: '/app/provider/leads', label: 'Solicitudes' },
         ]
       : [
           { to: '/app', label: 'Panel' },

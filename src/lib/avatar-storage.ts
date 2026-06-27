@@ -1,4 +1,5 @@
 import { getSupabaseBrowserClient } from './supabase'
+import { downscaleImage } from './image-downscale'
 import {
   AVATAR_ALLOWED_TYPES,
   AVATAR_BUCKET,
@@ -30,7 +31,7 @@ export async function uploadAvatar(params: {
 
   // Redimensionamos/comprimimos en el cliente antes de subir: el servidor no aplica
   // transformaciones (plan sin esa función), así evitamos servir originales pesados.
-  const { blob, extension, contentType } = await downscaleImage(params.file)
+  const { blob, extension, contentType } = await downscaleImage(params.file, AVATAR_OUTPUT_MAX_SIZE)
   const path = `${params.userId}/${crypto.randomUUID()}.${extension}`
 
   const { error } = await client.storage
@@ -80,59 +81,3 @@ export function getAvatarPublicUrl(path: string): string | null {
 }
 
 const AVATAR_OUTPUT_MAX_SIZE = 256
-
-interface DownscaledImage {
-  blob: Blob
-  extension: 'webp' | 'jpg'
-  contentType: 'image/webp' | 'image/jpeg'
-}
-
-// Redimensiona la imagen a un máximo de 256px (lado mayor) manteniendo proporción y
-// la comprime a WEBP (con fallback a JPEG). El recorte cuadrado lo hace el CSS al
-// mostrar el avatar, así que aquí solo escalamos.
-async function downscaleImage(file: File): Promise<DownscaledImage> {
-  const bitmap = await createImageBitmap(file)
-
-  try {
-    const scale = Math.min(
-      1,
-      AVATAR_OUTPUT_MAX_SIZE / Math.max(bitmap.width, bitmap.height),
-    )
-    const width = Math.max(1, Math.round(bitmap.width * scale))
-    const height = Math.max(1, Math.round(bitmap.height * scale))
-
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-
-    const context = canvas.getContext('2d')
-
-    if (!context) {
-      throw new Error('No fue posible procesar la imagen.')
-    }
-
-    context.drawImage(bitmap, 0, 0, width, height)
-
-    const webp = await canvasToBlob(canvas, 'image/webp')
-
-    if (webp) {
-      return { blob: webp, extension: 'webp', contentType: 'image/webp' }
-    }
-
-    const jpeg = await canvasToBlob(canvas, 'image/jpeg')
-
-    if (jpeg) {
-      return { blob: jpeg, extension: 'jpg', contentType: 'image/jpeg' }
-    }
-
-    throw new Error('No fue posible procesar la imagen.')
-  } finally {
-    bitmap.close()
-  }
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), type, 0.8)
-  })
-}

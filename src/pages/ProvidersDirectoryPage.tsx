@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
   listProviderCategories,
   searchProviders,
 } from '../features/providers/api'
+import { PROVIDER_COUNTRIES } from '../features/providers/countries'
 import { ProviderLogo } from '../features/providers/ProviderLogo'
 import type { ProviderCard, ProviderCategory } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
+
+// Cantidad de tarjetas que se muestran por página (paginación en cliente).
+const PAGE_SIZE = 12
 
 export function ProvidersDirectoryPage() {
   const [providers, setProviders] = useState<ProviderCard[]>([])
@@ -19,6 +23,7 @@ export function ProvidersDirectoryPage() {
   const [country, setCountry] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useEffect(() => {
     void listProviderCategories().then(setCategories).catch(() => setCategories([]))
@@ -27,6 +32,8 @@ export function ProvidersDirectoryPage() {
   useEffect(() => {
     setIsLoading(true)
     setErrorMessage(null)
+    // Cada cambio de filtro/búsqueda reinicia la paginación.
+    setVisibleCount(PAGE_SIZE)
 
     void searchProviders({ searchText, categorySlug, country })
       .then((rows) => setProviders(rows))
@@ -36,13 +43,8 @@ export function ProvidersDirectoryPage() {
       .finally(() => setIsLoading(false))
   }, [categorySlug, country, searchText])
 
-  const countryOptions = useMemo(
-    () =>
-      [...new Set(providers.flatMap((provider) => provider.countries))]
-        .filter(Boolean)
-        .sort((left, right) => left.localeCompare(right)),
-    [providers],
-  )
+  const visibleProviders = providers.slice(0, visibleCount)
+  const hasMore = providers.length > visibleCount
   const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
   return (
@@ -88,7 +90,7 @@ export function ProvidersDirectoryPage() {
             onChange={(event) => setCountry(event.target.value)}
           >
             <option value="">Todos</option>
-            {countryOptions.map((item) => (
+            {PROVIDER_COUNTRIES.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
@@ -129,7 +131,7 @@ export function ProvidersDirectoryPage() {
             No encontramos proveedores con esos filtros. Ajusta tu búsqueda o categoría.
           </p>
         ) : null}
-        {providers.map((provider) => (
+        {visibleProviders.map((provider) => (
           <article key={provider.id} className="info-card stack">
             <div className="split-header">
               <div className="provider-summary">
@@ -167,6 +169,18 @@ export function ProvidersDirectoryPage() {
           </article>
         ))}
       </div>
+
+      {hasMore ? (
+        <div className="actions">
+          <button
+            type="button"
+            className="button button--secondary"
+            onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+          >
+            Mostrar más
+          </button>
+        </div>
+      ) : null}
     </section>
   )
 }

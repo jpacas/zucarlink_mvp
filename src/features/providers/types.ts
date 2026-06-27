@@ -44,6 +44,7 @@ export interface CurrentProviderProfile extends ProviderProfileDraft {
   slug: string
   ownerId: string
   logoUrl: string | null
+  logoPath: string | null
   status: ProviderStatus
   category: ProviderCategory | null
 }
@@ -54,4 +55,17 @@ export interface ProviderLeadInput {
   email: string
   company: string
   message: string
+}
+
+export type ProviderLeadStatus = 'new' | 'reviewed' | 'contacted' | 'closed'
+
+export interface ProviderLead {
+  id: string
+  providerId: string
+  name: string
+  email: string
+  company: string | null
+  message: string
+  status: ProviderLeadStatus
+  createdAt: string
 }

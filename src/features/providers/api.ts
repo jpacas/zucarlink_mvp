@@ -1,13 +1,16 @@
 import type { User } from '@supabase/supabase-js'
 
 import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getLogoPublicUrl, removeLogo, uploadProviderLogo } from '../../lib/logo-storage'
 import type {
   AdminProviderRecord,
   CurrentProviderProfile,
   ProviderCard,
   ProviderCategory,
   ProviderDetail,
+  ProviderLead,
   ProviderLeadInput,
+  ProviderLeadStatus,
   ProviderProfileDraft,
   ProviderStatus,
 } from './types'
@@ -46,6 +49,7 @@ interface ProviderRow {
   slug: string | null
   company_name: string
   logo_url: string | null
+  logo_path: string | null
   short_description: string | null
   long_description: string | null
   category_id: string | null
@@ -54,6 +58,17 @@ interface ProviderRow {
   website: string | null
   contact_email: string | null
   status: ProviderStatus
+}
+
+interface ProviderLeadRow {
+  id: string
+  provider_id: string
+  name: string
+  email: string
+  company: string | null
+  message: string
+  status: ProviderLeadStatus
+  created_at: string
 }
 
 function getClient() {
@@ -104,6 +119,19 @@ function mapDetail(row: ProviderDetailRow): ProviderDetail {
     website: row.website,
     contactEmail: row.contact_email,
     status: row.status,
+  }
+}
+
+function mapLead(row: ProviderLeadRow): ProviderLead {
+  return {
+    id: row.id,
+    providerId: row.provider_id,
+    name: row.name,
+    email: row.email,
+    company: row.company,
+    message: row.message,
+    status: row.status,
+    createdAt: row.created_at,
   }
 }
 
@@ -189,7 +217,7 @@ export async function getCurrentProviderProfile(
   const { data, error } = await client
     .from('providers')
     .select(
-      'id, owner_id, slug, company_name, logo_url, short_description, long_description, category_id, countries, products_services, website, contact_email, status',
+      'id, owner_id, slug, company_name, logo_url, logo_path, short_description, long_description, category_id, countries, products_services, website, contact_email, status',
     )
     .eq('owner_id', user.id)
     .maybeSingle()
@@ -227,6 +255,7 @@ export async function getCurrentProviderProfile(
     slug: provider.slug ?? slugify(provider.company_name),
     companyName: provider.company_name,
     logoUrl: provider.logo_url,
+    logoPath: provider.logo_path,
     shortDescription: provider.short_description ?? '',
     longDescription: provider.long_description ?? '',
     categoryId: provider.category_id ?? '',
@@ -309,6 +338,61 @@ export async function createProviderLead(payload: ProviderLeadInput) {
   if (error) {
     throw new Error(error.message)
   }
+}
+
+export async function listProviderLeads(): Promise<ProviderLead[]> {
+  const client = getClient()
+  const { data, error } = await client.rpc('list_provider_leads')
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return ((data ?? []) as ProviderLeadRow[]).map(mapLead)
+}
+
+export async function updateProviderLeadStatus(
+  leadId: string,
+  nextStatus: ProviderLeadStatus,
+) {
+  const client = getClient()
+  const { error } = await client.rpc('update_provider_lead_status', {
+    lead_id: leadId,
+    next_status: nextStatus,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+// Sube el logo del proveedor (comprimido en cliente), borra el anterior y guarda en
+// `providers` tanto la URL pública (logo_url, que sirven las RPCs) como el path
+// (logo_path, usado para limpiar el archivo al reemplazarlo). Requiere que el perfil
+// de proveedor ya exista.
+export async function saveLogoForProvider(
+  user: User,
+  file: File,
+  currentPath?: string | null,
+): Promise<{ path: string; publicUrl: string | null }> {
+  if (currentPath) {
+    await removeLogo(currentPath).catch(() => undefined)
+  }
+
+  const { path } = await uploadProviderLogo({ file, userId: user.id })
+  const publicUrl = getLogoPublicUrl(path)
+
+  const client = getClient()
+  const { error } = await client
+    .from('providers')
+    .update({ logo_path: path, logo_url: publicUrl })
+    .eq('owner_id', user.id)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return { path, publicUrl }
 }
 
 export function createEmptyProviderDraft(): ProviderProfileDraft {

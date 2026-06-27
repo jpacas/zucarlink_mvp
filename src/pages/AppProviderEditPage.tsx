@@ -4,13 +4,19 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ProviderProfileForm } from '../features/providers/ProviderProfileForm'
+import { ProviderLogoUploader } from '../features/providers/ProviderLogoUploader'
 import {
   createEmptyProviderDraft,
   getCurrentProviderProfile,
   listProviderCategories,
+  saveLogoForProvider,
   saveProviderProfile,
 } from '../features/providers/api'
-import type { ProviderCategory, ProviderProfileDraft } from '../features/providers/types'
+import type {
+  CurrentProviderProfile,
+  ProviderCategory,
+  ProviderProfileDraft,
+} from '../features/providers/types'
 
 type FeedbackState = {
   kind: 'error'
@@ -21,8 +27,10 @@ export function AppProviderEditPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [draft, setDraft] = useState<ProviderProfileDraft>(createEmptyProviderDraft())
+  const [provider, setProvider] = useState<CurrentProviderProfile | null>(null)
   const [categories, setCategories] = useState<ProviderCategory[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [feedback, setFeedback] = useState<FeedbackState>(null)
 
   useEffect(() => {
@@ -31,19 +39,20 @@ export function AppProviderEditPage() {
     }
 
     void Promise.all([getCurrentProviderProfile(user), listProviderCategories()])
-      .then(([provider, nextCategories]) => {
+      .then(([nextProvider, nextCategories]) => {
         setCategories(nextCategories)
+        setProvider(nextProvider)
 
-        if (provider) {
+        if (nextProvider) {
           setDraft({
-            companyName: provider.companyName,
-            categoryId: provider.categoryId,
-            countries: provider.countries,
-            shortDescription: provider.shortDescription,
-            longDescription: provider.longDescription,
-            productsServices: provider.productsServices,
-            website: provider.website,
-            contactEmail: provider.contactEmail,
+            companyName: nextProvider.companyName,
+            categoryId: nextProvider.categoryId,
+            countries: nextProvider.countries,
+            shortDescription: nextProvider.shortDescription,
+            longDescription: nextProvider.longDescription,
+            productsServices: nextProvider.productsServices,
+            website: nextProvider.website,
+            contactEmail: nextProvider.contactEmail,
           })
         }
       })
@@ -78,6 +87,23 @@ export function AppProviderEditPage() {
     }
   }
 
+  async function handleLogoUpload(file: File) {
+    if (!provider) {
+      return
+    }
+
+    setIsUploadingLogo(true)
+
+    try {
+      const { path, publicUrl } = await saveLogoForProvider(currentUser, file, provider.logoPath)
+      setProvider((current) =>
+        current ? { ...current, logoUrl: publicUrl, logoPath: path } : current,
+      )
+    } finally {
+      setIsUploadingLogo(false)
+    }
+  }
+
   return (
     <div className="stack">
     <Breadcrumbs items={[
@@ -90,6 +116,18 @@ export function AppProviderEditPage() {
       <h2>Editar perfil comercial</h2>
       <p>Actualiza la información base que verá el público cuando el perfil esté activo.</p>
       {feedback ? <p className="error-text">{feedback.message}</p> : null}
+      {provider ? (
+        <ProviderLogoUploader
+          companyName={provider.companyName || draft.companyName || 'Proveedor'}
+          currentLogoUrl={provider.logoUrl}
+          isSubmitting={isUploadingLogo}
+          onUpload={handleLogoUpload}
+        />
+      ) : (
+        <p className="helper-text">
+          Guarda tu perfil comercial para poder subir el logo de tu empresa.
+        </p>
+      )}
       <ProviderProfileForm
         categories={categories}
         draft={draft}

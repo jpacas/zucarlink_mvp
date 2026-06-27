@@ -133,6 +133,7 @@ interface ProviderRow {
   slug: string | null
   company_name: string
   logo_url: string | null
+  logo_path?: string | null
   short_description: string | null
   long_description: string | null
   category_id: string | null
@@ -257,6 +258,7 @@ interface SupabaseAuthFake {
         path: string,
         expiresIn: number,
       ) => Promise<{ data: { signedUrl: string } | null; error: AuthErrorLike | null }>
+      getPublicUrl: (path: string) => { data: { publicUrl: string } }
     }
   }
   from: (table: TableName) => QueryBuilder
@@ -474,6 +476,7 @@ class QueryBuilder {
         id: nextId('provider'),
         slug: null,
         logo_url: null,
+        logo_path: null,
         short_description: null,
         long_description: null,
         category_id: null,
@@ -860,7 +863,7 @@ export function createSupabaseAuthFake(
       },
     },
     storage: {
-      from() {
+      from(bucket: string) {
         return {
           async upload(path, file) {
             storage.set(path, { path, file })
@@ -889,6 +892,13 @@ export function createSupabaseAuthFake(
                 signedUrl: `https://signed.example/${path}?expiresIn=${expiresIn}`,
               },
               error: null,
+            }
+          },
+          getPublicUrl(path) {
+            return {
+              data: {
+                publicUrl: `https://public.example/${bucket}/${path}`,
+              },
             }
           },
         }

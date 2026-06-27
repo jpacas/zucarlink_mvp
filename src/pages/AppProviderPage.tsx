@@ -60,9 +60,14 @@ export function AppProviderPage() {
             <span className="user-badge">{provider.status}</span>
           </div>
         </div>
-        <Link className="button button--secondary" to="/app/provider/edit">
-          Editar perfil
-        </Link>
+        <div className="actions">
+          <Link className="button button--secondary" to="/app/provider/leads">
+            Ver solicitudes
+          </Link>
+          <Link className="button button--secondary" to="/app/provider/edit">
+            Editar perfil
+          </Link>
+        </div>
       </div>
 
       <div className="info-card stack">
