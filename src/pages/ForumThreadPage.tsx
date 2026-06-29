@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import {
   createForumReply,
+  deleteForumReply,
+  deleteForumTopic,
   getForumThread,
   getForumTopicLikeState,
   toggleForumTopicLike,
@@ -12,7 +14,7 @@ import {
 import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
 import { formatForumDate, formatRelativeDate } from '../features/forum/format'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
-import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
+import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 
 interface ReplyNode {
@@ -78,6 +80,7 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
 
 export function ForumThreadPage() {
   const { threadSlug = '' } = useParams()
+  const navigate = useNavigate()
   const { user } = useAuth()
   // Cualquier miembro de Zucarlink con el correo confirmado puede responder.
   const canParticipate = Boolean(user?.email_confirmed_at)
@@ -87,6 +90,7 @@ export function ForumThreadPage() {
   const [replyBody, setReplyBody] = useState('')
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const [viewerLiked, setViewerLiked] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
@@ -220,6 +224,65 @@ export function ForumThreadPage() {
     }
   }
 
+  async function handleDeleteThread() {
+    if (!thread || isDeleting) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      '¿Eliminar esta conversación y todas sus respuestas? Esta acción no se puede deshacer.',
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      await deleteForumTopic(thread.slug)
+      navigate('/forum')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'No fue posible eliminar la conversación.',
+      )
+      setIsDeleting(false)
+    }
+  }
+
+  async function handleDeleteReply(node: ReplyNode) {
+    if (!thread || isDeleting) {
+      return
+    }
+
+    const childCount = node.children.length
+    const message =
+      childCount > 0
+        ? `Esta respuesta tiene ${childCount} ${
+            childCount === 1 ? 'respuesta' : 'respuestas'
+          } que también se eliminarán. ¿Continuar? Esta acción no se puede deshacer.`
+        : '¿Eliminar esta respuesta? Esta acción no se puede deshacer.'
+
+    if (!window.confirm(message)) {
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      await deleteForumReply(node.reply.id)
+      const refreshed = await getForumThread(thread.slug)
+      setThread(refreshed)
+      setErrorMessage(null)
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'No fue posible eliminar la respuesta.',
+      )
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   function renderReplyNode(node: ReplyNode, depth: number) {
     const { reply, children } = node
     const isExpanded = expandedReplies.has(reply.id)
@@ -266,6 +329,17 @@ export function ForumThreadPage() {
               {isExpanded
                 ? `Ocultar ${children.length === 1 ? 'respuesta' : 'respuestas'}`
                 : `Ver ${children.length} ${children.length === 1 ? 'respuesta' : 'respuestas'}`}
+            </button>
+          ) : null}
+          {user?.id === reply.author.id ? (
+            <button
+              className="forum-reply__reply forum-reply__delete"
+              type="button"
+              onClick={() => handleDeleteReply(node)}
+              disabled={isDeleting}
+            >
+              <TrashIcon />
+              Eliminar
             </button>
           ) : null}
         </div>
@@ -372,6 +446,19 @@ export function ForumThreadPage() {
               <span>Responder</span>
             </Link>
           )}
+
+          {user?.id === thread.author.id ? (
+            <button
+              type="button"
+              className="forum-action forum-action--danger"
+              onClick={handleDeleteThread}
+              disabled={isDeleting}
+              aria-label="Eliminar conversación"
+            >
+              <TrashIcon />
+              <span>Eliminar</span>
+            </button>
+          ) : null}
         </div>
       </article>
 

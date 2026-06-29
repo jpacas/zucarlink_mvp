@@ -222,6 +222,28 @@ export async function createForumReply(payload: {
   return data
 }
 
+export async function deleteForumTopic(threadSlug: string): Promise<void> {
+  const client = getClient()
+  const { error } = await client.rpc('delete_forum_topic', {
+    thread_slug: threadSlug,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export async function deleteForumReply(replyId: string): Promise<void> {
+  const client = getClient()
+  const { error } = await client.rpc('delete_forum_reply', {
+    reply_id: replyId,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
 interface ForumTopicLikeStateRow {
   like_count?: number | null
   viewer_liked?: boolean | null

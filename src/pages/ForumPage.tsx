@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import {
   createForumReply,
+  deleteForumTopic,
   listForumCategories,
   listForumThreads,
   toggleForumTopicLike,
@@ -11,7 +12,7 @@ import {
 import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/forum/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
-import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
+import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 import { formatForumDate, formatRelativeDate } from '../features/forum/format'
 
@@ -69,6 +70,8 @@ export function ForumPage() {
   const [composeSubmitting, setComposeSubmitting] = useState(false)
   const [composeError, setComposeError] = useState<string | null>(null)
   const [flashSlug, setFlashSlug] = useState<string | null>(null)
+  const [deletingSlug, setDeletingSlug] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
 
   function updateThread(slug: string, patch: Partial<ForumThreadCard>) {
@@ -100,6 +103,34 @@ export function ForumPage() {
       })
     } finally {
       setPendingLike(null)
+    }
+  }
+
+  async function handleDeleteThread(thread: ForumThreadCard) {
+    if (deletingSlug) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      '¿Eliminar esta conversación y todas sus respuestas? Esta acción no se puede deshacer.',
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setDeletingSlug(thread.slug)
+    setDeleteError(null)
+
+    try {
+      await deleteForumTopic(thread.slug)
+      setThreads((current) => current.filter((item) => item.slug !== thread.slug))
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error ? error.message : 'No fue posible eliminar la conversación.',
+      )
+    } finally {
+      setDeletingSlug(null)
     }
   }
 
@@ -300,6 +331,12 @@ export function ForumPage() {
         ))}
       </div>
 
+      {deleteError ? (
+        <p className="error-text" role="alert">
+          {deleteError}
+        </p>
+      ) : null}
+
       {hasActiveQuery && threads.length > 0 ? (
         <p className="helper-text" role="status" aria-live="polite">
           {filteredThreads.length === 1
@@ -395,6 +432,20 @@ export function ForumPage() {
                     url={`${window.location.origin}/forum/thread/${thread.slug}`}
                     title={thread.title}
                   />
+
+                  {user?.id === thread.author.id ? (
+                    <button
+                      type="button"
+                      className="forum-action forum-action--sm forum-action--danger"
+                      onClick={() => handleDeleteThread(thread)}
+                      disabled={deletingSlug === thread.slug}
+                      aria-label="Eliminar conversación"
+                      title="Eliminar conversación"
+                    >
+                      <TrashIcon />
+                      <span>Eliminar</span>
+                    </button>
+                  ) : null}
                 </div>
               </div>
 

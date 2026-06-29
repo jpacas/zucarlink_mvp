@@ -1983,6 +1983,15 @@ fieldset.field {
   height: 15px;
 }
 
+.forum-action--danger {
+  background: rgba(255, 114, 75, 0.12);
+  color: var(--accent-orange);
+}
+
+.forum-action--danger:hover {
+  background: rgba(255, 114, 75, 0.2);
+}
+
 /* ─── Búsqueda por palabra clave del foro ────────────────────────────────── */
 .forum-search {
   max-width: 520px;
@@ -2195,6 +2204,19 @@ fieldset.field {
 .forum-reply__reply:hover {
   color: var(--brand-strong);
   text-decoration: underline;
+}
+
+.forum-reply__delete {
+  color: var(--accent-orange);
+}
+
+.forum-reply__delete:hover {
+  color: var(--accent-orange);
+}
+
+.forum-reply__delete:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 .forum-reply__toggle {
