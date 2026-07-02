@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { isAdminUser } from '../features/auth/roles'
 import { getMyAvatarUrl } from '../features/profile/api'
 import { useUnreadCount } from '../features/messages/useUnreadCount'
 import { ZucarLogo } from './ZucarLogo'
@@ -24,7 +25,7 @@ export function AppHeader() {
 
   const isAuthed = Boolean(user)
   const accountType = user?.user_metadata?.account_type
-  const isAdmin = Boolean(user?.user_metadata?.is_admin)
+  const isAdmin = isAdminUser(user)
 
   // Elementos propios de la cuenta (varían según el tipo de usuario)
   const accountLinks =

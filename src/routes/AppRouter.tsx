@@ -1,6 +1,7 @@
 import { Suspense, lazy, type ComponentType } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 
+import { AdminRoute } from '../features/auth/AdminRoute'
 import { ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute'
 import { PrivateLayout } from '../layouts/PrivateLayout'
@@ -116,8 +117,10 @@ export function AppRouter() {
             <Route path="provider" element={<AppProviderPage />} />
             <Route path="provider/edit" element={<AppProviderEditPage />} />
             <Route path="provider/leads" element={<AppProviderLeadsPage />} />
-            <Route path="admin/dashboard" element={<AdminDashboardPage />} />
-            <Route path="providers-admin" element={<AdminProvidersPage />} />
+            <Route element={<AdminRoute />}>
+              <Route path="admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="providers-admin" element={<AdminProvidersPage />} />
+            </Route>
             <Route path="messages" element={<MessagesPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

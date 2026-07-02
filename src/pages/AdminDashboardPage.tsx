@@ -9,6 +9,7 @@ import type {
   ProviderLeadMetric,
 } from '../features/admin-dashboard/types'
 import { useAuth } from '../features/auth/AuthProvider'
+import { isAdminUser } from '../features/auth/roles'
 
 const periodOptions = [7, 30, 90]
 
@@ -28,7 +29,7 @@ const kpiLabels: Array<{
 
 export function AdminDashboardPage() {
   const { user } = useAuth()
-  const isAdmin = Boolean(user?.user_metadata?.is_admin)
+  const isAdmin = isAdminUser(user)
   const [periodDays, setPeriodDays] = useState(30)
   const [dashboard, setDashboard] = useState<AdminOperationalDashboard | null>(null)
   const [isLoading, setIsLoading] = useState(true)

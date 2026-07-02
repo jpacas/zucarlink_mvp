@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { isAdminUser } from '../features/auth/roles'
 import { ProviderLogo } from '../features/providers/ProviderLogo'
 import { listAdminProviders, updateProviderStatus } from '../features/providers/api'
 import type { AdminProviderRecord, ProviderStatus } from '../features/providers/types'
@@ -22,7 +23,7 @@ export function AdminProvidersPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [pendingProviderId, setPendingProviderId] = useState<string | null>(null)
-  const isAdmin = Boolean(user?.user_metadata?.is_admin)
+  const isAdmin = isAdminUser(user)
 
   async function loadProviders() {
     setIsLoading(true)
