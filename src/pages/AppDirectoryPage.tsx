@@ -85,7 +85,7 @@ export function AppDirectoryPage() {
     [debouncedSearchText, filters.country, filters.specialty],
   )
   const profiles = profilesData ?? []
-  const errorMessage = searchErrorMessage ?? allProfilesErrorMessage
+  const errorMessage = searchErrorMessage ?? (profilesData ? null : allProfilesErrorMessage)
 
   const countries = useMemo(
     () =>
