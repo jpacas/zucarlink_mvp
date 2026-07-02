@@ -87,6 +87,8 @@ it('lets an admin open the operational dashboard and switch the reporting period
     userMetadata: {
       full_name: 'Admin Zucarlink',
       account_type: 'technician',
+    },
+    appMetadata: {
       is_admin: true,
     },
   })
@@ -154,12 +156,36 @@ it('keeps the operational dashboard hidden from non-admin users', async () => {
   expect(screen.queryByRole('heading', { name: 'Dashboard gerencial' })).not.toBeInTheDocument()
 })
 
+it('redirects a non-admin user away from /app/admin/dashboard', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'tecnico@example.com',
+    userMetadata: {
+      full_name: 'Técnico Zucarlink',
+      account_type: 'technician',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+  })
+
+  await renderApp({
+    initialRoute: '/app/admin/dashboard',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Hola, Técnico' })
+  expect(screen.queryByRole('heading', { name: 'Dashboard gerencial' })).not.toBeInTheDocument()
+})
+
 it('shows a useful dashboard error when the admin RPC fails', async () => {
   const authState = createAuthenticatedAuthState({
     email: 'admin@zucarlink.com',
     userMetadata: {
       full_name: 'Admin Zucarlink',
       account_type: 'technician',
+    },
+    appMetadata: {
       is_admin: true,
     },
   })
@@ -188,6 +214,8 @@ it('renders empty operational dashboard states without breaking', async () => {
     userMetadata: {
       full_name: 'Admin Zucarlink',
       account_type: 'technician',
+    },
+    appMetadata: {
       is_admin: true,
     },
   })

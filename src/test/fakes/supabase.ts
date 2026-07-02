@@ -521,6 +521,7 @@ function createFakeUser(
   email: string,
   userMetadata: Record<string, unknown> = {},
   emailConfirmed = true,
+  appMetadata: Record<string, unknown> = {},
 ): User {
   const now = new Date().toISOString()
   const id = `user_${++authSequence}`
@@ -536,6 +537,7 @@ function createFakeUser(
     app_metadata: {
       provider: 'email',
       providers: ['email'],
+      ...appMetadata,
     },
     user_metadata: userMetadata,
     role: 'authenticated',
@@ -601,11 +603,13 @@ export function createAuthenticatedAuthState(options: {
   email: string
   userMetadata?: Record<string, unknown>
   emailConfirmed?: boolean
+  appMetadata?: Record<string, unknown>
 }): { session: Session; user: User } {
   const user = createFakeUser(
     options.email,
     options.userMetadata,
     options.emailConfirmed ?? true,
+    options.appMetadata,
   )
   const session = createFakeSession(user)
 

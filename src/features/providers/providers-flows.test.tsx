@@ -631,6 +631,8 @@ it('lets an admin activate a provider from the private moderation view', async (
     userMetadata: {
       full_name: 'Admin Zucarlink',
       account_type: 'technician',
+    },
+    appMetadata: {
       is_admin: true,
     },
   })
