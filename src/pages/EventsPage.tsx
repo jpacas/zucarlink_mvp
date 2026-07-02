@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { EventCard } from '../features/content/components/EventCard'
 import { SectionHeader } from '../features/content/components/SectionHeader'
@@ -6,48 +6,21 @@ import { listPublishedEvents } from '../features/content/api'
 import type { EventItem } from '../features/content/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function EventsPage() {
-  const [items, setItems] = useState<EventItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const {
+    data,
+    isLoading,
+    error: errorMessage,
+  } = useAsyncData<EventItem[]>(() => listPublishedEvents(), [])
+  const items = useMemo(() => data ?? [], [data])
 
   usePageMetadata({
     title: 'Congresos y eventos',
     description:
       'Agenda curada de congresos y ferias de la industria azucarera para planificar la asistencia de los técnicos.',
   })
-
-  useEffect(() => {
-    let isMounted = true
-
-    setIsLoading(true)
-
-    void listPublishedEvents()
-      .then((nextItems) => {
-        if (isMounted) {
-          setItems(nextItems)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setItems([])
-          setErrorMessage(
-            error instanceof Error ? error.message : 'No fue posible cargar los eventos.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
 
   const [upcoming, past] = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10)

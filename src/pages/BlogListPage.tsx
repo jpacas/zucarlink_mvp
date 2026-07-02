@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ContentCard } from '../features/content/components/ContentCard'
@@ -8,6 +8,7 @@ import { listPublishedContent } from '../features/content/api'
 import type { ContentCategory, ContentItem } from '../features/content/types'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { useAsyncData } from '../lib/useAsyncData'
 
 const categories: ContentCategory[] = [
   'Mercado',
@@ -24,11 +25,8 @@ const categories: ContentCategory[] = [
 ]
 
 export function BlogListPage() {
-  const [items, setItems] = useState<ContentItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   usePageMetadata({
     title: 'Artículos y análisis',
@@ -36,39 +34,19 @@ export function BlogListPage() {
       'Contexto propio, análisis y lecturas rápidas para convertir señales del sector en criterio útil.',
   })
 
-  useEffect(() => {
-    let isMounted = true
-
-    setIsLoading(true)
-
-    void listPublishedContent('blog', {
-      query,
-      category: selectedCategory ? (selectedCategory as ContentCategory) : undefined,
-    })
-      .then((nextItems) => {
-        if (isMounted) {
-          setItems(nextItems)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setItems([])
-          setErrorMessage(
-            error instanceof Error ? error.message : 'No fue posible cargar los artículos.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [query, selectedCategory])
+  const {
+    data,
+    isLoading,
+    error: errorMessage,
+  } = useAsyncData<ContentItem[]>(
+    () =>
+      listPublishedContent('blog', {
+        query,
+        category: selectedCategory ? (selectedCategory as ContentCategory) : undefined,
+      }),
+    [query, selectedCategory],
+  )
+  const items = data ?? []
 
   const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
