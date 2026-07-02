@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { getDirectoryPublicSummary, listPublicPreviewProfiles, type PublicPreviewProfile } from '../features/directory/api'
 import type { DirectoryAggregateSnapshot } from '../features/directory/types'
 import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import { useAsyncData } from '../lib/useAsyncData'
 
 const emptySummary: DirectoryAggregateSnapshot = {
   totalMembers: 0,
@@ -112,46 +113,16 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
 
 export function DirectoryPage() {
   const { user } = useAuth()
-  const [summary, setSummary] = useState<DirectoryAggregateSnapshot>(emptySummary)
-  const [previewProfiles, setPreviewProfiles] = useState<PublicPreviewProfile[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [retryToken, setRetryToken] = useState(0)
+  const { data, isLoading, error: errorMessage, reload } = useAsyncData(
+    () =>
+      Promise.all([getDirectoryPublicSummary(), listPublicPreviewProfiles(12)]).then(
+        ([nextSummary, nextProfiles]) => ({ summary: nextSummary, previewProfiles: nextProfiles }),
+      ),
+    [],
+  )
+  const summary = data?.summary ?? emptySummary
+  const previewProfiles = data?.previewProfiles ?? []
   const isPublicSummaryUnavailable = isPublicConfigurationError(errorMessage)
-
-  useEffect(() => {
-    let isMounted = true
-
-    void Promise.all([
-      getDirectoryPublicSummary(),
-      listPublicPreviewProfiles(12),
-    ])
-      .then(([nextSummary, nextProfiles]) => {
-        if (isMounted) {
-          setSummary(nextSummary)
-          setPreviewProfiles(nextProfiles)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setErrorMessage(
-            error instanceof Error
-              ? error.message
-              : 'No fue posible cargar el directorio.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [retryToken])
 
   return (
     <div className="stack">
@@ -250,7 +221,7 @@ export function DirectoryPage() {
               <button
                 type="button"
                 className="button button--ghost"
-                onClick={() => setRetryToken((current) => current + 1)}
+                onClick={reload}
               >
                 Reintentar resumen
               </button>

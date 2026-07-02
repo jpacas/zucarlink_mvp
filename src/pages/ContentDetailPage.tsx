@@ -1,45 +1,21 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { TagBadge } from '../features/content/components/TagBadge'
 import { getPublishedContentBySlug } from '../features/content/api'
-import type { ContentItem } from '../features/content/types'
 import { formatDate } from '../lib/date'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function ContentDetailPage() {
   const { slug = '' } = useParams()
-  const [item, setItem] = useState<ContentItem | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { data: item, error: errorMessage } = useAsyncData(() => getPublishedContentBySlug(slug), [slug])
 
   usePageMetadata({
     title: item?.title ?? 'Contenido',
     description: item?.summary ?? 'Detalle editorial público de Zucarlink.',
   })
-
-  useEffect(() => {
-    let isMounted = true
-
-    void getPublishedContentBySlug(slug)
-      .then((nextItem) => {
-        if (isMounted) {
-          setItem(nextItem)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setItem(null)
-          setErrorMessage(error instanceof Error ? error.message : 'No fue posible cargar el contenido.')
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [slug])
 
   if (errorMessage) {
     const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)

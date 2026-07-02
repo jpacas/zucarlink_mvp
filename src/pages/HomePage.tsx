@@ -1,80 +1,23 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { getDirectoryPublicSummary } from '../features/directory/api'
 import { listFeaturedContent } from '../features/content/api'
-import type { ContentItem } from '../features/content/types'
 import { listForumThreads } from '../features/forum/api'
-import type { ForumThreadCard } from '../features/forum/types'
 import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function HomePage() {
-  const [forumPreview, setForumPreview] = useState<ForumThreadCard[]>([])
-  const [contentPreview, setContentPreview] = useState<ContentItem[]>([])
-  const [hasContentPreviewIssue, setHasContentPreviewIssue] = useState(false)
-  const [members, setMembers] = useState<number | null>(null)
-  const [countries, setCountries] = useState<number | null>(null)
-  const [activeThreads, setActiveThreads] = useState<number | null>(null)
+  const { data: summaryData } = useAsyncData(() => getDirectoryPublicSummary(), [])
+  const members = summaryData?.totalMembers ?? null
+  const countries = summaryData?.totalCountries ?? null
 
-  useEffect(() => {
-    let isMounted = true
+  const { data: threadsData } = useAsyncData(() => listForumThreads(undefined, 3), [])
+  const forumPreview = threadsData ?? []
+  const activeThreads = threadsData?.length ?? null
 
-    void getDirectoryPublicSummary()
-      .then((summary) => {
-        if (isMounted) {
-          setMembers(summary.totalMembers)
-          setCountries(summary.totalCountries)
-        }
-      })
-      .catch(() => {})
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  useEffect(() => {
-    let isMounted = true
-
-    void listForumThreads(undefined, 3)
-      .then((threads) => {
-        if (isMounted) {
-          setForumPreview(threads)
-          setActiveThreads(threads.length)
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setForumPreview([])
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  useEffect(() => {
-    let isMounted = true
-
-    void listFeaturedContent(2)
-      .then((items) => {
-        if (isMounted) {
-          setContentPreview(items)
-          setHasContentPreviewIssue(false)
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setContentPreview([])
-          setHasContentPreviewIssue(true)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const { data: contentData, error: contentError } = useAsyncData(() => listFeaturedContent(2), [])
+  const contentPreview = contentData ?? []
+  const hasContentPreviewIssue = Boolean(contentError)
 
   return (
     <div className="stack">

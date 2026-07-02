@@ -4,6 +4,7 @@ import { DirectoryProfileCard } from '../features/directory/DirectoryProfileCard
 import { searchDirectoryProfiles } from '../features/directory/api'
 import type { DirectoryFilters, DirectoryProfileCard as DirectoryProfileCardData } from '../features/directory/types'
 import { SkeletonCard } from '../components/Skeleton'
+import { useAsyncData } from '../lib/useAsyncData'
 
 const emptyFilters: DirectoryFilters = {
   searchText: '',
@@ -27,10 +28,7 @@ export function AppDirectoryPage() {
   const [searchInput, setSearchInput] = useState('')
   const [debouncedSearchText, setDebouncedSearchText] = useState('')
   const [allProfiles, setAllProfiles] = useState<DirectoryProfileCardData[]>([])
-  const [profiles, setProfiles] = useState<DirectoryProfileCardData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [retryToken, setRetryToken] = useState(0)
+  const [allProfilesErrorMessage, setAllProfilesErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -61,7 +59,7 @@ export function AppDirectoryPage() {
       })
       .catch((error) => {
         if (isMounted) {
-          setErrorMessage(
+          setAllProfilesErrorMessage(
             error instanceof Error ? error.message : 'No fue posible cargar el directorio.',
           )
         }
@@ -72,39 +70,22 @@ export function AppDirectoryPage() {
     }
   }, [])
 
-  useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
-
-    void searchDirectoryProfiles({
-      searchText: debouncedSearchText,
-      country: filters.country,
-      specialty: filters.specialty ? toSpecialtySlug(filters.specialty) : '',
-    })
-      .then((rows) => {
-        if (isMounted) {
-          setProfiles(rows)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setErrorMessage(
-            error instanceof Error ? error.message : 'No fue posible cargar resultados.',
-          )
-          setProfiles([])
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [debouncedSearchText, filters.country, filters.specialty, retryToken])
+  const {
+    data: profilesData,
+    isLoading,
+    error: searchErrorMessage,
+    reload: retrySearch,
+  } = useAsyncData(
+    () =>
+      searchDirectoryProfiles({
+        searchText: debouncedSearchText,
+        country: filters.country,
+        specialty: filters.specialty ? toSpecialtySlug(filters.specialty) : '',
+      }),
+    [debouncedSearchText, filters.country, filters.specialty],
+  )
+  const profiles = profilesData ?? []
+  const errorMessage = searchErrorMessage ?? allProfilesErrorMessage
 
   const countries = useMemo(
     () =>
@@ -196,7 +177,7 @@ export function AppDirectoryPage() {
             <button
               type="button"
               className="button button--ghost"
-              onClick={() => setRetryToken((current) => current + 1)}
+              onClick={retrySearch}
             >
               Reintentar búsqueda
             </button>
