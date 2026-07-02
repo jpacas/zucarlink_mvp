@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from './supabase'
+import { getSupabaseBrowserClient, getSupabaseClientOrThrow } from './supabase'
 import { downscaleImage } from './image-downscale'
 import {
   AVATAR_ALLOWED_TYPES,
@@ -21,11 +21,7 @@ export async function uploadAvatar(params: {
   file: File
   userId: string
 }): Promise<AvatarUploadResult> {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
+  const client = getSupabaseClientOrThrow()
 
   validateAvatarFile(params.file)
 
@@ -51,11 +47,7 @@ export async function uploadAvatar(params: {
 }
 
 export async function removeAvatar(path: string) {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
+  const client = getSupabaseClientOrThrow()
 
   const { error } = await client.storage.from(AVATAR_BUCKET).remove([path])
 

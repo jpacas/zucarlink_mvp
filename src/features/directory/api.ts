@@ -1,5 +1,5 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type {
   DirectoryAggregateSnapshot,
   DirectoryFilters,
@@ -29,16 +29,6 @@ interface DirectoryProfileRow {
 interface DirectoryProfileDetailRow extends DirectoryProfileRow {
   years_experience: number | null
   experiences: DirectoryProfileExperience[] | null
-}
-
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
 }
 
 async function resolveAvatarUrl(avatarPath: string | null) {
@@ -83,7 +73,7 @@ interface PublicPreviewRow {
 }
 
 export async function listPublicPreviewProfiles(limitCount = 12): Promise<PublicPreviewProfile[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_public_preview_profiles', {
     limit_count: limitCount,
   })
@@ -108,7 +98,7 @@ export async function listPublicPreviewProfiles(limitCount = 12): Promise<Public
 }
 
 export async function getDirectoryPublicSummary(): Promise<DirectoryAggregateSnapshot> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_public_directory_summary')
 
   if (error) {
@@ -130,7 +120,7 @@ export async function getDirectoryPublicSummary(): Promise<DirectoryAggregateSna
 export async function searchDirectoryProfiles(
   filters: Partial<DirectoryFilters> = {},
 ): Promise<DirectoryProfileCard[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('search_directory_profiles', {
     search_text: filters.searchText?.trim() || null,
     country_filter: filters.country?.trim() || null,
@@ -149,7 +139,7 @@ export async function searchDirectoryProfiles(
 export async function getDirectoryProfileDetail(
   profileId: string,
 ): Promise<DirectoryProfileDetail> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_directory_profile_detail', {
     profile_id: profileId,
   })

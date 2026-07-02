@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type {
   ContentItem,
   ContentListFilters,
@@ -57,16 +57,6 @@ interface PriceItemRow {
   market_summary?: string | null
   market_summary_sources?: PriceMarketSummarySource[] | null
   market_summary_updated_at?: string | null
-}
-
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
 }
 
 function mapContentItem(row: ContentItemRow): ContentItem {
@@ -135,7 +125,7 @@ export async function listPublishedContent(
   type: 'news' | 'blog',
   filters: ContentListFilters = {},
 ): Promise<ContentItem[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   let query = client
     .from('content_items')
     .select()
@@ -170,7 +160,7 @@ export async function listPublishedContent(
 }
 
 export async function getPublishedContentBySlug(slug: string): Promise<ContentItem> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('content_items')
     .select()
@@ -190,7 +180,7 @@ export async function getPublishedContentBySlug(slug: string): Promise<ContentIt
 }
 
 export async function listPublishedEvents(): Promise<EventItem[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('events')
     .select()
@@ -205,7 +195,7 @@ export async function listPublishedEvents(): Promise<EventItem[]> {
 }
 
 export async function listPublishedPrices(): Promise<PriceItem[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('price_items')
     .select()
@@ -220,7 +210,7 @@ export async function listPublishedPrices(): Promise<PriceItem[]> {
 }
 
 export async function listFeaturedContent(limitCount?: number): Promise<ContentItem[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('content_items')
     .select()

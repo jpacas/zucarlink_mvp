@@ -20,3 +20,13 @@ export function getSupabaseBrowserClient() {
 
   return browserClient
 }
+
+export function getSupabaseClientOrThrow() {
+  const client = getSupabaseBrowserClient()
+
+  if (!client) {
+    throw new Error('Supabase no está configurado.')
+  }
+
+  return client
+}

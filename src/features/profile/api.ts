@@ -5,7 +5,7 @@ import {
   removeAvatar,
   uploadAvatar,
 } from '../../lib/avatar-storage'
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import { getCurrentProviderProfile } from '../providers/api'
 import type {
   CurrentProfile,
@@ -58,16 +58,6 @@ interface SpecialtyRow {
   slug: string
 }
 
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
-}
-
 async function ensureCompanyId(companyName: string, country: string) {
   const cleanName = companyName.trim()
 
@@ -75,7 +65,7 @@ async function ensureCompanyId(companyName: string, country: string) {
     return null
   }
 
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('upsert_company', {
     p_name: cleanName,
     p_country: country.trim() || null,
@@ -93,7 +83,7 @@ async function loadCompaniesByIds(ids: string[]) {
     return new Map<string, CompanyRow>()
   }
 
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('companies')
     .select('id, name')
@@ -107,7 +97,7 @@ async function loadCompaniesByIds(ids: string[]) {
 }
 
 async function loadProfileSpecialties(profileId: string) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data: links, error: linksError } = await client
     .from('profile_specialties')
     .select('specialty_id')
@@ -149,7 +139,7 @@ async function loadProfileSpecialties(profileId: string) {
 }
 
 async function loadExperiences(profileId: string) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('experiences')
     .select(
@@ -182,7 +172,7 @@ function mapExperience(
 }
 
 export async function getMyAvatarUrl(user: User): Promise<string | null> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('profiles')
     .select('avatar_path')
@@ -197,7 +187,7 @@ export async function getMyAvatarUrl(user: User): Promise<string | null> {
 }
 
 export async function getCurrentProfile(user: User): Promise<CurrentProfile | null> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('profiles')
     .select(
@@ -260,7 +250,7 @@ export async function getCurrentProfile(user: User): Promise<CurrentProfile | nu
 }
 
 export async function listSpecialties() {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('specialties')
     .select('id, name, slug')
@@ -278,7 +268,7 @@ export async function saveProfileDraft(
   payload: ProfileDraftInput,
   specialtyIds: string[],
 ) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const companyId = await ensureCompanyId(payload.companyName, payload.country)
   const status = getProfileStatus(payload, specialtyIds.map((id) => ({ id })))
 
@@ -306,7 +296,7 @@ export async function saveProfileDraft(
 }
 
 export async function replaceProfileSpecialties(userId: string, specialtyIds: string[]) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('replace_profile_specialties', {
     p_user_id: userId,
     p_specialty_ids: specialtyIds,
@@ -318,7 +308,7 @@ export async function replaceProfileSpecialties(userId: string, specialtyIds: st
 }
 
 export async function saveExperience(userId: string, payload: ExperienceInput) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const companyId = await ensureCompanyId(payload.companyName, '')
   const changes = {
     profile_id: userId,
@@ -359,7 +349,7 @@ export async function saveExperience(userId: string, payload: ExperienceInput) {
 }
 
 export async function deleteExperience(userId: string, experienceId: string) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client
     .from('experiences')
     .delete()
@@ -381,7 +371,7 @@ export async function saveAvatarForProfile(userId: string, file: File, currentPa
     userId,
   })
 
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client
     .from('profiles')
     .update({

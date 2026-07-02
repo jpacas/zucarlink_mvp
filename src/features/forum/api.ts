@@ -1,5 +1,5 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type {
   ForumCategory,
   ForumReply,
@@ -69,16 +69,6 @@ interface ForumThreadDetailRow extends ForumThreadRow {
   replies?: ForumReplyRow[] | null
 }
 
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
-}
-
 async function resolveAvatarUrl(author: ForumAuthorRow) {
   if (author.avatarUrl ?? author.avatar_url) {
     return author.avatarUrl ?? author.avatar_url ?? null
@@ -133,7 +123,7 @@ async function mapReply(row: ForumReplyRow): Promise<ForumReply> {
 }
 
 export async function listForumCategories(): Promise<ForumCategory[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_forum_categories')
 
   if (error) {
@@ -149,7 +139,7 @@ export async function listForumCategories(): Promise<ForumCategory[]> {
 }
 
 export async function listForumThreads(categorySlug?: string, limitCount?: number) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_forum_threads', {
     category_slug: categorySlug ?? null,
     limit_count: limitCount ?? null,
@@ -163,7 +153,7 @@ export async function listForumThreads(categorySlug?: string, limitCount?: numbe
 }
 
 export async function getForumThread(threadSlug: string): Promise<ForumThreadDetail> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_forum_thread', {
     thread_slug: threadSlug,
   })
@@ -189,7 +179,7 @@ export async function createForumTopic(payload: {
   title: string
   body: string
 }) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_topic', {
     category_slug: payload.categorySlug,
     title_text: payload.title.trim(),
@@ -208,7 +198,7 @@ export async function createForumReply(payload: {
   body: string
   parentReplyId?: string | null
 }) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_reply', {
     thread_slug: payload.threadSlug,
     body_text: payload.body.trim(),
@@ -223,7 +213,7 @@ export async function createForumReply(payload: {
 }
 
 export async function deleteForumTopic(threadSlug: string): Promise<void> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('delete_forum_topic', {
     thread_slug: threadSlug,
   })
@@ -234,7 +224,7 @@ export async function deleteForumTopic(threadSlug: string): Promise<void> {
 }
 
 export async function deleteForumReply(replyId: string): Promise<void> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('delete_forum_reply', {
     reply_id: replyId,
   })
@@ -258,7 +248,7 @@ function mapLikeState(data: unknown): ForumTopicLikeState {
 }
 
 export async function getForumTopicLikeState(threadSlug: string): Promise<ForumTopicLikeState> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_forum_topic_like_state', {
     thread_slug: threadSlug,
   })
@@ -271,7 +261,7 @@ export async function getForumTopicLikeState(threadSlug: string): Promise<ForumT
 }
 
 export async function toggleForumTopicLike(threadSlug: string): Promise<ForumTopicLikeState> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('toggle_forum_topic_like', {
     thread_slug: threadSlug,
   })

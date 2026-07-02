@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from './supabase'
+import { getSupabaseBrowserClient, getSupabaseClientOrThrow } from './supabase'
 import { downscaleImage } from './image-downscale'
 import {
   LOGO_ALLOWED_TYPES,
@@ -23,11 +23,7 @@ export async function uploadProviderLogo(params: {
   file: File
   userId: string
 }): Promise<LogoUploadResult> {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
+  const client = getSupabaseClientOrThrow()
 
   validateLogoFile(params.file)
 
@@ -52,11 +48,7 @@ export async function uploadProviderLogo(params: {
 }
 
 export async function removeLogo(path: string) {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
+  const client = getSupabaseClientOrThrow()
 
   const { error } = await client.storage.from(LOGO_BUCKET).remove([path])
 

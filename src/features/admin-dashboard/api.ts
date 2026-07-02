@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type { AdminDashboardKpis, AdminOperationalDashboard } from './types'
 
 interface AdminDashboardKpisRow {
@@ -60,16 +60,6 @@ interface AdminDashboardRow {
     status: string
     item_count: number
   }>
-}
-
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
 }
 
 function numberOrZero(value: number | undefined) {
@@ -165,7 +155,7 @@ function mapDashboard(row: AdminDashboardRow): AdminOperationalDashboard {
 export async function getAdminOperationalDashboard(
   periodDays: number,
 ): Promise<AdminOperationalDashboard> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_admin_operational_dashboard', {
     period_days: periodDays,
   })

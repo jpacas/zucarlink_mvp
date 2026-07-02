@@ -1,5 +1,5 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type { ForumContribution } from '../forum/types'
 import type { PublicMemberProfile, PublicProfileForumActivity } from './types'
 
@@ -26,18 +26,8 @@ interface PublicProfileForumActivityRow {
   }>
 }
 
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
-}
-
 export async function getPublicMemberProfile(profileId: string): Promise<PublicMemberProfile> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_public_member_profile', {
     profile_id: profileId,
   })
@@ -66,7 +56,7 @@ export async function getPublicMemberProfile(profileId: string): Promise<PublicM
 }
 
 export async function getProfileForumActivity(profileId: string): Promise<PublicProfileForumActivity> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_profile_forum_activity', {
     profile_id: profileId,
   })

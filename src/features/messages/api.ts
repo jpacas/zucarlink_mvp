@@ -1,16 +1,6 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type { Message, MessageThread } from './types'
-
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
-}
 
 interface ThreadRow {
   thread_id: string
@@ -36,7 +26,7 @@ async function resolveAvatarUrl(avatarPath: string | null): Promise<string | nul
 }
 
 export async function listMyThreads(): Promise<MessageThread[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_my_threads')
 
   if (error) {
@@ -59,7 +49,7 @@ export async function listMyThreads(): Promise<MessageThread[]> {
 }
 
 export async function startOrGetThread(otherProfileId: string): Promise<string> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('start_or_get_thread', {
     other_profile_id: otherProfileId,
   })
@@ -72,7 +62,7 @@ export async function startOrGetThread(otherProfileId: string): Promise<string> 
 }
 
 export async function getThreadMessages(threadId: string): Promise<Message[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_thread_messages', {
     p_thread_id: threadId,
   })
@@ -91,7 +81,7 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
 }
 
 export async function sendMessage(threadId: string, body: string): Promise<string> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('send_message', {
     p_thread_id: threadId,
     body_text: body,
@@ -105,7 +95,7 @@ export async function sendMessage(threadId: string, body: string): Promise<strin
 }
 
 export async function markThreadRead(threadId: string): Promise<void> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('mark_thread_read', {
     p_thread_id: threadId,
   })
@@ -116,7 +106,7 @@ export async function markThreadRead(threadId: string): Promise<void> {
 }
 
 export async function clearThread(threadId: string): Promise<void> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('clear_thread', {
     p_thread_id: threadId,
   })

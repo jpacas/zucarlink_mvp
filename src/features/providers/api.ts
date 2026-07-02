@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js'
 
-import { getSupabaseBrowserClient } from '../../lib/supabase'
+import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import { getLogoPublicUrl, removeLogo, uploadProviderLogo } from '../../lib/logo-storage'
 import type {
   AdminProviderRecord,
@@ -72,16 +72,6 @@ interface ProviderLeadRow {
   message: string
   status: ProviderLeadStatus
   created_at: string
-}
-
-function getClient() {
-  const client = getSupabaseBrowserClient()
-
-  if (!client) {
-    throw new Error('Supabase no está configurado.')
-  }
-
-  return client
 }
 
 function slugify(value: string) {
@@ -159,7 +149,7 @@ function mapLead(row: ProviderLeadRow): ProviderLead {
 }
 
 export async function listProviderCategories(): Promise<ProviderCategory[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_provider_categories')
 
   if (error) {
@@ -174,7 +164,7 @@ export async function searchProviders(filters?: {
   categorySlug?: string
   country?: string
 }): Promise<ProviderCard[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('search_providers', {
     search_text: filters?.searchText?.trim() || null,
     category_slug: filters?.categorySlug?.trim().toLowerCase() || null,
@@ -189,7 +179,7 @@ export async function searchProviders(filters?: {
 }
 
 export async function getProviderBySlug(slug: string): Promise<ProviderDetail> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_provider_by_slug', {
     provider_slug: slug,
   })
@@ -208,7 +198,7 @@ export async function getProviderBySlug(slug: string): Promise<ProviderDetail> {
 }
 
 export async function listAdminProviders(): Promise<AdminProviderRecord[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_providers_admin')
 
   if (error) {
@@ -222,7 +212,7 @@ export async function listAdminProviders(): Promise<AdminProviderRecord[]> {
 }
 
 export async function updateProviderStatus(providerId: string, nextStatus: ProviderStatus) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('admin_update_provider_status', {
     provider_id: providerId,
     next_status: nextStatus,
@@ -236,7 +226,7 @@ export async function updateProviderStatus(providerId: string, nextStatus: Provi
 export async function getCurrentProviderProfile(
   user: User,
 ): Promise<CurrentProviderProfile | null> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('providers')
     .select(
@@ -298,7 +288,7 @@ export async function saveProviderProfile(
   payload: ProviderProfileDraft,
   nextStatus: ProviderStatus,
 ) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const cleanCountries = splitList(payload.countries)
   const cleanProducts = splitList(payload.productsServices)
   const cleanBrands = splitList(payload.brands)
@@ -351,7 +341,7 @@ export async function saveProviderProfile(
 }
 
 export async function createProviderLead(payload: ProviderLeadInput) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('create_provider_lead', {
     provider_id: payload.providerId,
     name_text: payload.name.trim(),
@@ -366,7 +356,7 @@ export async function createProviderLead(payload: ProviderLeadInput) {
 }
 
 export async function listProviderLeads(): Promise<ProviderLead[]> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_provider_leads')
 
   if (error) {
@@ -380,7 +370,7 @@ export async function updateProviderLeadStatus(
   leadId: string,
   nextStatus: ProviderLeadStatus,
 ) {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client.rpc('update_provider_lead_status', {
     lead_id: leadId,
     next_status: nextStatus,
@@ -407,7 +397,7 @@ export async function saveLogoForProvider(
   const { path } = await uploadProviderLogo({ file, userId: user.id })
   const publicUrl = getLogoPublicUrl(path)
 
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { error } = await client
     .from('providers')
     .update({ logo_path: path, logo_url: publicUrl })
@@ -445,7 +435,7 @@ export function isProviderDraftComplete(payload: ProviderProfileDraft) {
 // Llama a la Edge Function que lee metadatos públicos del sitio (sin IA, sin credenciales)
 // para prellenar el onboarding. Devuelve título/descripción/imagen vacíos si no hay datos.
 export async function fetchSiteMeta(url: string): Promise<SiteMeta> {
-  const client = getClient()
+  const client = getSupabaseClientOrThrow()
   const { data, error } = await client.functions.invoke<SiteMeta & { error?: string }>(
     'fetch-site-meta',
     { body: { url } },
