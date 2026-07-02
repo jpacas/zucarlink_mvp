@@ -9,13 +9,14 @@ import {
   listForumThreads,
   toggleForumTopicLike,
 } from '../features/forum/api'
-import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/forum/types'
+import type { ForumAuthor, ForumThreadCard } from '../features/forum/types'
 import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 import { formatDateTime, formatRelative } from '../lib/date'
+import { useAsyncData } from '../lib/useAsyncData'
 
 function normalizeText(value: string) {
   return value
@@ -61,10 +62,7 @@ export function ForumPage() {
   const { user } = useAuth()
   // Cualquier miembro de Zucarlink con el correo confirmado puede participar.
   const canParticipate = Boolean(user?.email_confirmed_at)
-  const [categories, setCategories] = useState<ForumCategory[]>([])
   const [threads, setThreads] = useState<ForumThreadCard[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [pendingLike, setPendingLike] = useState<string | null>(null)
   const [composeSlug, setComposeSlug] = useState<string | null>(null)
   const [composeBody, setComposeBody] = useState('')
@@ -173,42 +171,23 @@ export function ForumPage() {
     }
   }
 
+  const { data, isLoading, error: errorMessage } = useAsyncData(
+    () =>
+      Promise.all([listForumCategories(), listForumThreads(categorySlug)]).then(
+        ([nextCategories, nextThreads]) => ({ categories: nextCategories, threads: nextThreads }),
+      ),
+    [categorySlug],
+  )
+  const categories = data?.categories ?? []
+
+  // `threads` se mantiene como estado local (no puramente derivado de `data`) porque
+  // recibe actualizaciones optimistas (like, respuestas, eliminar) que no deben
+  // esperar a un recarga completa del hook.
   useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
-
-    void Promise.all([
-      listForumCategories(),
-      listForumThreads(categorySlug),
-    ])
-      .then(([nextCategories, nextThreads]) => {
-        if (!isMounted) {
-          return
-        }
-
-        setCategories(nextCategories)
-        setThreads(nextThreads)
-        setErrorMessage(null)
-      })
-      .catch((error) => {
-        if (!isMounted) {
-          return
-        }
-
-        setErrorMessage(error instanceof Error ? error.message : 'No fue posible cargar el foro.')
-        setCategories([])
-        setThreads([])
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
+    if (data) {
+      setThreads(data.threads)
     }
-  }, [categorySlug])
+  }, [data])
 
   const activeCategory = useMemo(
     () => categories.find((category) => category.slug === categorySlug) ?? null,

@@ -17,6 +17,7 @@ import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
+import { useAsyncData } from '../lib/useAsyncData'
 
 interface ReplyNode {
   reply: ForumReply
@@ -86,7 +87,6 @@ export function ForumThreadPage() {
   // Cualquier miembro de Zucarlink con el correo confirmado puede responder.
   const canParticipate = Boolean(user?.email_confirmed_at)
   const [thread, setThread] = useState<ForumThreadDetail | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [replyBody, setReplyBody] = useState('')
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
@@ -112,56 +112,35 @@ export function ForumThreadPage() {
     })
   }
 
+  const {
+    data: loadedThread,
+    isLoading,
+    error: loadErrorMessage,
+  } = useAsyncData(() => getForumThread(threadSlug), [threadSlug])
+
+  // `thread`/`errorMessage` se mantienen como estado local (no derivado puro del hook)
+  // porque también se actualizan manualmente tras publicar/eliminar una respuesta
+  // (`setThread(refreshed)`), fuera del ciclo de carga inicial.
   useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
+    setThread(loadedThread)
+    setErrorMessage(loadErrorMessage)
+  }, [loadedThread, loadErrorMessage])
 
-    void getForumThread(threadSlug)
-      .then((nextThread) => {
-        if (!isMounted) {
-          return
-        }
+  // El estado de likes es secundario: un fallo aquí no debe tumbar el tema, por eso
+  // ignoramos el campo `error` de este hook (fallback silencioso a 0/false).
+  const { data: likeState } = useAsyncData(
+    () => getForumTopicLikeState(threadSlug),
+    [threadSlug],
+  )
 
-        setThread(nextThread)
-        setErrorMessage(null)
-      })
-      .catch((error) => {
-        if (!isMounted) {
-          return
-        }
-
-        setThread(null)
-        setErrorMessage(error instanceof Error ? error.message : 'No fue posible cargar el tema.')
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    // El estado de likes es secundario: un fallo aquí no debe tumbar el tema.
-    void getForumTopicLikeState(threadSlug)
-      .then((state) => {
-        if (!isMounted) {
-          return
-        }
-
-        setLikeCount(state.likeCount)
-        setViewerLiked(state.viewerLiked)
-      })
-      .catch(() => {
-        if (!isMounted) {
-          return
-        }
-
-        setLikeCount(0)
-        setViewerLiked(false)
-      })
-
-    return () => {
-      isMounted = false
+  // `likeCount`/`viewerLiked` se mantienen como estado local (no derivado puro) porque
+  // el botón de like los actualiza de forma optimista antes de confirmar con el servidor.
+  useEffect(() => {
+    if (likeState) {
+      setLikeCount(likeState.likeCount)
+      setViewerLiked(likeState.viewerLiked)
     }
-  }, [threadSlug])
+  }, [likeState])
 
   async function handleToggleLike() {
     if (!thread || isLiking) {

@@ -3,50 +3,39 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumTopic, listForumCategories } from '../features/forum/api'
-import type { ForumCategory } from '../features/forum/types'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function ForumNewThreadPage() {
   const { user, isLoading: isAuthLoading } = useAuth()
   const navigate = useNavigate()
-  const [categories, setCategories] = useState<ForumCategory[]>([])
   const [title, setTitle] = useState('')
   const [categorySlug, setCategorySlug] = useState('')
   const [body, setBody] = useState('')
   // Basta con ser miembro de Zucarlink con el correo confirmado.
   const canCreateTopic = Boolean(user?.email_confirmed_at)
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const {
+    data: categories,
+    isLoading: isLoadingCategories,
+    error: loadErrorMessage,
+  } = useAsyncData(() => listForumCategories(), [])
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  // Selecciona la primera categoría por defecto SOLO la primera vez que llegan datos,
+  // sin sobreescribir una selección posterior del usuario (el <select> es mutable).
   useEffect(() => {
-    let isMounted = true
-
-    void listForumCategories()
-      .then((nextCategories) => {
-        if (!isMounted) {
-          return
-        }
-
-        setCategories(nextCategories)
-        setCategorySlug(nextCategories[0]?.slug ?? '')
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setErrorMessage(
-            error instanceof Error ? error.message : 'No fue posible cargar categorías.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoadingCategories(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
+    if (categories && categories.length > 0 && !categorySlug) {
+      setCategorySlug(categories[0].slug)
     }
-  }, [])
+  }, [categories])
+
+  // `errorMessage` se mantiene como estado local (sembrado desde el hook) porque
+  // también se reutiliza para errores del envío del formulario (`handleSubmit`),
+  // no solo para el error de carga de categorías.
+  useEffect(() => {
+    setErrorMessage(loadErrorMessage)
+  }, [loadErrorMessage])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -88,7 +77,7 @@ export function ForumNewThreadPage() {
     return <Navigate to="/login" replace />
   }
 
-  if (errorMessage && !canCreateTopic && categories.length === 0) {
+  if (errorMessage && !canCreateTopic && (categories?.length ?? 0) === 0) {
     return (
       <section className="content-card stack">
         <h2>Crear tema</h2>
@@ -142,7 +131,7 @@ export function ForumNewThreadPage() {
             onChange={(event) => setCategorySlug(event.target.value)}
             required
           >
-            {categories.map((category) => (
+            {(categories ?? []).map((category) => (
               <option key={category.id} value={category.slug}>
                 {category.name}
               </option>

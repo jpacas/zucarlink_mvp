@@ -1,42 +1,20 @@
 import { Link, Navigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getInitials } from '../lib/initials'
 import { getProfileForumActivity } from '../features/profile/public-api'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
-import type { PublicProfileForumActivity } from '../features/profile/types'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function ProfilePage() {
   const { user } = useAuth()
   const { profile, isLoading, errorMessage } = useCurrentProfile(user)
-  const [forumActivity, setForumActivity] = useState<PublicProfileForumActivity | null>(null)
-
-  useEffect(() => {
-    let isMounted = true
-
-    if (!user) {
-      setForumActivity(null)
-      return
-    }
-
-    void getProfileForumActivity(user.id)
-      .then((activity) => {
-        if (isMounted) {
-          setForumActivity(activity)
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setForumActivity(null)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [user])
+  // Fallback silencioso a `null` en error: se ignora el campo `error` del hook.
+  const { data: forumActivity } = useAsyncData(
+    () => (user ? getProfileForumActivity(user.id) : Promise.resolve(null)),
+    [user],
+  )
 
   if (!user) {
     return <Navigate to="/login" replace />
