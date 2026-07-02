@@ -9,8 +9,6 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const projectRoot = path.resolve(__dirname, '..')
 
-const DEFAULT_PASSWORD = 'ZucarlinkForum2026!'
-
 const authors = [
   {
     email: 'foro.ana.mejia@zucarlink.test',
@@ -167,9 +165,19 @@ for (const envFile of ['.env.local', '.env', '.env.development.local']) {
   loadEnvFile(path.join(projectRoot, envFile))
 }
 
+function requiredEnv(name, fallback) {
+  const value = process.env[name] ?? (fallback ? process.env[fallback] : '')
+
+  if (!value) {
+    throw new Error(`Falta la variable ${name}${fallback ? ` (o ${fallback})` : ''}.`)
+  }
+
+  return value
+}
+
 const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-const demoPassword = process.env.WEEK7_FORUM_PASSWORD ?? DEFAULT_PASSWORD
+const demoPassword = requiredEnv('SEED_DEMO_PASSWORD')
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('Faltan SUPABASE_URL/VITE_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY.')

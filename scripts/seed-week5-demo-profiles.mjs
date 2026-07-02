@@ -9,8 +9,6 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const projectRoot = path.resolve(__dirname, '..')
 
-const DEFAULT_PASSWORD = 'ZucarlinkDemo2026!'
-
 const demoProfiles = [
   {
     email: 'demo.ana.mejia@zucarlink.test',
@@ -646,7 +644,7 @@ async function main() {
 
   const supabaseUrl = requiredEnv('SUPABASE_URL', 'VITE_SUPABASE_URL')
   const serviceRoleKey = requiredEnv('SUPABASE_SERVICE_ROLE_KEY')
-  const demoPassword = process.env.WEEK5_DEMO_PASSWORD || DEFAULT_PASSWORD
+  const demoPassword = requiredEnv('SEED_DEMO_PASSWORD')
 
   const client = createClient(supabaseUrl, serviceRoleKey, {
     auth: {

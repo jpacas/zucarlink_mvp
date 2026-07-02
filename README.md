@@ -81,13 +81,7 @@ node scripts/seed-week9-providers.mjs       # 5 proveedores activos con categor�
 
 Cada script es idempotente: si los datos ya existen, los actualiza sin duplicar.
 
-Contraseñas por defecto para cuentas demo (configurables con variables de entorno):
-
-| Variable | Default |
-|---|---|
-| `WEEK5_DEMO_PASSWORD` | `ZucarlinkDemo2026!` |
-| `WEEK7_FORUM_PASSWORD` | `ZucarlinkForum2026!` |
-| `WEEK9_PROVIDER_PASSWORD` | `ZucarlinkDemo2026!` |
+Contraseña para cuentas demo: obligatoria vía variable de entorno `SEED_DEMO_PASSWORD` (sin valor por defecto — los scripts fallan si no está seteada).
 
 ## Edge Functions (email)
 

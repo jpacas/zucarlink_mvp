@@ -2,8 +2,6 @@ import process from 'node:process'
 
 import { createClient } from '@supabase/supabase-js'
 
-const DEFAULT_PASSWORD = 'ZucarlinkProviders2026!'
-
 const categories = [
   { slug: 'automatizacion', name: 'Automatización' },
   { slug: 'laboratorio', name: 'Laboratorio' },
@@ -90,6 +88,16 @@ function getEnv(name) {
   return value
 }
 
+function requiredEnv(name, fallback) {
+  const value = process.env[name] ?? (fallback ? process.env[fallback] : '')
+
+  if (!value) {
+    throw new Error(`Falta la variable ${name}${fallback ? ` (o ${fallback})` : ''}.`)
+  }
+
+  return value
+}
+
 function slugify(value) {
   return value
     .normalize('NFD')
@@ -103,7 +111,7 @@ function slugify(value) {
 async function main() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
   const serviceRoleKey = getEnv('SUPABASE_SERVICE_ROLE_KEY')
-  const password = process.env.WEEK9_PROVIDER_PASSWORD || DEFAULT_PASSWORD
+  const password = requiredEnv('SEED_DEMO_PASSWORD')
 
   if (!url) {
     throw new Error('Missing SUPABASE_URL or VITE_SUPABASE_URL')
