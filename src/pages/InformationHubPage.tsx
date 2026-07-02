@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { FeaturedContent } from '../features/content/components/FeaturedContent'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listFeaturedContent } from '../features/content/api'
-import type { ContentItem } from '../features/content/types'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { useAsyncData } from '../lib/useAsyncData'
 import { BlogIcon, EventIcon, NewsIcon, PriceIcon } from '../components/InfoIcons'
 import type { ReactNode } from 'react'
 
@@ -51,44 +50,14 @@ const informationSections: InformationSection[] = [
 ]
 
 export function InformationHubPage() {
-  const [featuredItems, setFeaturedItems] = useState<ContentItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
   usePageMetadata({
     title: 'Información',
     description:
       'Noticias, análisis, eventos e indicadores curados para seguirle el pulso a la industria azucarera.',
   })
 
-  useEffect(() => {
-    let isMounted = true
-
-    void listFeaturedContent(4)
-      .then((items) => {
-        if (isMounted) {
-          setFeaturedItems(items)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setFeaturedItems([])
-          setErrorMessage(
-            error instanceof Error ? error.message : 'No fue posible cargar los destacados.',
-          )
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const { data, isLoading, error: errorMessage } = useAsyncData(() => listFeaturedContent(4), [])
+  const featuredItems = data ?? []
 
   return (
     <div className="stack">

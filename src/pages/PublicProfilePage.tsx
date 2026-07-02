@@ -1,56 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getProfileForumActivity, getPublicMemberProfile } from '../features/profile/public-api'
-import type { PublicMemberProfile, PublicProfileForumActivity } from '../features/profile/types'
-import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import { getInitials } from '../lib/initials'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function PublicProfilePage() {
   const { profileId = '' } = useParams()
-  const [profile, setProfile] = useState<PublicMemberProfile | null>(null)
-  const [activity, setActivity] = useState<PublicProfileForumActivity | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [hasAvatarError, setHasAvatarError] = useState(false)
 
-  useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
-
-    void Promise.all([
-      getPublicMemberProfile(profileId),
-      getProfileForumActivity(profileId),
-    ])
-      .then(([nextProfile, nextActivity]) => {
-        if (!isMounted) {
-          return
-        }
-
-        setProfile(nextProfile)
-        setActivity(nextActivity)
-        setErrorMessage(null)
-      })
-      .catch((error) => {
-        if (!isMounted) {
-          return
-        }
-
-        setErrorMessage(error instanceof Error ? error.message : 'No fue posible abrir el perfil.')
-        setProfile(null)
-        setActivity(null)
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [profileId])
+  const { data, isLoading, error: errorMessage } = useAsyncData(
+    () =>
+      Promise.all([getPublicMemberProfile(profileId), getProfileForumActivity(profileId)]).then(
+        ([nextProfile, nextActivity]) => ({ profile: nextProfile, activity: nextActivity }),
+      ),
+    [profileId],
+  )
+  const profile = data?.profile ?? null
+  const activity = data?.activity ?? null
 
   if (isLoading) {
     return (

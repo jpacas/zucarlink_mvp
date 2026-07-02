@@ -1,46 +1,17 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getDirectoryProfileDetail } from '../features/directory/api'
-import type { DirectoryProfileDetail } from '../features/directory/types'
 import { getInitials } from '../lib/initials'
+import { useAsyncData } from '../lib/useAsyncData'
 
 export function DirectoryProfileDetailPage() {
   const { profileId = '' } = useParams()
-  const [profile, setProfile] = useState<DirectoryProfileDetail | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
-
-    void getDirectoryProfileDetail(profileId)
-      .then((nextProfile) => {
-        if (isMounted) {
-          setProfile(nextProfile)
-          setErrorMessage(null)
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setErrorMessage(
-            error instanceof Error ? error.message : 'No fue posible cargar el perfil.',
-          )
-          setProfile(null)
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [profileId])
+  const { data: profile, isLoading, error: errorMessage } = useAsyncData(
+    () => getDirectoryProfileDetail(profileId),
+    [profileId],
+  )
 
   if (isLoading) {
     return (
