@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
-import { getSupabaseBrowserClient } from '../lib/supabase'
+import { requestPasswordReset } from '../features/auth/api'
 
 export function PasswordResetRequestPage() {
   const [email, setEmail] = useState('')
@@ -13,24 +13,11 @@ export function PasswordResetRequestPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const client = getSupabaseBrowserClient()
-
-    if (!client) {
-      setErrorMessage('El servicio de autenticación no está disponible en este momento.')
-      return
-    }
-
     setIsSubmitting(true)
     setErrorMessage(null)
 
     try {
-      const { error } = await client.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/nueva-contrasena`,
-      })
-
-      if (error) {
-        throw new Error(error.message)
-      }
+      await requestPasswordReset(email)
 
       setSent(true)
     } catch (error) {

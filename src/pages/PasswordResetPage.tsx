@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
+import { updatePassword } from '../features/auth/api'
 import { getSupabaseBrowserClient } from '../lib/supabase'
 
 export function PasswordResetPage() {
@@ -44,13 +45,6 @@ export function PasswordResetPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const client = getSupabaseBrowserClient()
-
-    if (!client) {
-      setErrorMessage('El servicio de autenticación no está disponible.')
-      return
-    }
-
     if (password !== confirmPassword) {
       setErrorMessage('Las contraseñas no coinciden.')
       return
@@ -65,16 +59,12 @@ export function PasswordResetPage() {
     setErrorMessage(null)
 
     try {
-      const { error } = await client.auth.updateUser({ password })
-
-      if (error) {
-        throw new Error(error.message)
-      }
+      await updatePassword(password)
 
       setSuccess(true)
 
       // Sign out so the user logs in fresh with the new password
-      await client.auth.signOut()
+      await getSupabaseBrowserClient()?.auth.signOut()
 
       setTimeout(() => {
         navigate('/login', { replace: true })
