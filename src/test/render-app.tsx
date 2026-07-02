@@ -18,6 +18,13 @@ export async function renderApp({
   vi.spyOn(supabaseModule, 'getSupabaseBrowserClient').mockImplementation(
     () => supabase as never,
   )
+  vi.spyOn(supabaseModule, 'getSupabaseClientOrThrow').mockImplementation(() => {
+    if (!supabase) {
+      throw new Error('Supabase no está configurado.')
+    }
+
+    return supabase as never
+  })
 
   const [{ AppRouter }, { AuthProvider }] = await Promise.all([
     import('../routes/AppRouter'),

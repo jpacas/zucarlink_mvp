@@ -23,6 +23,13 @@ async function loadApiWithFake(
   vi.spyOn(supabaseModule, 'getSupabaseBrowserClient').mockImplementation(
     () => supabase as never,
   )
+  vi.spyOn(supabaseModule, 'getSupabaseClientOrThrow').mockImplementation(() => {
+    if (!supabase) {
+      throw new Error('Supabase no está configurado.')
+    }
+
+    return supabase as never
+  })
 
   return import('./api')
 }
