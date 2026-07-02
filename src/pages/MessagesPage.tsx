@@ -25,10 +25,10 @@ function formatTime(isoString: string) {
     date.getDate() === now.getDate()
 
   if (isToday) {
-    return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' })
   }
 
-  return date.toLocaleDateString('es', { day: 'numeric', month: 'short' })
+  return date.toLocaleDateString('es-SV', { day: 'numeric', month: 'short' })
 }
 
 function AvatarDisplay({

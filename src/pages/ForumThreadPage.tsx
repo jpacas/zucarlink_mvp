@@ -12,7 +12,7 @@ import {
   toggleForumTopicLike,
 } from '../features/forum/api'
 import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
-import { formatForumDate, formatRelativeDate } from '../features/forum/format'
+import { formatDateTime, formatRelative } from '../lib/date'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
@@ -297,9 +297,9 @@ export function ForumThreadPage() {
           <time
             className="forum-meta-row__time"
             dateTime={reply.createdAt}
-            title={formatForumDate(reply.createdAt)}
+            title={formatDateTime(reply.createdAt)}
           >
-            {formatRelativeDate(reply.createdAt)}
+            {formatRelative(reply.createdAt)}
           </time>
         </div>
         <p>{reply.body}</p>
@@ -400,9 +400,9 @@ export function ForumThreadPage() {
           <time
             className="forum-meta-row__time"
             dateTime={thread.createdAt}
-            title={formatForumDate(thread.createdAt)}
+            title={formatDateTime(thread.createdAt)}
           >
-            {formatRelativeDate(thread.createdAt)}
+            {formatRelative(thread.createdAt)}
           </time>
         </div>
         <p className="forum-original__body">{thread.body}</p>

@@ -14,7 +14,7 @@ import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
-import { formatForumDate, formatRelativeDate } from '../features/forum/format'
+import { formatDateTime, formatRelative } from '../lib/date'
 
 function normalizeText(value: string) {
   return value
@@ -356,9 +356,9 @@ export function ForumPage() {
                 <time
                   className="forum-meta-row__time"
                   dateTime={thread.lastActivityAt}
-                  title={`Actividad ${formatForumDate(thread.lastActivityAt)}`}
+                  title={`Actividad ${formatDateTime(thread.lastActivityAt)}`}
                 >
-                  {formatRelativeDate(thread.lastActivityAt)}
+                  {formatRelative(thread.lastActivityAt)}
                 </time>
               </div>
               <Link className="forum-thread-link" to={`/forum/thread/${thread.slug}`}>

@@ -10,6 +10,7 @@ import type {
 } from '../features/admin-dashboard/types'
 import { useAuth } from '../features/auth/AuthProvider'
 import { isAdminUser } from '../features/auth/roles'
+import { formatDateTime } from '../lib/date'
 
 const periodOptions = [7, 30, 90]
 
@@ -344,11 +345,4 @@ function ContentStatusCard({ items }: { items: ContentStatusMetric[] }) {
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat('es-419').format(value)
-}
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('es-419', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
 }

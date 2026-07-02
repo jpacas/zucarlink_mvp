@@ -1,10 +1,5 @@
+import { formatDate } from '../../../lib/date'
 import type { PriceItem } from '../types'
-
-function formatObservedDate(value: string) {
-  return new Intl.DateTimeFormat('es-SV', {
-    dateStyle: 'medium',
-  }).format(new Date(value))
-}
 
 interface PriceCardProps {
   item: PriceItem
@@ -24,7 +19,7 @@ export function PriceCard({ item }: PriceCardProps) {
         </strong>
       </div>
       <div className="content-item-card__meta">
-        <span>{formatObservedDate(item.observedAt)}</span>
+        <span>{formatDate(item.observedAt)}</span>
         {item.sourceName ? (
           item.sourceUrl ? (
             <a href={item.sourceUrl} target="_blank" rel="noreferrer">

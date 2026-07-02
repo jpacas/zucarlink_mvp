@@ -1,11 +1,6 @@
+import { formatDate } from '../../../lib/date'
 import { PriceTrendChart } from './PriceTrendChart'
 import type { PriceItem } from '../types'
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-SV', {
-    dateStyle: 'medium',
-  }).format(new Date(value))
-}
 
 interface FeaturedPriceCardProps {
   label: string

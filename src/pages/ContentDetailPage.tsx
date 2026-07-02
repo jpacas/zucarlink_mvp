@@ -5,14 +5,9 @@ import { SectionHeader } from '../features/content/components/SectionHeader'
 import { TagBadge } from '../features/content/components/TagBadge'
 import { getPublishedContentBySlug } from '../features/content/api'
 import type { ContentItem } from '../features/content/types'
+import { formatDate } from '../lib/date'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
-
-function formatPublishedDate(value: string) {
-  return new Intl.DateTimeFormat('es-SV', {
-    dateStyle: 'medium',
-  }).format(new Date(value))
-}
 
 export function ContentDetailPage() {
   const { slug = '' } = useParams()
@@ -72,7 +67,7 @@ export function ContentDetailPage() {
     <article className="content-card stack">
       <SectionHeader as="h1" eyebrow={item.type === 'news' ? 'Noticia' : 'Blog'} title={item.title} />
       <div className="content-item-card__meta">
-        <span>{formatPublishedDate(item.publishedAt)}</span>
+        <span>{formatDate(item.publishedAt)}</span>
         {item.sourceName ? <span>{item.sourceName}</span> : null}
       </div>
       <p>{item.summary}</p>

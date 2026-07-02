@@ -1,14 +1,8 @@
 import { Link } from 'react-router-dom'
 
+import { formatDate } from '../../../lib/date'
 import type { ContentItem } from '../types'
 import { TagBadge } from './TagBadge'
-
-function formatContentDate(value: string) {
-  return new Intl.DateTimeFormat('es-SV', {
-    dateStyle: 'medium',
-    timeZone: 'UTC',
-  }).format(new Date(value))
-}
 
 type CategoryAccent = 'brand' | 'tecnico' | 'proveedor' | 'info'
 
@@ -47,7 +41,7 @@ export function ContentCard({ item }: ContentCardProps) {
       </Link>
       <p className="content-news-card__summary">{item.summary}</p>
       <div className="content-item-card__meta content-news-card__meta">
-        <span>{formatContentDate(item.publishedAt)}</span>
+        <span>{formatDate(item.publishedAt)}</span>
         {item.sourceName ? <span>{item.sourceName}</span> : null}
       </div>
       <div className="content-item-card__footer content-news-card__footer">
