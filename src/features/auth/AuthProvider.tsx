@@ -73,7 +73,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [client])
 
   const value = useMemo<AuthContextValue>(
     () => ({
