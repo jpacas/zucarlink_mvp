@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 
+import { getInitials } from '../../lib/initials'
 import type { DirectoryProfileCard as DirectoryProfileCardData } from './types'
 
 interface DirectoryProfileCardProps {
@@ -22,7 +23,7 @@ export function DirectoryProfileCard({ profile }: DirectoryProfileCardProps) {
           />
         ) : (
           <div className="avatar-fallback" aria-hidden="true">
-            {profile.fullName.slice(0, 1).toUpperCase() || 'Z'}
+            {getInitials(profile.fullName)}
           </div>
         )}
         <div className="stack stack--compact">

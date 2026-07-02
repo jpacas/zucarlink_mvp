@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { SkeletonThreadItem } from '../components/Skeleton'
+import { getInitials } from '../lib/initials'
 import {
   clearThread,
   getThreadMessages,
@@ -55,7 +56,7 @@ function AvatarDisplay({
 
   return (
     <div className={`avatar-fallback avatar-fallback--${size}`} aria-hidden="true">
-      {name.slice(0, 1).toUpperCase() || 'Z'}
+      {getInitials(name)}
     </div>
   )
 }

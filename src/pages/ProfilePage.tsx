@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { getInitials } from '../lib/initials'
 import { getProfileForumActivity } from '../features/profile/public-api'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import type { PublicProfileForumActivity } from '../features/profile/types'
@@ -98,7 +99,7 @@ export function ProfilePage() {
             />
           ) : (
             <div className="avatar-fallback" aria-hidden="true">
-              {profile.fullName.slice(0, 1).toUpperCase() || 'Z'}
+              {getInitials(profile.fullName)}
             </div>
           )}
           <div className="stack">

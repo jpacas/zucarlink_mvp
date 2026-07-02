@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 
+import { getInitials } from '../../lib/initials'
 import type {
   ExperienceInput,
   ProfileDraftInput,
@@ -212,7 +213,7 @@ export function AvatarUploader({
         />
       ) : (
         <div className="avatar-fallback" aria-hidden="true">
-          {currentName.slice(0, 1).toUpperCase() || 'Z'}
+          {getInitials(currentName)}
         </div>
       )}
       <div className="stack">

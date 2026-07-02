@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getDirectoryProfileDetail } from '../features/directory/api'
 import type { DirectoryProfileDetail } from '../features/directory/types'
+import { getInitials } from '../lib/initials'
 
 export function DirectoryProfileDetailPage() {
   const { profileId = '' } = useParams()
@@ -86,7 +87,7 @@ export function DirectoryProfileDetailPage() {
             />
           ) : (
             <div className="avatar-fallback" aria-hidden="true">
-              {profile.fullName.slice(0, 1).toUpperCase() || 'Z'}
+              {getInitials(profile.fullName)}
             </div>
           )}
           <div className="stack">

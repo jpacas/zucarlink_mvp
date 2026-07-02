@@ -13,6 +13,7 @@ import {
 } from '../features/forum/api'
 import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
 import { formatDateTime, formatRelative } from '../lib/date'
+import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
@@ -65,7 +66,7 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
         />
       ) : (
         <div className="forum-author__fallback" aria-hidden="true">
-          {author.fullName.slice(0, 1).toUpperCase() || 'Z'}
+          {getInitials(author.fullName)}
         </div>
       )}
       <div className="forum-author__copy">

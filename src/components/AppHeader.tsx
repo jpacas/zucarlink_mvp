@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { isAdminUser } from '../features/auth/roles'
 import { getMyAvatarUrl } from '../features/profile/api'
 import { useUnreadCount } from '../features/messages/useUnreadCount'
+import { getInitials } from '../lib/initials'
 import { ZucarLogo } from './ZucarLogo'
 
 const publicLinks = [
@@ -72,7 +73,7 @@ export function AppHeader() {
             : []),
         ]
 
-  const initials = (user?.email ?? '?')[0].toUpperCase()
+  const initials = getInitials(user?.email, '?')
   const unreadCount = useUnreadCount(isAuthed && accountType !== 'provider')
 
   useEffect(() => {

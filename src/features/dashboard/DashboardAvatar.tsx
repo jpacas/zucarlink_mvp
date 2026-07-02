@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { getInitials } from '../../lib/initials'
+
 export function DashboardAvatar({ url, name }: { url: string | null; name: string }) {
   const [error, setError] = useState(false)
 
@@ -20,7 +22,7 @@ export function DashboardAvatar({ url, name }: { url: string | null; name: strin
 
   return (
     <div className="avatar-fallback avatar-fallback--sm" aria-hidden="true">
-      {name.slice(0, 1).toUpperCase() || 'Z'}
+      {getInitials(name)}
     </div>
   )
 }

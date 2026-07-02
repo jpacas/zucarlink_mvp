@@ -10,6 +10,7 @@ import {
   toggleForumTopicLike,
 } from '../features/forum/api'
 import type { ForumAuthor, ForumCategory, ForumThreadCard } from '../features/forum/types'
+import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
@@ -42,7 +43,7 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
         />
       ) : (
         <div className="forum-author__fallback" aria-hidden="true">
-          {author.fullName.slice(0, 1).toUpperCase() || 'Z'}
+          {getInitials(author.fullName)}
         </div>
       )}
       <div className="forum-author__copy">

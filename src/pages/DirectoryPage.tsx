@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { getDirectoryPublicSummary, listPublicPreviewProfiles, type PublicPreviewProfile } from '../features/directory/api'
 import type { DirectoryAggregateSnapshot } from '../features/directory/types'
+import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 const emptySummary: DirectoryAggregateSnapshot = {
@@ -64,7 +65,7 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
           />
         ) : (
           <div className="avatar-fallback" aria-hidden="true">
-            {profile.fullName.slice(0, 1).toUpperCase() || 'Z'}
+            {getInitials(profile.fullName)}
           </div>
         )}
         <div className="stack stack--compact">

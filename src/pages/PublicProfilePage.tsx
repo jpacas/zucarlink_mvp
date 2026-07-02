@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getProfileForumActivity, getPublicMemberProfile } from '../features/profile/public-api'
 import type { PublicMemberProfile, PublicProfileForumActivity } from '../features/profile/types'
+import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 
 export function PublicProfilePage() {
@@ -101,7 +102,7 @@ export function PublicProfilePage() {
             />
           ) : (
             <div className="avatar-fallback" aria-hidden="true">
-              {profile.fullName.slice(0, 1).toUpperCase() || 'Z'}
+              {getInitials(profile.fullName)}
             </div>
           )}
           <div className="stack stack--compact">
