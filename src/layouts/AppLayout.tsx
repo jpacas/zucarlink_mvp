@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { SiteFooter } from '../components/SiteFooter'
 
-export function PublicLayout() {
+export function AppLayout() {
   return (
     <div className="app-shell">
       <a href="#main-content" className="skip-link">Saltar al contenido principal</a>

@@ -4,8 +4,7 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { AdminRoute } from '../features/auth/AdminRoute'
 import { ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute'
-import { PrivateLayout } from '../layouts/PrivateLayout'
-import { PublicLayout } from '../layouts/PublicLayout'
+import { AppLayout } from '../layouts/AppLayout'
 import { ZucarLogo } from '../components/ZucarLogo'
 
 const AppHomePage = lazyNamed(() => import('../pages/AppHomePage'), 'AppHomePage')
@@ -67,7 +66,7 @@ export function AppRouter() {
   return (
     <Suspense fallback={<RouteLoadingState />}>
       <Routes>
-        <Route element={<PublicLayout />}>
+        <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
           <Route path="directory" element={<DirectoryPage />} />
           <Route path="directory/:profileId" element={<PublicProfilePage />} />
@@ -108,7 +107,7 @@ export function AppRouter() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="onboarding" element={<OnboardingPage />} />
-          <Route path="app" element={<PrivateLayout />}>
+          <Route path="app" element={<AppLayout />}>
             <Route index element={<AppHomePage />} />
             <Route path="directory" element={<AppDirectoryPage />} />
             <Route path="directory/:profileId" element={<DirectoryProfileDetailPage />} />
