@@ -33,7 +33,7 @@ export async function listMyThreads(): Promise<MessageThread[]> {
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as ThreadRow[]
+  const rows = data ?? []
 
   return Promise.all(
     rows.map(async (row) => ({
@@ -71,7 +71,7 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as MessageRow[]).map((row) => ({
+  return (data ?? []).map((row) => ({
     id: row.id,
     senderId: row.sender_id,
     body: row.body,
