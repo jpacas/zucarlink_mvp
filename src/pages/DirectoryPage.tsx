@@ -7,6 +7,7 @@ import type { DirectoryAggregateSnapshot } from '../features/directory/types'
 import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { useAsyncData } from '../lib/useAsyncData'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 const emptySummary: DirectoryAggregateSnapshot = {
   totalMembers: 0,
@@ -112,6 +113,11 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
 }
 
 export function DirectoryPage() {
+  usePageMetadata({
+    title: 'Directorio de la industria azucarera',
+    description:
+      'Técnicos, especialistas y profesionales del sector azucarero en una red curada.',
+  })
   const { user } = useAuth()
   const { data, isLoading, error: errorMessage, reload } = useAsyncData(
     () =>

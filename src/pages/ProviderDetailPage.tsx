@@ -8,12 +8,17 @@ import { getProviderBySlug } from '../features/providers/api'
 import type { ProviderDetail } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function ProviderDetailPage() {
   const { slug = '' } = useParams()
   const [provider, setProvider] = useState<ProviderDetail | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showLeadForm, setShowLeadForm] = useState(false)
+  usePageMetadata({
+    title: provider?.companyName ?? 'Proveedor',
+    description: provider?.shortDescription || undefined,
+  })
 
   useEffect(() => {
     void getProviderBySlug(slug)

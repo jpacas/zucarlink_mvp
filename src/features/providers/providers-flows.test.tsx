@@ -585,7 +585,11 @@ it('paginates the providers directory with a "Mostrar más" control', async () =
   const supabase = createSupabaseAuthFake({
     rpc: {
       list_provider_categories: { data: providerCategories },
-      search_providers: { data: many },
+      search_providers: (args) => {
+        const limit = Number(args?.limit_count ?? 30)
+        const offset = Number(args?.offset_count ?? 0)
+        return { data: many.slice(offset, offset + limit) }
+      },
     },
   })
 

@@ -6,6 +6,7 @@ import { getProfileForumActivity, getPublicMemberProfile } from '../features/pro
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { getInitials } from '../lib/initials'
 import { useAsyncData } from '../lib/useAsyncData'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function PublicProfilePage() {
   const { profileId = '' } = useParams()
@@ -20,6 +21,11 @@ export function PublicProfilePage() {
   )
   const profile = data?.profile ?? null
   const activity = data?.activity ?? null
+
+  usePageMetadata({
+    title: profile?.fullName ?? 'Perfil público',
+    description: profile?.shortBio || undefined,
+  })
 
   if (isLoading) {
     return (

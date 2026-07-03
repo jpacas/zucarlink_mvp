@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
 
+import { usePageMetadata } from '../lib/usePageMetadata'
+
 export function LegalPage() {
+  usePageMetadata({
+    title: 'Aviso legal',
+    description: 'Aviso legal de Zucarlink: titularidad del sitio y datos de contacto.',
+  })
+
   return (
     <section className="content-card stack">
       <div className="stack">

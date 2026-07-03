@@ -17,6 +17,7 @@ import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 import { formatDateTime, formatRelative } from '../lib/date'
 import { useAsyncData } from '../lib/useAsyncData'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 function normalizeText(value: string) {
   return value
@@ -60,6 +61,11 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
 export function ForumPage() {
   const { categorySlug } = useParams()
   const { user } = useAuth()
+  usePageMetadata({
+    title: 'Foro técnico',
+    description:
+      'Debates técnicos entre profesionales de la industria azucarera: producción, mantenimiento, tecnología y más.',
+  })
   // Cualquier miembro de Zucarlink con el correo confirmado puede participar.
   const canParticipate = Boolean(user?.email_confirmed_at)
   const [threads, setThreads] = useState<ForumThreadCard[]>([])

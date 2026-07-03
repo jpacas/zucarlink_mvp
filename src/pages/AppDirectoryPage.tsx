@@ -4,7 +4,6 @@ import { DirectoryProfileCard } from '../features/directory/DirectoryProfileCard
 import { searchDirectoryProfiles } from '../features/directory/api'
 import type { DirectoryFilters, DirectoryProfileCard as DirectoryProfileCardData } from '../features/directory/types'
 import { SkeletonCard } from '../components/Skeleton'
-import { useAsyncData } from '../lib/useAsyncData'
 
 const emptyFilters: DirectoryFilters = {
   searchText: '',
@@ -13,6 +12,7 @@ const emptyFilters: DirectoryFilters = {
 }
 
 const searchDebounceMs = 300
+const PAGE_SIZE = 30
 
 function toSpecialtySlug(name: string) {
   return name
@@ -48,10 +48,19 @@ export function AppDirectoryPage() {
     }
   }, [searchInput])
 
+  const [profiles, setProfiles] = useState<DirectoryProfileCardData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [searchErrorMessage, setSearchErrorMessage] = useState<string | null>(null)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+
   useEffect(() => {
     let isMounted = true
 
-    void searchDirectoryProfiles()
+    // Solo se usa para poblar los selects de país/especialidad; se pide el máximo
+    // permitido por la RPC (200) en vez de la página estándar de resultados.
+    void searchDirectoryProfiles(undefined, { limit: 200 })
       .then((rows) => {
         if (isMounted) {
           setAllProfiles(rows)
@@ -70,22 +79,76 @@ export function AppDirectoryPage() {
     }
   }, [])
 
-  const {
-    data: profilesData,
-    isLoading,
-    error: searchErrorMessage,
-    reload: retrySearch,
-  } = useAsyncData(
-    () =>
-      searchDirectoryProfiles({
-        searchText: debouncedSearchText,
-        country: filters.country,
-        specialty: filters.specialty ? toSpecialtySlug(filters.specialty) : '',
-      }),
+  const searchFilters = useMemo(
+    () => ({
+      searchText: debouncedSearchText,
+      country: filters.country,
+      specialty: filters.specialty ? toSpecialtySlug(filters.specialty) : '',
+    }),
     [debouncedSearchText, filters.country, filters.specialty],
   )
-  const profiles = profilesData ?? []
-  const errorMessage = searchErrorMessage ?? (profilesData ? null : allProfilesErrorMessage)
+
+  useEffect(() => {
+    let isMounted = true
+    setIsLoading(true)
+    setSearchErrorMessage(null)
+
+    void searchDirectoryProfiles(searchFilters, { limit: PAGE_SIZE, offset: 0 })
+      .then((rows) => {
+        if (!isMounted) return
+        setProfiles(rows)
+        setHasMore(rows.length === PAGE_SIZE)
+        setHasSearched(true)
+      })
+      .catch((error) => {
+        if (!isMounted) return
+        setSearchErrorMessage(
+          error instanceof Error ? error.message : 'No fue posible cargar el directorio.',
+        )
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [searchFilters])
+
+  const retrySearch = () => {
+    setIsLoading(true)
+    setSearchErrorMessage(null)
+
+    void searchDirectoryProfiles(searchFilters, { limit: PAGE_SIZE, offset: 0 })
+      .then((rows) => {
+        setProfiles(rows)
+        setHasMore(rows.length === PAGE_SIZE)
+        setHasSearched(true)
+      })
+      .catch((error) =>
+        setSearchErrorMessage(
+          error instanceof Error ? error.message : 'No fue posible cargar el directorio.',
+        ),
+      )
+      .finally(() => setIsLoading(false))
+  }
+
+  const loadMore = () => {
+    setIsLoadingMore(true)
+    void searchDirectoryProfiles(searchFilters, { limit: PAGE_SIZE, offset: profiles.length })
+      .then((rows) => {
+        setProfiles((current) => [...current, ...rows])
+        setHasMore(rows.length === PAGE_SIZE)
+      })
+      .catch((error) =>
+        setSearchErrorMessage(
+          error instanceof Error ? error.message : 'No fue posible cargar el directorio.',
+        ),
+      )
+      .finally(() => setIsLoadingMore(false))
+  }
+
+  const errorMessage = searchErrorMessage ?? (hasSearched ? null : allProfilesErrorMessage)
 
   const countries = useMemo(
     () =>
@@ -208,6 +271,19 @@ export function AppDirectoryPage() {
           <DirectoryProfileCard key={profile.id} profile={profile} />
         ))}
       </div>
+
+      {hasMore ? (
+        <div className="actions">
+          <button
+            type="button"
+            className="button button--secondary"
+            onClick={loadMore}
+            disabled={isLoadingMore}
+          >
+            {isLoadingMore ? 'Cargando…' : 'Mostrar más'}
+          </button>
+        </div>
+      ) : null}
     </section>
   )
 }

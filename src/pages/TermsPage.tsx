@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
 
+import { usePageMetadata } from '../lib/usePageMetadata'
+
 export function TermsPage() {
+  usePageMetadata({
+    title: 'Términos de uso',
+    description: 'Términos y condiciones de uso de la plataforma Zucarlink.',
+  })
+
   return (
     <section className="content-card stack">
       <div className="stack">

@@ -4,12 +4,22 @@ import { Link } from 'react-router-dom'
 import { searchProviders } from '../features/providers/api'
 import type { ProviderCard } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function ProvidersLandingPage() {
   const [providers, setProviders] = useState<ProviderCard[]>([])
+  usePageMetadata({
+    title: 'Proveedores del sector azucarero',
+    description:
+      'Empresas y marcas con presencia útil ante una audiencia técnica especializada de la industria azucarera.',
+  })
 
   useEffect(() => {
-    void searchProviders().then(setProviders).catch(() => setProviders([]))
+    // Solo se usa para las cifras agregadas de la sección "Cobertura visible";
+    // se pide el máximo permitido por la RPC (200) en vez de la página estándar.
+    void searchProviders(undefined, { limit: 200 })
+      .then(setProviders)
+      .catch(() => setProviders([]))
   }, [])
 
   return (

@@ -4,10 +4,15 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumTopic, listForumCategories } from '../features/forum/api'
 import { useAsyncData } from '../lib/useAsyncData'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function ForumNewThreadPage() {
   const { user, isLoading: isAuthLoading } = useAuth()
   const navigate = useNavigate()
+  usePageMetadata({
+    title: 'Nuevo tema',
+    description: 'Abre un tema nuevo en el foro técnico de Zucarlink.',
+  })
   const [title, setTitle] = useState('')
   const [categorySlug, setCategorySlug] = useState('')
   const [body, setBody] = useState('')

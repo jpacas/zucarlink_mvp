@@ -4,8 +4,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { updatePassword } from '../features/auth/api'
 import { getSupabaseBrowserClient } from '../lib/supabase'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function PasswordResetPage() {
+  usePageMetadata({
+    title: 'Nueva contraseña',
+    description: 'Define una nueva contraseña para tu cuenta de Zucarlink.',
+  })
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')

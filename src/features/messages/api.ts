@@ -7,6 +7,17 @@ async function resolveAvatarUrl(avatarPath: string | null): Promise<string | nul
   return getAvatarPublicUrl(avatarPath)
 }
 
+export async function countMyUnread(): Promise<number> {
+  const client = getSupabaseClientOrThrow()
+  const { data, error } = await client.rpc('count_my_unread')
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data ?? 0
+}
+
 export async function listMyThreads(): Promise<MessageThread[]> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_my_threads')

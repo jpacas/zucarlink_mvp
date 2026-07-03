@@ -4,8 +4,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
 import { resolvePostAuthDestination } from '../features/profile/api'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function LoginPage() {
+  usePageMetadata({
+    title: 'Ingresar',
+    description: 'Ingresa a tu cuenta de Zucarlink.',
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

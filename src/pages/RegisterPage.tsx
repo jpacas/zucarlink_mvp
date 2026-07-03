@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
 import { resolvePostAuthDestination } from '../features/profile/api'
+import { usePageMetadata } from '../lib/usePageMetadata'
 import type { AccountType } from '../types/auth'
 
 type FeedbackState = {
@@ -12,6 +13,10 @@ type FeedbackState = {
 } | null
 
 export function RegisterPage() {
+  usePageMetadata({
+    title: 'Crear cuenta',
+    description: 'Regístrate en Zucarlink como técnico o como proveedor del sector azucarero.',
+  })
   const [searchParams] = useSearchParams()
   // Permite que el inicio enlace directo al tipo de cuenta (?tipo=proveedor).
   const initialAccountType: AccountType =

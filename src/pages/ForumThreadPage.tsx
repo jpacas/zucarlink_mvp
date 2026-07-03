@@ -18,6 +18,7 @@ import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 import { useAsyncData } from '../lib/useAsyncData'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 interface ReplyNode {
   reply: ForumReply
@@ -97,6 +98,11 @@ export function ForumThreadPage() {
   const [isLiking, setIsLiking] = useState(false)
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(() => new Set())
   const replyTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  usePageMetadata({
+    title: thread?.title ?? 'Tema del foro',
+    description: thread?.excerpt || undefined,
+  })
 
   const replyTree = useMemo(() => buildReplyTree(thread?.replies ?? []), [thread])
 

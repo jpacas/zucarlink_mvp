@@ -11,19 +11,26 @@ import type { ProviderCard, ProviderCategory } from '../features/providers/types
 import { trackEvent } from '../lib/analytics'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
-// Cantidad de tarjetas que se muestran por página (paginación en cliente).
+// Cantidad de tarjetas por página (paginación server-side vía LIMIT/OFFSET).
 const PAGE_SIZE = 12
 
 export function ProvidersDirectoryPage() {
+  usePageMetadata({
+    title: 'Directorio de proveedores',
+    description: 'Explora proveedores activos del sector azucarero por categoría y país.',
+  })
   const [providers, setProviders] = useState<ProviderCard[]>([])
   const [categories, setCategories] = useState<ProviderCategory[]>([])
   const [searchText, setSearchText] = useState('')
   const [categorySlug, setCategorySlug] = useState('')
   const [country, setCountry] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [hasMore, setHasMore] = useState(false)
+  const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
   useEffect(() => {
     void listProviderCategories().then(setCategories).catch(() => setCategories([]))
@@ -32,20 +39,33 @@ export function ProvidersDirectoryPage() {
   useEffect(() => {
     setIsLoading(true)
     setErrorMessage(null)
-    // Cada cambio de filtro/búsqueda reinicia la paginación.
-    setVisibleCount(PAGE_SIZE)
 
-    void searchProviders({ searchText, categorySlug, country })
-      .then((rows) => setProviders(rows))
+    void searchProviders({ searchText, categorySlug, country }, { limit: PAGE_SIZE, offset: 0 })
+      .then((rows) => {
+        setProviders(rows)
+        setHasMore(rows.length === PAGE_SIZE)
+      })
       .catch((error) =>
         setErrorMessage(error instanceof Error ? error.message : 'No fue posible cargar proveedores.'),
       )
       .finally(() => setIsLoading(false))
   }, [categorySlug, country, searchText])
 
-  const visibleProviders = providers.slice(0, visibleCount)
-  const hasMore = providers.length > visibleCount
-  const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
+  const loadMore = () => {
+    setIsLoadingMore(true)
+    void searchProviders(
+      { searchText, categorySlug, country },
+      { limit: PAGE_SIZE, offset: providers.length },
+    )
+      .then((rows) => {
+        setProviders((current) => [...current, ...rows])
+        setHasMore(rows.length === PAGE_SIZE)
+      })
+      .catch((error) =>
+        setErrorMessage(error instanceof Error ? error.message : 'No fue posible cargar proveedores.'),
+      )
+      .finally(() => setIsLoadingMore(false))
+  }
 
   return (
     <section className="content-card stack">
@@ -132,7 +152,7 @@ export function ProvidersDirectoryPage() {
             No encontramos proveedores con esos filtros. Ajusta tu búsqueda o categoría.
           </p>
         ) : null}
-        {visibleProviders.map((provider) => (
+        {providers.map((provider) => (
           <article key={provider.id} className="info-card stack">
             <div className="split-header">
               <div className="provider-summary">
@@ -185,9 +205,10 @@ export function ProvidersDirectoryPage() {
           <button
             type="button"
             className="button button--secondary"
-            onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+            onClick={loadMore}
+            disabled={isLoadingMore}
           >
-            Mostrar más
+            {isLoadingMore ? 'Cargando…' : 'Mostrar más'}
           </button>
         </div>
       ) : null}

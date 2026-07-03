@@ -769,6 +769,7 @@ export type Database = {
         Returns: string
       }
       clear_thread: { Args: { p_thread_id: string }; Returns: undefined }
+      count_my_unread: { Args: never; Returns: number }
       create_forum_reply: {
         Args: {
           body_text: string
@@ -1002,6 +1003,8 @@ export type Database = {
       search_directory_profiles: {
         Args: {
           country_filter?: string
+          limit_count?: number
+          offset_count?: number
           search_text?: string
           specialty_slug_filter?: string
         }
@@ -1021,6 +1024,8 @@ export type Database = {
         Args: {
           category_slug?: string
           country_filter?: string
+          limit_count?: number
+          offset_count?: number
           search_text?: string
         }
         Returns: {

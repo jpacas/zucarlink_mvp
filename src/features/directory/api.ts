@@ -100,12 +100,15 @@ export async function getDirectoryPublicSummary(): Promise<DirectoryAggregateSna
 
 export async function searchDirectoryProfiles(
   filters: Partial<DirectoryFilters> = {},
+  pagination: { limit?: number; offset?: number } = {},
 ): Promise<DirectoryProfileCard[]> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('search_directory_profiles', {
     search_text: filters.searchText?.trim() || undefined,
     country_filter: filters.country?.trim() || undefined,
     specialty_slug_filter: filters.specialty?.trim().toLowerCase() || undefined,
+    limit_count: pagination.limit,
+    offset_count: pagination.offset,
   })
 
   if (error) {

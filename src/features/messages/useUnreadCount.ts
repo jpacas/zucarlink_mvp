@@ -1,25 +1,51 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { listMyThreads } from './api'
+import { countMyUnread } from './api'
 
-const POLL_MS = 30_000
+const POLL_MS = 90_000
 
 export function useUnreadCount(enabled = true): number {
   const [count, setCount] = useState(0)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const refresh = () => {
-    void listMyThreads()
-      .then((threads) => setCount(threads.reduce((sum, t) => sum + t.unreadCount, 0)))
+    void countMyUnread()
+      .then(setCount)
       .catch(() => {})
   }
 
   useEffect(() => {
     if (!enabled) return
-    refresh()
-    pollRef.current = setInterval(refresh, POLL_MS)
+
+    const startPolling = () => {
+      if (pollRef.current) return
+      refresh()
+      pollRef.current = setInterval(refresh, POLL_MS)
+    }
+
+    const stopPolling = () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        startPolling()
+      } else {
+        stopPolling()
+      }
+    }
+
+    if (document.visibilityState === 'visible') {
+      startPolling()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      stopPolling()
     }
   }, [enabled])
 

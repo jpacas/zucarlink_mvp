@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
 
+import { usePageMetadata } from '../lib/usePageMetadata'
+
 export function PrivacyPage() {
+  usePageMetadata({
+    title: 'Política de privacidad',
+    description: 'Qué datos recopila Zucarlink, cómo los usa y cómo los protege.',
+  })
+
   return (
     <section className="content-card stack">
       <div className="stack">

@@ -5,8 +5,14 @@ import { listFeaturedContent } from '../features/content/api'
 import { listForumThreads } from '../features/forum/api'
 import { HeartIcon, ReplyIcon } from '../components/ForumIcons'
 import { useAsyncData } from '../lib/useAsyncData'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function HomePage() {
+  usePageMetadata({
+    title: 'Red profesional de la industria azucarera',
+    description:
+      'Directorio curado, foro técnico y contacto directo con proveedores para técnicos y especialistas del sector azucarero.',
+  })
   const { data: summaryData } = useAsyncData(() => getDirectoryPublicSummary(), [])
   const members = summaryData?.totalMembers ?? null
   const countries = summaryData?.totalCountries ?? null

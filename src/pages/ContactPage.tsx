@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
 
+import { usePageMetadata } from '../lib/usePageMetadata'
+
 export function ContactPage() {
+  usePageMetadata({
+    title: 'Contacto',
+    description: 'Contacta al equipo de Zucarlink para consultas sobre tu cuenta o tu empresa.',
+  })
+
   return (
     <section className="content-card stack">
       <div className="stack">

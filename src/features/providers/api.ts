@@ -159,16 +159,21 @@ export async function listProviderCategories(): Promise<ProviderCategory[]> {
   return (data ?? []).map(mapCategory)
 }
 
-export async function searchProviders(filters?: {
-  searchText?: string
-  categorySlug?: string
-  country?: string
-}): Promise<ProviderCard[]> {
+export async function searchProviders(
+  filters?: {
+    searchText?: string
+    categorySlug?: string
+    country?: string
+  },
+  pagination: { limit?: number; offset?: number } = {},
+): Promise<ProviderCard[]> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('search_providers', {
     search_text: filters?.searchText?.trim() || undefined,
     category_slug: filters?.categorySlug?.trim().toLowerCase() || undefined,
     country_filter: filters?.country?.trim() || undefined,
+    limit_count: pagination.limit,
+    offset_count: pagination.offset,
   })
 
   if (error) {

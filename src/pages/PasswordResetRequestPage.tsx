@@ -3,8 +3,13 @@ import { Link } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { requestPasswordReset } from '../features/auth/api'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function PasswordResetRequestPage() {
+  usePageMetadata({
+    title: 'Recuperar contraseña',
+    description: 'Solicita un enlace para restablecer tu contraseña de Zucarlink.',
+  })
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
