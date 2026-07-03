@@ -8,13 +8,6 @@ import type {
   DirectoryProfileExperience,
 } from './types'
 
-interface PublicDirectorySummaryRow {
-  total_members: number
-  total_countries: number
-  total_companies: number
-  total_specialties: number
-}
-
 interface DirectoryProfileRow {
   id: string
   full_name: string
@@ -58,16 +51,6 @@ export interface PublicPreviewProfile {
   avatarUrl: string | null
   roleTitle: string
   organizationName: string
-  country: string
-  specialties: string[]
-}
-
-interface PublicPreviewRow {
-  id: string
-  full_name: string
-  avatar_path: string | null
-  role_title: string
-  organization_name: string
   country: string
   specialties: string[]
 }

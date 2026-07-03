@@ -2,24 +2,6 @@ import { getAvatarPublicUrl } from '../../lib/avatar-storage'
 import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type { Message, MessageThread } from './types'
 
-interface ThreadRow {
-  thread_id: string
-  other_profile_id: string
-  other_full_name: string
-  other_avatar_path: string | null
-  last_message_body: string
-  last_message_at: string | null
-  unread_count: number
-}
-
-interface MessageRow {
-  id: string
-  sender_id: string
-  body: string
-  is_read: boolean
-  created_at: string
-}
-
 async function resolveAvatarUrl(avatarPath: string | null): Promise<string | null> {
   if (!avatarPath) return null
   return getAvatarPublicUrl(avatarPath)

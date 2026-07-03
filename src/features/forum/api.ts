@@ -23,13 +23,6 @@ interface ForumAuthorRow {
   avatar_path?: string | null
 }
 
-interface ForumCategoryRow {
-  id: string
-  slug: string
-  name: string
-  description?: string | null
-}
-
 interface ForumThreadRow {
   id: string
   slug: string

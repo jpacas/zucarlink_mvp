@@ -3,16 +3,6 @@ import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type { ForumContribution } from '../forum/types'
 import type { PublicMemberProfile, PublicProfileForumActivity } from './types'
 
-interface PublicMemberProfileRow {
-  id: string
-  full_name: string
-  avatar_path: string | null
-  role_title: string | null
-  organization_name: string | null
-  country: string | null
-  short_bio: string | null
-}
-
 interface PublicProfileForumActivityRow {
   thread_count?: number
   reply_count?: number
