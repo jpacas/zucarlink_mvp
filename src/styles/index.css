@@ -2820,6 +2820,11 @@ fieldset.field {
   border-color: var(--brand);
 }
 
+.messages-composer__input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
 .messages-composer__send {
   flex-shrink: 0;
   align-self: flex-end;
