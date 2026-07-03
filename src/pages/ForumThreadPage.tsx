@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { getMemberProfilePath } from '../features/directory/memberProfilePath'
 import { AttachmentInput } from '../components/AttachmentInput'
 import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
@@ -57,7 +58,13 @@ function buildReplyTree(replies: ForumReply[]): ReplyNode[] {
   return roots
 }
 
-function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
+function ForumAuthorSummary({
+  author,
+  isAuthenticated,
+}: {
+  author: ForumAuthor
+  isAuthenticated: boolean
+}) {
   const [hasAvatarError, setHasAvatarError] = useState(false)
   const canRenderAvatar = Boolean(author.avatarUrl) && !hasAvatarError
 
@@ -80,7 +87,10 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
         </div>
       )}
       <div className="forum-author__copy">
-        <Link className="forum-author__name" to={`/directory/${author.id}`}>
+        <Link
+          className="forum-author__name"
+          to={getMemberProfilePath(author.id, isAuthenticated)}
+        >
           {author.fullName}
         </Link>
         <span>{author.roleTitle || 'Miembro'}</span>
@@ -303,7 +313,7 @@ export function ForumThreadPage() {
           <span className="forum-reply__context">↳ En respuesta a {reply.parentAuthorName}</span>
         ) : null}
         <div className="forum-meta-row forum-meta-row--split">
-          <ForumAuthorSummary author={reply.author} />
+          <ForumAuthorSummary author={reply.author} isAuthenticated={Boolean(user)} />
           <time
             className="forum-meta-row__time"
             dateTime={reply.createdAt}
@@ -409,7 +419,7 @@ export function ForumThreadPage() {
         </div>
         <h2>{thread.title}</h2>
         <div className="forum-meta-row forum-meta-row--split">
-          <ForumAuthorSummary author={thread.author} />
+          <ForumAuthorSummary author={thread.author} isAuthenticated={Boolean(user)} />
           <time
             className="forum-meta-row__time"
             dateTime={thread.createdAt}

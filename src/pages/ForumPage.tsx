@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { getMemberProfilePath } from '../features/directory/memberProfilePath'
 import {
   createForumReply,
   deleteForumTopic,
@@ -26,7 +27,13 @@ function normalizeText(value: string) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
-function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
+function ForumAuthorSummary({
+  author,
+  isAuthenticated,
+}: {
+  author: ForumAuthor
+  isAuthenticated: boolean
+}) {
   const [hasAvatarError, setHasAvatarError] = useState(false)
   const canRenderAvatar = Boolean(author.avatarUrl) && !hasAvatarError
 
@@ -49,7 +56,10 @@ function ForumAuthorSummary({ author }: { author: ForumAuthor }) {
         </div>
       )}
       <div className="forum-author__copy">
-        <Link className="forum-author__name" to={`/directory/${author.id}`}>
+        <Link
+          className="forum-author__name"
+          to={getMemberProfilePath(author.id, isAuthenticated)}
+        >
           {author.fullName}
         </Link>
         <span>{author.roleTitle || 'Miembro'}</span>
@@ -360,7 +370,7 @@ export function ForumPage() {
                 </span>
               ) : null}
               <div className="forum-card__footer">
-                <ForumAuthorSummary author={thread.author} />
+                <ForumAuthorSummary author={thread.author} isAuthenticated={Boolean(user)} />
                 <div className="forum-card__actions">
                   {user ? (
                     <button

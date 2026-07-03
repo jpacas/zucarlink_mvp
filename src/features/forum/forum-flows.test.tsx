@@ -296,6 +296,35 @@ it('lets an authenticated member like and unlike the thread', async () => {
   expect(await screen.findByRole('button', { name: 'Me gusta' })).toHaveTextContent('5')
 })
 
+it('links the thread author to the private directory from the thread detail page when authenticated', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'con-sesion-detalle@example.com',
+    userMetadata: {
+      full_name: 'Con Sesion Detalle',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      get_forum_thread: { data: threadDetail },
+      get_forum_topic_like_state: { data: [{ like_count: 0, viewer_liked: false }] },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/forum/thread/automatizacion-mano-de-obra-barata',
+    supabase,
+  })
+
+  expect(await screen.findByRole('link', { name: 'Ana Mejía' })).toHaveAttribute(
+    'href',
+    '/app/directory/profile-ana',
+  )
+})
+
 it('copies the thread link when sharing without native share support', async () => {
   const user = userEvent.setup()
 
@@ -364,6 +393,32 @@ it('lets an authenticated member like a thread from the listing', async () => {
     })
   })
   expect(await screen.findByRole('button', { name: 'Quitar me gusta' })).toHaveTextContent('13')
+})
+
+it('links the thread author to the private directory when authenticated', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'con-sesion@example.com',
+    userMetadata: {
+      full_name: 'Con Sesion',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      list_forum_threads: { data: forumThreads },
+    },
+  })
+
+  await renderApp({ initialRoute: '/forum', supabase })
+
+  expect(await screen.findByRole('link', { name: 'Ana Mejía' })).toHaveAttribute(
+    'href',
+    '/app/directory/profile-ana',
+  )
 })
 
 it('lets an authenticated member reply to a thread directly from the listing', async () => {
