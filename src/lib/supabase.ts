@@ -1,8 +1,9 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 import { hasSupabaseEnv } from './env'
+import type { Database } from './database.types'
 
-let browserClient: SupabaseClient | null = null
+let browserClient: SupabaseClient<Database> | null = null
 
 export function getSupabaseBrowserClient() {
   if (!hasSupabaseEnv()) {
@@ -13,7 +14,7 @@ export function getSupabaseBrowserClient() {
     return browserClient
   }
 
-  browserClient = createClient(
+  browserClient = createClient<Database>(
     import.meta.env.VITE_SUPABASE_URL,
     import.meta.env.VITE_SUPABASE_ANON_KEY,
   )
