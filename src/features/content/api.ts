@@ -143,7 +143,7 @@ export async function listPublishedContent(
     throw new Error(error.message)
   }
 
-  const rows = ((data ?? []) as ContentItemRow[]).filter((row) => {
+  const rows = ((data ?? []) as unknown as ContentItemRow[]).filter((row) => {
     if (!filters.query) {
       return true
     }
@@ -176,7 +176,7 @@ export async function getPublishedContentBySlug(slug: string): Promise<ContentIt
     throw new Error('Contenido no encontrado.')
   }
 
-  return mapContentItem(data as ContentItemRow)
+  return mapContentItem(data as unknown as ContentItemRow)
 }
 
 export async function listPublishedEvents(): Promise<EventItem[]> {
@@ -191,7 +191,7 @@ export async function listPublishedEvents(): Promise<EventItem[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as EventItemRow[]).map(mapEventItem)
+  return ((data ?? []) as unknown as EventItemRow[]).map(mapEventItem)
 }
 
 export async function listPublishedPrices(): Promise<PriceItem[]> {
@@ -206,7 +206,7 @@ export async function listPublishedPrices(): Promise<PriceItem[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as PriceItemRow[]).map(mapPriceItem)
+  return ((data ?? []) as unknown as PriceItemRow[]).map(mapPriceItem)
 }
 
 export async function listFeaturedContent(limitCount?: number): Promise<ContentItem[]> {
@@ -222,7 +222,7 @@ export async function listFeaturedContent(limitCount?: number): Promise<ContentI
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as ContentItemRow[]
+  const rows = (data ?? []) as unknown as ContentItemRow[]
   const limitedRows = typeof limitCount === 'number' ? rows.slice(0, limitCount) : rows
   return limitedRows.map(mapContentItem)
 }
