@@ -467,9 +467,15 @@ export function ForumPage() {
           ))}
         </div>
       ) : hasActiveQuery && threads.length > 0 ? (
-        <section className="info-card stack">
+        <div className="empty-state">
+          <div className="empty-state__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
           <h3>Sin resultados para «{query.trim()}»</h3>
-          <p className="helper-text">
+          <p>
             No encontramos temas que coincidan con tu búsqueda
             {activeCategory ? ` en ${activeCategory.name}` : ''}. Prueba con otra palabra clave.
           </p>
@@ -478,11 +484,17 @@ export function ForumPage() {
               Limpiar búsqueda
             </button>
           </div>
-        </section>
+        </div>
       ) : (
-        <section className="info-card stack">
+        <div className="empty-state">
+          <div className="empty-state__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
           <h3>{activeCategory ? `Sin temas en ${activeCategory.name}` : 'Sin temas aún'}</h3>
-          <p className="helper-text">
+          <p>
             {activeCategory
               ? 'Todavía no hay conversaciones visibles en esta categoría. ¡Sé el primero!'
               : 'El foro todavía no tiene conversaciones públicas visibles.'}
@@ -505,7 +517,7 @@ export function ForumPage() {
               </Link>
             </div>
           )}
-        </section>
+        </div>
       )}
     </section>
   )

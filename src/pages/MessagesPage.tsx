@@ -372,12 +372,20 @@ export function MessagesPage() {
               </button>
             </div>
           ) : threads.length === 0 ? (
-            <div className="messages-empty-list">
-              <p className="helper-text">Aún no tienes conversaciones.</p>
-              <p className="helper-text">Inicia una desde el directorio de miembros.</p>
-              <Link className="button" to="/app/directory" style={{ marginTop: '12px' }}>
-                Abrir directorio
-              </Link>
+            <div className="empty-state">
+              <div className="empty-state__icon">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                  <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h3>Aún no tienes conversaciones</h3>
+              <p>Inicia una desde el directorio de miembros.</p>
+              <div className="actions">
+                <Link className="button" to="/app/directory">
+                  Abrir directorio
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="messages-thread-list" role="list">
@@ -472,9 +480,16 @@ export function MessagesPage() {
                     ))}
                   </div>
                 ) : messages.length === 0 ? (
-                  <p className="helper-text" style={{ textAlign: 'center', padding: '32px 0' }}>
-                    Aún no hay mensajes. ¡Inicia la conversación!
-                  </p>
+                  <div className="empty-state">
+                    <div className="empty-state__icon">
+                      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                        <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <h3>Aún no hay mensajes</h3>
+                    <p>¡Inicia la conversación!</p>
+                  </div>
                 ) : (
                   messages.map((message) => (
                     <MessageBubble

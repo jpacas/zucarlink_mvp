@@ -191,12 +191,16 @@ export function AppDirectoryPage() {
       ) : null}
 
       {!isLoading && !errorMessage && profiles.length === 0 ? (
-        <section className="directory-empty">
+        <div className="empty-state">
+          <div className="empty-state__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
           <h3>Sin resultados</h3>
-          <p className="helper-text">
-            Ajusta búsqueda o filtros para encontrar otro perfil técnico.
-          </p>
-        </section>
+          <p>Ajusta búsqueda o filtros para encontrar otro perfil técnico.</p>
+        </div>
       ) : null}
 
       <div className="directory-grid" data-testid="directory-results">

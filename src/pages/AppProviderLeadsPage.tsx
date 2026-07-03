@@ -130,11 +130,20 @@ export function AppProviderLeadsPage() {
         ) : null}
         {!isLoading && errorMessage ? <p className="error-text">{errorMessage}</p> : null}
         {!isLoading && !errorMessage && visibleLeads.length === 0 ? (
-          <p className="helper-text">
-            {leads.length === 0
-              ? 'Aún no tienes solicitudes. Cuando alguien te contacte desde el directorio, aparecerá aquí.'
-              : 'No hay solicitudes con ese estado.'}
-          </p>
+          <div className="empty-state">
+            <div className="empty-state__icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3>{leads.length === 0 ? 'Sin solicitudes' : 'Sin resultados para este filtro'}</h3>
+            <p>
+              {leads.length === 0
+                ? 'Aún no tienes solicitudes. Cuando alguien te contacte desde el directorio, aparecerá aquí.'
+                : 'No hay solicitudes con ese estado.'}
+            </p>
+          </div>
         ) : null}
 
         <div className="stack" data-testid="provider-leads">

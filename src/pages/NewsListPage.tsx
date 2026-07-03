@@ -78,7 +78,16 @@ export function NewsListPage() {
           ))}
         </div>
       ) : (
-        <p className="helper-text">No hay noticias publicadas para este filtro.</p>
+        <div className="empty-state">
+          <div className="empty-state__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+              <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h3>Sin resultados</h3>
+          <p>No hay noticias publicadas para este filtro.</p>
+        </div>
       )}
       <div className="actions">
         <Link className="button" to="/register">
