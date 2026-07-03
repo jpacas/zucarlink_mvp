@@ -1,5 +1,5 @@
 import { getAdminClient } from '../../_shared/supabase-admin.ts'
-import { sendEmail } from '../resend.ts'
+import { sendEmail } from '../../_shared/resend.ts'
 import { renderProviderLeadEmail } from '../templates/provider-lead.ts'
 
 interface ProviderLeadRow {

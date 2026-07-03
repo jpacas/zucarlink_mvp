@@ -159,6 +159,17 @@ interface ProviderLeadRow {
   created_at?: string
 }
 
+interface NotificationPreferencesRow {
+  user_id: string
+  email_unread_reminder: boolean
+  email_forum_reply: boolean
+  email_liked_topic_reply: boolean
+  email_inactivity_digest: boolean
+  unsubscribed_all: boolean
+  unsubscribe_token: string
+  updated_at?: string
+}
+
 interface CreateSupabaseAuthFakeOptions {
   session?: Session | null
   user?: User | null
@@ -187,6 +198,7 @@ interface CreateSupabaseAuthFakeOptions {
     providerCategories?: ProviderCategoryRow[]
     providers?: ProviderRow[]
     providerLeads?: ProviderLeadRow[]
+    notificationPreferences?: NotificationPreferencesRow[]
   }
   rpc?: Record<
     string,
@@ -213,6 +225,7 @@ type TableName =
   | 'provider_categories'
   | 'providers'
   | 'provider_leads'
+  | 'notification_preferences'
 
 type BaseRow =
   | ProfileRow
@@ -226,6 +239,7 @@ type BaseRow =
   | ProviderCategoryRow
   | ProviderRow
   | ProviderLeadRow
+  | NotificationPreferencesRow
   | Record<string, unknown>
 
 interface StorageObject {
@@ -287,6 +301,7 @@ class QueryBuilder {
   private selectedColumns: string[] | null = null
   private insertedRows: Partial<BaseRow>[] | null = null
   private updatedFields: Partial<BaseRow> | null = null
+  private upsertedRow: { row: Partial<BaseRow>; onConflict: string } | null = null
   private deleted = false
   private orderField: string | null = null
   private orderAscending = true
@@ -313,6 +328,11 @@ class QueryBuilder {
 
   update(fields: Partial<BaseRow>) {
     this.updatedFields = fields
+    return this
+  }
+
+  upsert(row: Partial<BaseRow>, options?: { onConflict?: string }) {
+    this.upsertedRow = { row, onConflict: options?.onConflict ?? 'id' }
     return this
   }
 
@@ -374,6 +394,26 @@ class QueryBuilder {
       )
       this.setTable(this.tableName, updatedRows)
       return { data: null, error: null }
+    }
+
+    if (this.upsertedRow) {
+      const { row, onConflict } = this.upsertedRow
+      const conflictValue = (row as Record<string, unknown>)[onConflict]
+      const existingIndex = rows.findIndex(
+        (existing) => (existing as Record<string, unknown>)[onConflict] === conflictValue,
+      )
+
+      if (existingIndex === -1) {
+        const inserted = this.withGeneratedFields(row)
+        this.setTable(this.tableName, [...rows, inserted])
+        return { data: inserted, error: null }
+      }
+
+      const merged = { ...rows[existingIndex], ...row }
+      const nextRows = [...rows]
+      nextRows[existingIndex] = merged
+      this.setTable(this.tableName, nextRows)
+      return { data: merged, error: null }
     }
 
     if (this.deleted) {
@@ -506,6 +546,19 @@ class QueryBuilder {
         company: null,
         status: 'new',
         created_at: new Date().toISOString(),
+        ...row,
+      }
+    }
+
+    if (this.tableName === 'notification_preferences') {
+      return {
+        email_unread_reminder: true,
+        email_forum_reply: true,
+        email_liked_topic_reply: true,
+        email_inactivity_digest: true,
+        unsubscribed_all: false,
+        unsubscribe_token: nextId('unsubscribe-token'),
+        updated_at: new Date().toISOString(),
         ...row,
       }
     }
@@ -650,6 +703,7 @@ export function createSupabaseAuthFake(
     provider_categories: [...(options.data?.providerCategories ?? [])],
     providers: [...(options.data?.providers ?? [])],
     provider_leads: [...(options.data?.providerLeads ?? [])],
+    notification_preferences: [...(options.data?.notificationPreferences ?? [])],
   }
   const storage = new Map<string, StorageObject>()
 

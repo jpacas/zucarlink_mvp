@@ -539,6 +539,7 @@ export type Database = {
           current_company_id: string | null
           full_name: string
           id: string
+          last_seen_at: string | null
           linkedin_url: string | null
           phone: string | null
           profile_status: string
@@ -557,6 +558,7 @@ export type Database = {
           current_company_id?: string | null
           full_name: string
           id: string
+          last_seen_at?: string | null
           linkedin_url?: string | null
           phone?: string | null
           profile_status?: string
@@ -575,6 +577,7 @@ export type Database = {
           current_company_id?: string | null
           full_name?: string
           id?: string
+          last_seen_at?: string | null
           linkedin_url?: string | null
           phone?: string | null
           profile_status?: string
@@ -755,6 +758,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          email_forum_reply: boolean
+          email_inactivity_digest: boolean
+          email_liked_topic_reply: boolean
+          email_unread_reminder: boolean
+          unsubscribe_token: string
+          unsubscribed_all: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email_forum_reply?: boolean
+          email_inactivity_digest?: boolean
+          email_liked_topic_reply?: boolean
+          email_unread_reminder?: boolean
+          unsubscribe_token?: string
+          unsubscribed_all?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email_forum_reply?: boolean
+          email_inactivity_digest?: boolean
+          email_liked_topic_reply?: boolean
+          email_unread_reminder?: boolean
+          unsubscribe_token?: string
+          unsubscribed_all?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -816,6 +852,16 @@ export type Database = {
           specialties: string[]
           verification_status: string
           years_experience: number
+        }[]
+      }
+      get_email_prefs_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          email_forum_reply: boolean
+          email_inactivity_digest: boolean
+          email_liked_topic_reply: boolean
+          email_unread_reminder: boolean
+          unsubscribed_all: boolean
         }[]
       }
       get_forum_thread: {
@@ -1055,6 +1101,11 @@ export type Database = {
           like_count: number
           viewer_liked: boolean
         }[]
+      }
+      touch_last_seen: { Args: never; Returns: undefined }
+      update_email_prefs_by_token: {
+        Args: { p_prefs: Json; p_token: string }
+        Returns: boolean
       }
       update_provider_lead_status: {
         Args: { lead_id: string; next_status: string }

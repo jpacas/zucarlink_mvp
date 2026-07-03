@@ -48,6 +48,10 @@ const ProvidersLandingPage = lazyNamed(
   'ProvidersLandingPage',
 )
 const ContactPage = lazyNamed(() => import('../pages/ContactPage'), 'ContactPage')
+const EmailPreferencesPage = lazyNamed(
+  () => import('../pages/EmailPreferencesPage'),
+  'EmailPreferencesPage',
+)
 const LegalPage = lazyNamed(() => import('../pages/LegalPage'), 'LegalPage')
 const PasswordResetRequestPage = lazyNamed(
   () => import('../pages/PasswordResetRequestPage'),
@@ -95,6 +99,7 @@ export function AppRouter() {
           <Route path="proveedores/:slug" element={<ProviderDetailPage />} />
           <Route path="recuperar-contrasena" element={<PasswordResetRequestPage />} />
           <Route path="nueva-contrasena" element={<PasswordResetPage />} />
+          <Route path="preferencias-email" element={<EmailPreferencesPage />} />
           <Route path="aviso-legal" element={<LegalPage />} />
           <Route path="privacidad" element={<PrivacyPage />} />
           <Route path="terminos" element={<TermsPage />} />

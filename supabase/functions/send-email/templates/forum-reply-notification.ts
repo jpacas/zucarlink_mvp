@@ -1,12 +1,15 @@
+import { renderFooterWithUnsubscribe } from '../../_shared/email-footer.ts'
+
 export interface ForumReplyNotificationData {
   replierName: string
   topicTitle: string
   replyPreview: string
   threadUrl: string
+  unsubscribeUrl: string
 }
 
 export function renderForumReplyNotificationEmail(data: ForumReplyNotificationData): string {
-  const { replierName, topicTitle, replyPreview, threadUrl } = data
+  const { replierName, topicTitle, replyPreview, threadUrl, unsubscribeUrl } = data
   const preview = replyPreview.length > 200
     ? replyPreview.slice(0, 200).trimEnd() + '…'
     : replyPreview
@@ -47,11 +50,10 @@ export function renderForumReplyNotificationEmail(data: ForumReplyNotificationDa
         </tr>
 
         <!-- Footer -->
-        <tr>
-          <td style="background-color:#f4f4f6;border-radius:0 0 8px 8px;padding:24px 40px;text-align:center;">
-            <p style="margin:0;color:#9090a8;font-size:13px;">Recibes este correo porque abriste un tema en el foro de <a href="https://zucarlink.com" style="color:#0029E2;text-decoration:none;">zucarlink.com</a></p>
-          </td>
-        </tr>
+        ${renderFooterWithUnsubscribe(
+          'Recibes este correo porque abriste un tema en el foro de <a href="https://zucarlink.com" style="color:#0029E2;text-decoration:none;">zucarlink.com</a>',
+          unsubscribeUrl,
+        )}
 
       </table>
     </td></tr>

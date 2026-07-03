@@ -1,13 +1,18 @@
-export interface MessageNotificationData {
-  senderName: string
-  messagePreview: string
+import { renderFooterWithUnsubscribe } from '../../_shared/email-footer.ts'
+
+export interface LikedTopicReplyData {
+  replierName: string
+  topicTitle: string
+  replyPreview: string
+  threadUrl: string
+  unsubscribeUrl: string
 }
 
-export function renderMessageNotificationEmail(data: MessageNotificationData): string {
-  const { senderName, messagePreview } = data
-  const preview = messagePreview.length > 200
-    ? messagePreview.slice(0, 200).trimEnd() + '…'
-    : messagePreview
+export function renderLikedTopicReplyEmail(data: LikedTopicReplyData): string {
+  const { replierName, topicTitle, replyPreview, threadUrl, unsubscribeUrl } = data
+  const preview = replyPreview.length > 200
+    ? replyPreview.slice(0, 200).trimEnd() + '…'
+    : replyPreview
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -27,17 +32,17 @@ export function renderMessageNotificationEmail(data: MessageNotificationData): s
         <!-- Body -->
         <tr>
           <td style="background-color:#ffffff;padding:40px;">
-            <h1 style="margin:0 0 8px;color:#201747;font-size:22px;font-weight:700;">Tienes un mensaje nuevo</h1>
-            <p style="margin:0 0 24px;color:#5a5a72;font-size:15px;"><strong style="color:#201747;">${escapeHtml(senderName)}</strong> te envió un mensaje en Zucarlink.</p>
+            <h1 style="margin:0 0 8px;color:#201747;font-size:22px;font-weight:700;">Nueva respuesta en un tema que te gustó</h1>
+            <p style="margin:0 0 24px;color:#5a5a72;font-size:15px;"><strong style="color:#201747;">${escapeHtml(replierName)}</strong> respondió en <strong style="color:#201747;">${escapeHtml(topicTitle)}</strong>, un tema al que le diste me gusta.</p>
 
-            <!-- Message preview -->
+            <!-- Reply preview -->
             <p style="margin:0 0 32px;color:#201747;font-size:15px;line-height:1.6;padding:20px 24px;background-color:#f4f4f6;border-left:3px solid #00C9FF;border-radius:0 8px 8px 0;font-style:italic;">"${escapeHtml(preview)}"</p>
 
             <!-- CTA -->
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td align="center">
-                  <a href="https://zucarlink.com/app/messages" style="display:inline-block;background-color:#0029E2;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:6px;">Responder mensaje</a>
+                  <a href="${escapeHtml(threadUrl)}" style="display:inline-block;background-color:#0029E2;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:6px;">Ver la conversación</a>
                 </td>
               </tr>
             </table>
@@ -45,11 +50,10 @@ export function renderMessageNotificationEmail(data: MessageNotificationData): s
         </tr>
 
         <!-- Footer -->
-        <tr>
-          <td style="background-color:#f4f4f6;border-radius:0 0 8px 8px;padding:24px 40px;text-align:center;">
-            <p style="margin:0;color:#9090a8;font-size:13px;">Recibes este correo porque tienes una cuenta activa en <a href="https://zucarlink.com" style="color:#0029E2;text-decoration:none;">zucarlink.com</a></p>
-          </td>
-        </tr>
+        ${renderFooterWithUnsubscribe(
+          'Recibes este correo porque le diste me gusta a un tema del foro de <a href="https://zucarlink.com" style="color:#0029E2;text-decoration:none;">zucarlink.com</a>',
+          unsubscribeUrl,
+        )}
 
       </table>
     </td></tr>

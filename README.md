@@ -31,8 +31,9 @@ npm run dev
 | `RESEND_API_KEY` | API key de Resend para envío de emails |
 | `RESEND_FROM_EMAIL` | Dirección de envío (default: `no-reply@zucarlink.com`) |
 | `EMAIL_WEBHOOK_SECRET` | Token de autenticación del webhook de emails |
+| `ENGAGEMENT_CRON_SECRET` | Token de autenticación del cron de re-engagement (`engagement-emails`) |
 
-Las variables `RESEND_*` y `EMAIL_WEBHOOK_SECRET` se configuran como **Supabase Secrets**, no en Vercel.
+Las variables `RESEND_*`, `EMAIL_WEBHOOK_SECRET` y `ENGAGEMENT_CRON_SECRET` se configuran como **Supabase Secrets**, no en Vercel.
 
 ## Scripts disponibles
 
@@ -67,6 +68,9 @@ Las migraciones se aplican en orden desde `supabase/migrations/`:
 | 013 | `admin_verifications` | Flujo de verificación de perfiles por admins |
 | 014 | `public_profile_preview` | Función para previsualización pública de perfiles |
 | 015 | `business_logic_fixes` | Reemplazo atómico de especialidades, deduplicación de empresas |
+| … | … | (016–027 omitidas de esta tabla; ver `supabase/migrations/` para el detalle) |
+| 028 | `engagement_foundation` | `profiles.last_seen_at`, tabla `notification_preferences`, log `engagement_email_log`, RPCs de candidatos para re-engagement |
+| 029 | `engagement_cron` | Habilita `pg_cron`/`pg_net` y programa la llamada horaria a `engagement-emails` |
 
 ## Seeds de desarrollo
 
@@ -85,13 +89,33 @@ Contraseña para cuentas demo: obligatoria vía variable de entorno `SEED_DEMO_P
 
 ## Edge Functions (email)
 
-`supabase/functions/send-email/` — webhook que dispara emails en tres eventos:
+`supabase/functions/send-email/` — webhook que dispara emails en eventos de la base de datos:
 
 | Evento | Trigger | Email enviado |
 |---|---|---|
 | Perfil completado | `profiles.UPDATE` (status: incomplete → complete) | Bienvenida personalizada según tipo de cuenta |
-| Mensaje recibido | `messages.INSERT` | Notificación con preview del mensaje (suprimida si el receptor estuvo activo en los últimos 5 min) |
 | Lead de proveedor | `provider_leads.INSERT` | Notificación al proveedor con datos de contacto del solicitante |
+| Respuesta en el foro | `forum_replies.INSERT` | Notifica al autor del tema y a quienes le dieron like (según sus preferencias) |
+
+`supabase/functions/engagement-emails/` — invocada por `pg_cron` cada hora (no por webhooks), corre dos jobs de re-engagement:
+
+| Job | Regla | Email enviado |
+|---|---|---|
+| Recordatorio de no leídos | Mensaje sin leer con más de 24h de antigüedad, receptor no activo recientemente | Resumen de conversaciones pendientes (máx. 1 por conversación cada 72h) |
+| Digest de inactividad | Usuario sin `last_seen_at` en los últimos 7 días | Resumen personalizado (mensajes sin leer, respuestas en tus temas y en temas que likeaste, temas populares nuevos); reintenta cada 14 días, máximo 3 veces por racha de inactividad |
+
+Ambas funciones comparten helpers en `supabase/functions/_shared/`: `resend.ts` (cliente de envío), `email-log.ts` (dedupe/rate-limit vía `engagement_email_log`), `notification-prefs.ts` (preferencias + token de unsubscribe) y `email-footer.ts` (pie con link de gestión de preferencias).
+
+### Pasos manuales de configuración (no versionados en git)
+
+1. En el dashboard de Supabase, eliminar cualquier Database Webhook antiguo sobre `messages.INSERT` (el aviso inmediato de mensaje nuevo fue reemplazado por el recordatorio de 24h).
+2. `supabase secrets set ENGAGEMENT_CRON_SECRET=...` (mismo valor que se guardará en Vault).
+3. En el SQL Editor, crear los secrets de Vault que usa la migración `20260702_000029_engagement_cron.sql`:
+   ```sql
+   select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+   select vault.create_secret('<ENGAGEMENT_CRON_SECRET value>', 'engagement_cron_secret');
+   ```
+4. `supabase functions deploy send-email engagement-emails --no-verify-jwt` y `supabase db push`.
 
 ## Estructura del proyecto
 
@@ -108,6 +132,7 @@ src/
     directory/          # directorio de miembros
     forum/              # foro técnico
     messages/           # mensajería privada
+    notifications/      # preferencias de notificación por email
     content/            # noticias, blog, eventos, precios
     admin-dashboard/    # panel de administración
   pages/                # componentes de nivel de ruta

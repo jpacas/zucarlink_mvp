@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { NotificationPreferencesCard } from '../features/notifications/NotificationPreferencesCard'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 
 export function SettingsPage() {
@@ -44,15 +45,7 @@ export function SettingsPage() {
           </div>
         </article>
 
-        <article className="info-card stack">
-          <h3>Notificaciones</h3>
-          <p className="helper-text">
-            Te enviamos un correo cuando recibes un mensaje directo, cuando alguien responde a un tema que abriste en el foro y cuando un proveedor recibe una solicitud de contacto.
-          </p>
-          <p className="helper-text">
-            El control para elegir qué correos recibir llegará pronto.
-          </p>
-        </article>
+        {user ? <NotificationPreferencesCard userId={user.id} /> : null}
       </div>
     </section>
     </div>

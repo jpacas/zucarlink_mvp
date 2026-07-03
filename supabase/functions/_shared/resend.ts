@@ -6,6 +6,7 @@ export interface SendEmailOptions {
   subject: string
   html: string
   replyTo?: string
+  headers?: Record<string, string>
 }
 
 export async function sendEmail(opts: SendEmailOptions): Promise<void> {
@@ -21,6 +22,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<void> {
       subject: opts.subject,
       html: opts.html,
       ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+      ...(opts.headers ? { headers: opts.headers } : {}),
     }),
   })
 

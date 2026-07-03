@@ -11,6 +11,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { getMissingEnvKeys } from '../../lib/env'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type { SignInPayload, SignUpPayload } from '../../types/auth'
+import { useLastSeenHeartbeat } from './useLastSeenHeartbeat'
 
 interface AuthContextValue {
   isConfigured: boolean
@@ -74,6 +75,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       subscription.unsubscribe()
     }
   }, [client])
+
+  useLastSeenHeartbeat(user?.id)
 
   const value = useMemo<AuthContextValue>(
     () => ({

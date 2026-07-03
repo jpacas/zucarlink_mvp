@@ -1,5 +1,4 @@
 import { handleProviderLead } from './handlers/on-provider-lead.ts'
-import { handleMessage } from './handlers/on-message.ts'
 import { handleProfileComplete } from './handlers/on-profile-complete.ts'
 import { handleForumReply } from './handlers/on-forum-reply.ts'
 
@@ -30,8 +29,6 @@ Deno.serve(async (req: Request) => {
   try {
     if (table === 'provider_leads' && eventType === 'INSERT') {
       await handleProviderLead(record as Parameters<typeof handleProviderLead>[0])
-    } else if (table === 'messages' && eventType === 'INSERT') {
-      await handleMessage(record as Parameters<typeof handleMessage>[0])
     } else if (table === 'forum_replies' && eventType === 'INSERT') {
       await handleForumReply(record as Parameters<typeof handleForumReply>[0])
     } else if (
