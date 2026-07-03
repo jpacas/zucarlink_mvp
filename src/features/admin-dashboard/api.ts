@@ -164,5 +164,5 @@ export async function getAdminOperationalDashboard(
     throw new Error(error.message)
   }
 
-  return mapDashboard((data ?? {}) as AdminDashboardRow)
+  return mapDashboard((data ?? {}) as unknown as AdminDashboardRow)
 }
