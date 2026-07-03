@@ -44,6 +44,7 @@
   --surface: rgba(255, 255, 255, 0.95);
   --surface-alt: rgba(244, 244, 246, 0.94);
   --surface-strong: #f0f0f8;
+  --white: #ffffff;
   --text: #201747;
   --text-muted: rgba(32, 23, 71, 0.65);
   --text-soft: rgba(32, 23, 71, 0.50);
@@ -61,6 +62,8 @@
   --accent-green-soft: rgba(13, 219, 137, 0.12);
   --danger: #cc3722;
   --danger-soft: rgba(204, 55, 34, 0.12);
+  --danger-strong: #b32f1e;
+  --success-deep: #06301f;
 
   /* Color semántico por audiencia (inspirado en el logo / molécula de sacarosa).
      Azul = ingenios/productores · Verde = técnicos · Naranja = proveedores ·
@@ -127,7 +130,7 @@ body {
     radial-gradient(circle at 78% 8%, rgba(0, 201, 255, 0.07), transparent 26%),
     radial-gradient(circle at 12% 92%, rgba(13, 219, 137, 0.06), transparent 30%),
     radial-gradient(circle at bottom right, rgba(255, 114, 75, 0.05), transparent 28%),
-    linear-gradient(180deg, #f4f4f6 0%, #eeeff4 100%);
+    linear-gradient(180deg, var(--bg) 0%, #eeeff4 100%);
   background-attachment: fixed;
 }
 
@@ -333,7 +336,7 @@ label {
   margin-left: 6px;
   border-radius: 999px;
   background: var(--accent-orange);
-  color: #fff;
+  color: var(--white);
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 1;
@@ -371,7 +374,7 @@ label {
 .nav-link--cta {
   background: var(--brand);
   border-color: var(--brand);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 600;
 }
 
@@ -752,7 +755,7 @@ fieldset.field {
 .radio-option:has(input:checked) input[type="radio"] {
   border-color: var(--brand);
   background: var(--brand);
-  box-shadow: inset 0 0 0 3px #fff;
+  box-shadow: inset 0 0 0 3px var(--white);
 }
 
 .radio-option:has(input:checked) {
@@ -779,7 +782,7 @@ fieldset.field {
   border-radius: 999px;
   padding: 12px 18px;
   background: var(--brand);
-  color: #ffffff;
+  color: var(--white);
   cursor: pointer;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -824,12 +827,12 @@ fieldset.field {
 
 .button--danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--white);
   border: 0;
 }
 
 .button--danger:hover {
-  background: #b32f1e;
+  background: var(--danger-strong);
   transform: translateY(-1px);
 }
 
@@ -845,15 +848,15 @@ fieldset.field {
    El azul (--button por defecto) sigue siendo el primario global. */
 .button--tecnico {
   background: var(--role-tecnico);
-  color: #06301f;
+  color: var(--success-deep);
 }
 .button--tecnico:hover {
   background: var(--role-tecnico-strong);
-  color: #06301f;
+  color: var(--success-deep);
 }
 .button--proveedor {
   background: var(--role-proveedor);
-  color: #ffffff;
+  color: var(--white);
 }
 .button--proveedor:hover {
   background: var(--role-proveedor-strong);
@@ -1064,7 +1067,7 @@ fieldset.field {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #0029E2;
+  background: var(--brand);
 }
 
 .compact-row {
@@ -1092,7 +1095,7 @@ fieldset.field {
   border-radius: 24px;
   object-fit: cover;
   border: 1px solid var(--line);
-  background: #f4f4f6;
+  background: var(--bg);
   flex-shrink: 0;
 }
 
@@ -1108,7 +1111,7 @@ fieldset.field {
   justify-content: center;
   background:
     linear-gradient(160deg, rgba(32, 23, 71, 0.97), rgba(0, 41, 226, 0.88));
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
 }
 
@@ -1157,7 +1160,7 @@ fieldset.field {
   border-radius: 999px;
   border: 2px solid rgba(0, 41, 226, 0.20);
   background: linear-gradient(150deg, rgba(32, 23, 71, 0.97), rgba(0, 41, 226, 0.88));
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
   font-size: 0.95rem;
   cursor: pointer;
@@ -1440,7 +1443,7 @@ fieldset.field {
   place-items: center;
   background:
     linear-gradient(150deg, rgba(32, 23, 71, 0.98), rgba(0, 41, 226, 0.88));
-  color: #ffffff;
+  color: var(--white);
   font-weight: 700;
 }
 
@@ -1693,7 +1696,7 @@ fieldset.field {
   width: 80px;
   padding: 16px 10px;
   background: var(--brand);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .event-card--featured .event-card__date-day {
@@ -2288,7 +2291,7 @@ fieldset.field {
   z-index: 9999;
   padding: 10px 20px;
   background: var(--brand);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 700;
   border-radius: 0 0 12px 12px;
   text-decoration: none;
@@ -2445,7 +2448,7 @@ fieldset.field {
     right: 0;
     width: auto;
     gap: 10px;
-    background: #ffffff;
+    background: var(--white);
     border: 1px solid var(--line);
     border-radius: 18px;
     box-shadow: 0 12px 40px rgba(32, 23, 71, 0.20);
@@ -2663,7 +2666,7 @@ fieldset.field {
   height: 20px;
   border-radius: 999px;
   background: var(--brand);
-  color: #fff;
+  color: var(--white);
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0 6px;
@@ -2780,8 +2783,8 @@ fieldset.field {
 }
 
 .message-bubble--mine {
-  background: #0029E2;
-  color: #ffffff;
+  background: var(--brand);
+  color: var(--white);
   border-radius: 16px 16px 4px 16px;
 }
 
@@ -2800,7 +2803,7 @@ fieldset.field {
 }
 
 .message-bubble--mine .message-bubble__body {
-  color: #fff;
+  color: var(--white);
 }
 
 .message-bubble--mine .message-bubble__time {
@@ -2842,7 +2845,7 @@ fieldset.field {
   font-size: 0.9rem;
   line-height: 1.4;
   resize: none;
-  background: #fff;
+  background: var(--white);
   transition: border-color 0.15s ease;
 }
 
@@ -3230,7 +3233,7 @@ fieldset.field {
   padding: 0 7px;
   border-radius: 999px;
   background: var(--brand);
-  color: #fff;
+  color: var(--white);
   font-size: 0.75rem;
   font-weight: 700;
   flex-shrink: 0;
