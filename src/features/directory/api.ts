@@ -82,7 +82,7 @@ export async function listPublicPreviewProfiles(limitCount = 12): Promise<Public
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as PublicPreviewRow[]
+  const rows = data ?? []
 
   return Promise.all(
     rows.map(async (row) => ({
@@ -105,9 +105,7 @@ export async function getDirectoryPublicSummary(): Promise<DirectoryAggregateSna
     throw new Error(error.message)
   }
 
-  const row = Array.isArray(data)
-    ? ((data[0] ?? null) as PublicDirectorySummaryRow | null)
-    : (data as PublicDirectorySummaryRow | null)
+  const row = Array.isArray(data) ? (data[0] ?? null) : data
 
   return {
     totalMembers: Number(row?.total_members ?? 0),
@@ -131,7 +129,7 @@ export async function searchDirectoryProfiles(
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as DirectoryProfileRow[]
+  const rows = data ?? []
 
   return Promise.all(rows.map(mapDirectoryProfile))
 }
@@ -149,8 +147,8 @@ export async function getDirectoryProfileDetail(
   }
 
   const row = Array.isArray(data)
-    ? ((data[0] ?? null) as DirectoryProfileDetailRow | null)
-    : (data as DirectoryProfileDetailRow | null)
+    ? ((data[0] ?? null) as unknown as DirectoryProfileDetailRow | null)
+    : (data as unknown as DirectoryProfileDetailRow | null)
 
   if (!row) {
     throw new Error('Perfil no encontrado.')
