@@ -130,7 +130,7 @@ export async function listForumCategories(): Promise<ForumCategory[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as ForumCategoryRow[]).map((row) => ({
+  return (data ?? []).map((row) => ({
     id: row.id,
     slug: row.slug,
     name: row.name,
@@ -239,8 +239,10 @@ interface ForumTopicLikeStateRow {
   viewer_liked?: boolean | null
 }
 
-function mapLikeState(data: unknown): ForumTopicLikeState {
-  const row = (Array.isArray(data) ? data[0] : data) as ForumTopicLikeStateRow | null
+function mapLikeState(
+  data: ForumTopicLikeStateRow[] | ForumTopicLikeStateRow | null,
+): ForumTopicLikeState {
+  const row = Array.isArray(data) ? (data[0] ?? null) : data
   return {
     likeCount: Number(row?.like_count ?? 0),
     viewerLiked: Boolean(row?.viewer_liked),
