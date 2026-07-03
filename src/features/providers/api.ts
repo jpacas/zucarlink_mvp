@@ -156,7 +156,7 @@ export async function listProviderCategories(): Promise<ProviderCategory[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as ProviderCategoryRow[]).map(mapCategory)
+  return (data ?? []).map(mapCategory)
 }
 
 export async function searchProviders(filters?: {
@@ -243,7 +243,7 @@ export async function getCurrentProviderProfile(
     return null
   }
 
-  const provider = data as ProviderRow
+  const provider = data as unknown as ProviderRow
   let category: ProviderCategory | null = null
 
   if (provider.category_id) {
@@ -258,7 +258,7 @@ export async function getCurrentProviderProfile(
     }
 
     if (categoryData) {
-      category = mapCategory(categoryData as ProviderCategoryRow)
+      category = mapCategory(categoryData)
     }
   }
 
@@ -363,7 +363,7 @@ export async function listProviderLeads(): Promise<ProviderLead[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as ProviderLeadRow[]).map(mapLead)
+  return ((data ?? []) as unknown as ProviderLeadRow[]).map(mapLead)
 }
 
 export async function updateProviderLeadStatus(
