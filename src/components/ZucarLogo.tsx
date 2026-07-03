@@ -23,10 +23,16 @@ export function ZucarLogo({
     ...(variant === 'dark' ? { filter: 'brightness(0) invert(1)' } : {}),
   }
 
+  // Aspect ratio real de los PNG en public/logos/ (800px de ancho base):
+  // horizontal 800x214, vertical 800x477.
+  const aspectRatio = layout === 'vertical' ? 800 / 477 : 800 / 214
+  const width = Math.round(height * aspectRatio)
+
   return (
     <img
       src={src}
       alt="Zucarlink"
+      width={width}
       height={height}
       style={style}
       className={className}

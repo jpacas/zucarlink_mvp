@@ -49,6 +49,9 @@ function AvatarDisplay({
         className={`avatar-image avatar-image--${size}`}
         src={avatarPath}
         alt={name}
+        width={size === 'sm' ? 36 : 88}
+        height={size === 'sm' ? 36 : 88}
+        loading="lazy"
         onError={() => setError(true)}
       />
     )

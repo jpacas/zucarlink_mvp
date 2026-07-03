@@ -17,7 +17,16 @@ export function ProviderLogo({ companyName, logoUrl, size = 'md' }: ProviderLogo
   const className = size === 'sm' ? 'provider-logo provider-logo--sm' : 'provider-logo'
 
   if (logoUrl) {
-    return <img className={className} src={logoUrl} alt={`Logo de ${companyName}`} />
+    return (
+      <img
+        className={className}
+        src={logoUrl}
+        alt={`Logo de ${companyName}`}
+        width={size === 'sm' ? 64 : 88}
+        height={size === 'sm' ? 64 : 88}
+        loading="lazy"
+      />
+    )
   }
 
   return (
