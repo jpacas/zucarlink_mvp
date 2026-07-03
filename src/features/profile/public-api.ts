@@ -36,7 +36,7 @@ export async function getPublicMemberProfile(profileId: string): Promise<PublicM
     throw new Error(error.message)
   }
 
-  const row = (Array.isArray(data) ? data[0] : data ?? null) as PublicMemberProfileRow | null
+  const row = Array.isArray(data) ? (data[0] ?? null) : (data ?? null)
 
   if (!row) {
     throw new Error('Perfil no encontrado.')
@@ -65,7 +65,7 @@ export async function getProfileForumActivity(profileId: string): Promise<Public
     throw new Error(error.message)
   }
 
-  const row = ((Array.isArray(data) ? data[0] : data) ?? null) as PublicProfileForumActivityRow | null
+  const row = ((Array.isArray(data) ? data[0] : data) ?? null) as unknown as PublicProfileForumActivityRow | null
 
   return {
     threadCount: Number(row?.thread_count ?? 0),
