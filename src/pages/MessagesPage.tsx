@@ -360,13 +360,12 @@ export function MessagesPage() {
               {Array.from({ length: 5 }).map((_, i) => <SkeletonThreadItem key={i} />)}
             </div>
           ) : threadsError ? (
-            <div style={{ padding: '16px' }}>
+            <div className="messages-thread-error">
               <p className="error-text">{threadsError}</p>
               <button
                 type="button"
-                className="button button--ghost"
+                className="button button--ghost messages-thread-error__retry"
                 onClick={() => void loadThreads()}
-                style={{ marginTop: '8px' }}
               >
                 Reintentar
               </button>
@@ -434,9 +433,8 @@ export function MessagesPage() {
                   <strong>{selectedThread.otherFullName}</strong>
                 </div>
                 <Link
-                  className="button button--secondary"
+                  className="button button--secondary messages-thread-header__profile-link"
                   to={`/app/directory/${selectedThread.otherProfileId}`}
-                  style={{ marginLeft: 'auto' }}
                 >
                   Ver perfil
                 </Link>
@@ -472,10 +470,13 @@ export function MessagesPage() {
               {/* Messages */}
               <div className="messages-body" role="log" aria-live="polite" aria-label="Mensajes">
                 {messagesLoading && messages.length === 0 ? (
-                  <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
+                  <div aria-hidden="true" className="messages-skeleton-list">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div key={i} className={`message-bubble-wrap${i % 2 === 1 ? ' message-bubble-wrap--mine' : ''}`}>
-                        <div className="message-bubble" style={{ width: `${48 + (i * 7) % 30}%`, height: 48, background: 'rgba(17,34,51,0.06)', borderRadius: 16 }} />
+                        <div
+                          className="message-bubble message-bubble--skeleton"
+                          style={{ '--skeleton-width': `${48 + (i * 7) % 30}%` } as React.CSSProperties}
+                        />
                       </div>
                     ))}
                   </div>
@@ -505,7 +506,7 @@ export function MessagesPage() {
               {/* Composer */}
               <div className="messages-composer">
                 {sendError ? (
-                  <p className="error-text" style={{ fontSize: '0.85rem', marginBottom: '8px' }}>
+                  <p className="error-text messages-composer__error">
                     {sendError}
                   </p>
                 ) : null}
