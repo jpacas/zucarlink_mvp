@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useAuth } from '../features/auth/AuthProvider'
+import { getMemberProfilePath } from '../features/directory/memberProfilePath'
 import { getProfileForumActivity, getPublicMemberProfile } from '../features/profile/public-api'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { getInitials } from '../lib/initials'
@@ -10,6 +12,7 @@ import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function PublicProfilePage() {
   const { profileId = '' } = useParams()
+  const { user, isLoading: isAuthLoading } = useAuth()
   const [hasAvatarError, setHasAvatarError] = useState(false)
 
   const { data, isLoading, error: errorMessage } = useAsyncData(
@@ -34,6 +37,10 @@ export function PublicProfilePage() {
         <p className="helper-text">Estamos abriendo la ficha pública del autor.</p>
       </section>
     )
+  }
+
+  if (!isAuthLoading && user) {
+    return <Navigate to={getMemberProfilePath(profileId, true)} replace />
   }
 
   if (!profile || errorMessage) {

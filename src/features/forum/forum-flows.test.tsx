@@ -673,6 +673,46 @@ it('renders a public profile with forum activity from the author link', async ()
   ).toHaveAttribute('href', '/forum/thread/automatizacion-mano-de-obra-barata')
 })
 
+it('redirects an authenticated visitor from the public profile to the private directory', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'ya-logueada@example.com',
+    userMetadata: {
+      full_name: 'Ya Logueada',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      get_directory_profile_detail: {
+        data: {
+          id: 'profile-ana',
+          full_name: 'Ana Mejía',
+          role_title: 'Jefa de automatización',
+          organization_name: 'Ingenio El Carmen',
+          country: 'El Salvador',
+          years_experience: 8,
+          short_bio: 'Automatización aplicada a molienda y vapor.',
+          avatar_path: null,
+          specialties: [],
+          verification_status: 'verified',
+          experiences: [],
+        },
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/directory/profile-ana',
+    supabase,
+  })
+
+  await screen.findByRole('heading', { name: 'Ana Mejía' })
+  expect(screen.getByText('Directorio privado')).toBeInTheDocument()
+})
+
 // `.storage.from(bucket)` del fake devuelve un objeto nuevo en cada llamada, así que
 // espiar el resultado de una sola invocación no intercepta llamadas posteriores del
 // código bajo prueba. Envolvemos `.from` para registrar cada `upload`/`remove` real.
