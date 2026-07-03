@@ -898,7 +898,7 @@ it('renders prices page with a note about curated indicators', async () => {
 
   await screen.findByRole('heading', { name: 'Precios e indicadores' })
   expect(await screen.findByText('Azúcar crudo')).toBeInTheDocument()
-  expect(screen.getByText(/no es un feed en tiempo real/i)).toBeInTheDocument()
+  expect(screen.getByText(/no cotización en tiempo real/i)).toBeInTheDocument()
 })
 
 it('renders an information preview on the home page', async () => {

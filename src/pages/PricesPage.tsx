@@ -20,7 +20,7 @@ export function PricesPage() {
   usePageMetadata({
     title: 'Precios e indicadores',
     description:
-      'Indicadores curados para lectura rápida del entorno azucarero. Este bloque no es un feed en tiempo real.',
+      'Cierre diario del mercado azucarero actualizado automáticamente (dato retrasado, no cotización en tiempo real).',
   })
 
   const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
@@ -32,7 +32,7 @@ export function PricesPage() {
         as="h1"
         eyebrow="Mercado"
         title="Precios e indicadores"
-        description="Indicadores curados para lectura rápida del entorno. Este bloque no es un feed en tiempo real."
+        description="Cierre diario del mercado actualizado automáticamente (dato retrasado, no cotización en tiempo real)."
       />
       {isLoading ? (
         <p className="helper-text">Cargando indicadores.</p>
