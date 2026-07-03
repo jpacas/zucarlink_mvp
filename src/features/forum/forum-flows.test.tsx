@@ -617,3 +617,327 @@ it('renders a public profile with forum activity from the author link', async ()
     }),
   ).toHaveAttribute('href', '/forum/thread/automatizacion-mano-de-obra-barata')
 })
+
+// `.storage.from(bucket)` del fake devuelve un objeto nuevo en cada llamada, así que
+// espiar el resultado de una sola invocación no intercepta llamadas posteriores del
+// código bajo prueba. Envolvemos `.from` para registrar cada `upload`/`remove` real.
+function spyOnBucket(supabase: ReturnType<typeof createSupabaseAuthFake>, bucket: string) {
+  const uploadCalls: unknown[][] = []
+  const removeCalls: unknown[][] = []
+  const originalFrom = supabase.storage.from.bind(supabase.storage)
+
+  vi.spyOn(supabase.storage, 'from').mockImplementation((requestedBucket: string) => {
+    const original = originalFrom(requestedBucket)
+
+    if (requestedBucket !== bucket) {
+      return original
+    }
+
+    return {
+      ...original,
+      upload: (...args: unknown[]) => {
+        uploadCalls.push(args)
+        return (original.upload as (...a: unknown[]) => unknown)(...args)
+      },
+      remove: (...args: unknown[]) => {
+        removeCalls.push(args)
+        return (original.remove as (...a: unknown[]) => unknown)(...args)
+      },
+    } as ReturnType<typeof originalFrom>
+  })
+
+  return { uploadCalls, removeCalls }
+}
+
+function stubImageDownscale() {
+  vi.stubGlobal(
+    'createImageBitmap',
+    vi.fn(async () => ({ width: 800, height: 600, close: vi.fn() })),
+  )
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+    drawImage: vi.fn(),
+  } as unknown as CanvasRenderingContext2D)
+  const originalToBlob = HTMLCanvasElement.prototype.toBlob
+  HTMLCanvasElement.prototype.toBlob = function toBlob(callback: BlobCallback) {
+    callback(new Blob(['imagen'], { type: 'image/webp' }))
+  }
+  return () => {
+    HTMLCanvasElement.prototype.toBlob = originalToBlob
+    vi.unstubAllGlobals()
+  }
+}
+
+it('creates a new thread with an image attachment, uploading before calling the RPC', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'con-foto@example.com',
+    userMetadata: {
+      full_name: 'Con Foto',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const createForumTopicSpy = vi.fn((_args: Record<string, unknown> | undefined) => {
+    void _args
+    return { data: { slug: 'tema-con-foto' } }
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      create_forum_topic: createForumTopicSpy,
+    },
+  })
+  const { uploadCalls } = spyOnBucket(supabase, 'forum-media')
+
+  const restoreCanvas = stubImageDownscale()
+
+  try {
+    await renderApp({ initialRoute: '/forum/new', supabase })
+
+    await screen.findByLabelText('Título')
+    await user.type(screen.getByLabelText('Título'), 'Tema con foto adjunta')
+    await user.selectOptions(screen.getByLabelText('Categoría'), 'automatizacion')
+    await user.type(screen.getByLabelText('Contenido'), 'Miren esta foto del panel eléctrico.')
+
+    const fileInput = document.querySelector('input[type="file"]')
+    if (!(fileInput instanceof HTMLInputElement)) {
+      throw new Error('Attachment file input not found')
+    }
+    const file = new File(['foto-bytes'], 'panel.jpg', { type: 'image/jpeg' })
+    await user.upload(fileInput, file)
+
+    await screen.findByRole('button', { name: 'Quitar adjunto' })
+    await user.click(screen.getByRole('button', { name: 'Publicar tema' }))
+
+    await waitFor(() => {
+      expect(createForumTopicSpy).toHaveBeenCalled()
+    })
+
+    const rpcArgs = createForumTopicSpy.mock.calls[0][0]!
+    expect(rpcArgs.attachment_path).toMatch(/^.+\/[0-9a-f-]{36}\.webp$/)
+    expect(rpcArgs.attachment_type).toBe('image')
+
+    // El upload de storage debe completarse antes de que se invoque el RPC.
+    expect(uploadCalls.length).toBeGreaterThan(0)
+    expect(supabase.calls.rpc.map((c) => c.fn)).toContain('create_forum_topic')
+  } finally {
+    restoreCanvas()
+  }
+})
+
+it('removes the uploaded attachment when create_forum_topic fails after upload', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'falla-rpc@example.com',
+    userMetadata: {
+      full_name: 'Falla RPC',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      create_forum_topic: () => ({ error: { message: 'La categoría seleccionada no existe.' } }),
+    },
+  })
+  const { removeCalls } = spyOnBucket(supabase, 'forum-media')
+
+  const restoreCanvas = stubImageDownscale()
+
+  try {
+    await renderApp({ initialRoute: '/forum/new', supabase })
+
+    await screen.findByLabelText('Título')
+    await user.type(screen.getByLabelText('Título'), 'Tema que fallará al publicar')
+    await user.selectOptions(screen.getByLabelText('Categoría'), 'automatizacion')
+    await user.type(screen.getByLabelText('Contenido'), 'Este tema no se va a poder publicar.')
+
+    const fileInput = document.querySelector('input[type="file"]')
+    if (!(fileInput instanceof HTMLInputElement)) {
+      throw new Error('Attachment file input not found')
+    }
+    await user.upload(fileInput, new File(['foto-bytes'], 'panel.jpg', { type: 'image/jpeg' }))
+    await screen.findByRole('button', { name: 'Quitar adjunto' })
+
+    await user.click(screen.getByRole('button', { name: 'Publicar tema' }))
+
+    await screen.findByText('La categoría seleccionada no existe.')
+    await waitFor(() => {
+      expect(removeCalls.length).toBeGreaterThan(0)
+    })
+  } finally {
+    restoreCanvas()
+  }
+})
+
+it('lets the user remove a selected attachment before submitting', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'quita-adjunto@example.com',
+    userMetadata: {
+      full_name: 'Quita Adjunto',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const createForumTopicSpy = vi.fn((_args: Record<string, unknown> | undefined) => {
+    void _args
+    return { data: { slug: 'tema-sin-adjunto' } }
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      create_forum_topic: createForumTopicSpy,
+    },
+  })
+
+  const restoreCanvas = stubImageDownscale()
+
+  try {
+    await renderApp({ initialRoute: '/forum/new', supabase })
+
+    await screen.findByLabelText('Título')
+    await user.type(screen.getByLabelText('Título'), 'Tema sin adjunto final')
+    await user.selectOptions(screen.getByLabelText('Categoría'), 'automatizacion')
+    await user.type(screen.getByLabelText('Contenido'), 'Contenido mínimo para abrir el debate.')
+
+    const fileInput = document.querySelector('input[type="file"]')
+    if (!(fileInput instanceof HTMLInputElement)) {
+      throw new Error('Attachment file input not found')
+    }
+    await user.upload(fileInput, new File(['foto-bytes'], 'panel.jpg', { type: 'image/jpeg' }))
+    await user.click(await screen.findByRole('button', { name: 'Quitar adjunto' }))
+
+    await user.click(screen.getByRole('button', { name: 'Publicar tema' }))
+
+    await waitFor(() => {
+      expect(createForumTopicSpy).toHaveBeenCalled()
+    })
+
+    const rpcArgs = createForumTopicSpy.mock.calls[0][0]!
+    expect(rpcArgs.attachment_path).toBeUndefined()
+    expect(rpcArgs.attachment_type).toBeUndefined()
+  } finally {
+    restoreCanvas()
+  }
+})
+
+it('renders attachments on the thread body and on a reply', async () => {
+  const detailWithAttachments = {
+    ...threadDetail,
+    attachment_path: 'profile-ana/photo.webp',
+    attachment_type: 'image',
+    replies: [
+      {
+        ...threadDetail.replies[0],
+        attachment_path: 'profile-carlos/clip.mp4',
+        attachment_type: 'video',
+      },
+    ],
+  }
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      get_forum_thread: { data: detailWithAttachments },
+      get_forum_topic_like_state: { data: [{ like_count: 0, viewer_liked: false }] },
+    },
+  })
+
+  await renderApp({
+    initialRoute: '/forum/thread/automatizacion-mano-de-obra-barata',
+    supabase,
+  })
+
+  const topicImage = await screen.findByRole('img', { name: 'Adjunto' })
+  expect(topicImage).toHaveAttribute(
+    'src',
+    'https://public.example/forum-media/profile-ana/photo.webp',
+  )
+
+  const replyVideo = document.querySelector('video')
+  expect(replyVideo).toHaveAttribute(
+    'src',
+    'https://public.example/forum-media/profile-carlos/clip.mp4',
+  )
+})
+
+it('shows a media badge in the listing for threads with an attachment', async () => {
+  const threadsWithAttachment = [
+    { ...forumThreads[0], attachment_type: 'video' },
+  ]
+  const supabase = createSupabaseAuthFake({
+    rpc: {
+      list_forum_categories: { data: forumCategories },
+      list_forum_threads: { data: threadsWithAttachment },
+    },
+  })
+
+  await renderApp({ initialRoute: '/forum', supabase })
+
+  await screen.findByRole('link', {
+    name:
+      '¿Vale la pena invertir en automatización cuando la mano de obra en Latinoamérica sigue siendo barata?',
+  })
+  expect(screen.getByLabelText('Incluye video')).toBeInTheDocument()
+})
+
+it('allows replying with only an attachment and an empty body', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'solo-adjunto@example.com',
+    userMetadata: {
+      full_name: 'Solo Adjunto',
+      account_type: 'technician',
+      profile_status: 'complete',
+    },
+  })
+  const user = userEvent.setup()
+  const createReplySpy = vi.fn((_args: Record<string, unknown> | undefined) => {
+    void _args
+    return { data: [{ id: 'reply-solo-adjunto' }] }
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      get_forum_thread: { data: threadDetail },
+      get_forum_topic_like_state: { data: [{ like_count: 0, viewer_liked: false }] },
+      create_forum_reply: createReplySpy,
+    },
+  })
+
+  const restoreCanvas = stubImageDownscale()
+
+  try {
+    await renderApp({
+      initialRoute: '/forum/thread/automatizacion-mano-de-obra-barata',
+      supabase,
+    })
+
+    await screen.findByLabelText('Tu respuesta')
+
+    const fileInput = document.querySelector('input[type="file"]')
+    if (!(fileInput instanceof HTMLInputElement)) {
+      throw new Error('Attachment file input not found')
+    }
+    await user.upload(fileInput, new File(['foto-bytes'], 'foto.jpg', { type: 'image/jpeg' }))
+    await screen.findByRole('button', { name: 'Quitar adjunto' })
+
+    await user.click(screen.getByRole('button', { name: 'Publicar respuesta' }))
+
+    await waitFor(() => {
+      expect(createReplySpy).toHaveBeenCalled()
+    })
+
+    const rpcArgs = createReplySpy.mock.calls[0][0]!
+    expect(rpcArgs.body_text).toBe('')
+    expect(rpcArgs.attachment_type).toBe('image')
+  } finally {
+    restoreCanvas()
+  }
+})

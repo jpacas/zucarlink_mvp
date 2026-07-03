@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { AttachmentInput } from '../components/AttachmentInput'
+import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { SkeletonThreadItem } from '../components/Skeleton'
 import { getInitials } from '../lib/initials'
+import { removeMessageAttachment, uploadMessageAttachment } from '../lib/media-storage'
 import {
   clearThread,
   getThreadMessages,
@@ -13,7 +16,7 @@ import {
   sendMessage,
   startOrGetThread,
 } from '../features/messages/api'
-import type { Message, MessageThread } from '../features/messages/types'
+import type { Message, MessageAttachmentType, MessageThread } from '../features/messages/types'
 
 const POLL_INTERVAL_MS = 8_000
 
@@ -93,7 +96,11 @@ function ThreadListItem({
         <p className="messages-thread-item__preview helper-text">
           {thread.lastMessageBody
             ? thread.lastMessageBody.slice(0, 72) + (thread.lastMessageBody.length > 72 ? '…' : '')
-            : 'Sin mensajes todavía'}
+            : thread.lastMessageAttachmentType === 'video'
+              ? '🎬 Video'
+              : thread.lastMessageAttachmentType === 'image'
+                ? '📷 Foto'
+                : 'Sin mensajes todavía'}
         </p>
       </div>
       {thread.unreadCount > 0 ? (
@@ -115,7 +122,10 @@ function MessageBubble({
   return (
     <div className={`message-bubble-wrap${isMine ? ' message-bubble-wrap--mine' : ''}`}>
       <div className={`message-bubble${isMine ? ' message-bubble--mine' : ''}`}>
-        <p className="message-bubble__body">{message.body}</p>
+        {message.attachment ? (
+          <AttachmentView url={message.attachment.url} type={message.attachment.type} />
+        ) : null}
+        {message.body ? <p className="message-bubble__body">{message.body}</p> : null}
         <span className="message-bubble__time helper-text">{formatTime(message.createdAt)}</span>
       </div>
     </div>
@@ -130,6 +140,7 @@ export function MessagesPage() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
   const [threadsLoading, setThreadsLoading] = useState(true)
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -300,23 +311,43 @@ export function MessagesPage() {
   }, [showDeleteModal, isDeleting])
 
   const handleSend = async () => {
-    if (!selectedThreadId || !newMessage.trim() || isSending) return
+    if (!selectedThreadId || (!newMessage.trim() && !attachmentFile) || isSending) return
 
     const body = newMessage.trim()
+    const pendingAttachment = attachmentFile
     setNewMessage('')
+    setAttachmentFile(null)
     setIsSending(true)
     setSendError(null)
 
+    let uploadedPath: string | null = null
+
     try {
-      await sendMessage(selectedThreadId, body)
+      let attachment: { path: string; type: MessageAttachmentType } | undefined
+
+      if (pendingAttachment && user) {
+        const uploaded = await uploadMessageAttachment({
+          file: pendingAttachment,
+          conversationId: selectedThreadId,
+          senderId: user.id,
+        })
+        uploadedPath = uploaded.path
+        attachment = uploaded
+      }
+
+      await sendMessage(selectedThreadId, body, attachment)
       const rows = await getThreadMessages(selectedThreadId)
       setMessages(rows)
 
       // Refresh thread list to update last message preview
       void loadThreads()
     } catch (error) {
+      if (uploadedPath) {
+        void removeMessageAttachment(uploadedPath).catch(() => {})
+      }
       setSendError(error instanceof Error ? error.message : 'No fue posible enviar el mensaje.')
       setNewMessage(body) // Restore message on error
+      setAttachmentFile(pendingAttachment)
     } finally {
       setIsSending(false)
     }
@@ -510,6 +541,12 @@ export function MessagesPage() {
                     {sendError}
                   </p>
                 ) : null}
+                <AttachmentInput
+                  file={attachmentFile}
+                  onSelect={setAttachmentFile}
+                  disabled={isSending}
+                  label="Adjuntar"
+                />
                 <div className="messages-composer__row">
                   <textarea
                     className="messages-composer__input"
@@ -525,7 +562,7 @@ export function MessagesPage() {
                     type="button"
                     className="button messages-composer__send"
                     onClick={() => void handleSend()}
-                    disabled={isSending || !newMessage.trim()}
+                    disabled={isSending || (!newMessage.trim() && !attachmentFile)}
                     aria-label="Enviar mensaje"
                   >
                     {isSending ? '...' : 'Enviar'}

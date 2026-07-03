@@ -1,6 +1,7 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
+import { getMessageAttachmentSignedUrl } from '../../lib/media-storage'
 import { getSupabaseClientOrThrow } from '../../lib/supabase'
-import type { Message, MessageThread } from './types'
+import type { Message, MessageAttachmentType, MessageThread } from './types'
 
 async function resolveAvatarUrl(avatarPath: string | null): Promise<string | null> {
   if (!avatarPath) return null
@@ -36,6 +37,8 @@ export async function listMyThreads(): Promise<MessageThread[]> {
       otherAvatarPath: await resolveAvatarUrl(row.other_avatar_path),
       lastMessageBody: row.last_message_body,
       lastMessageAt: row.last_message_at,
+      lastMessageAttachmentType:
+        (row.last_message_attachment_type as MessageAttachmentType | null) ?? null,
       unreadCount: row.unread_count,
     })),
   )
@@ -64,20 +67,35 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
     throw new Error(error.message)
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    senderId: row.sender_id,
-    body: row.body,
-    isRead: row.is_read,
-    createdAt: row.created_at,
-  }))
+  return Promise.all(
+    (data ?? []).map(async (row) => ({
+      id: row.id,
+      senderId: row.sender_id,
+      body: row.body,
+      isRead: row.is_read,
+      createdAt: row.created_at,
+      attachment:
+        row.attachment_path && row.attachment_type
+          ? {
+              url: (await getMessageAttachmentSignedUrl(row.attachment_path)) ?? '',
+              type: row.attachment_type as MessageAttachmentType,
+            }
+          : null,
+    })),
+  )
 }
 
-export async function sendMessage(threadId: string, body: string): Promise<string> {
+export async function sendMessage(
+  threadId: string,
+  body: string,
+  attachment?: { path: string; type: MessageAttachmentType } | null,
+): Promise<string> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('send_message', {
     p_thread_id: threadId,
     body_text: body,
+    attachment_path: attachment?.path ?? undefined,
+    attachment_type: attachment?.type ?? undefined,
   })
 
   if (error) {

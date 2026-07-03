@@ -1,6 +1,9 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
+import { getForumAttachmentPublicUrl } from '../../lib/media-storage'
 import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type {
+  ForumAttachment,
+  ForumAttachmentType,
   ForumCategory,
   ForumReply,
   ForumThreadCard,
@@ -40,6 +43,10 @@ interface ForumThreadRow {
   like_count?: number
   viewerLiked?: boolean
   viewer_liked?: boolean
+  attachmentPath?: string | null
+  attachment_path?: string | null
+  attachmentType?: ForumAttachmentType | null
+  attachment_type?: ForumAttachmentType | null
   createdAt?: string
   created_at?: string
   lastActivityAt?: string
@@ -55,7 +62,22 @@ interface ForumReplyRow {
   parent_reply_id?: string | null
   parentAuthorName?: string | null
   parent_author_name?: string | null
+  attachmentPath?: string | null
+  attachment_path?: string | null
+  attachmentType?: ForumAttachmentType | null
+  attachment_type?: ForumAttachmentType | null
   author: ForumAuthorRow
+}
+
+function resolveAttachment(
+  path: string | null | undefined,
+  type: ForumAttachmentType | null | undefined,
+): ForumAttachment | null {
+  if (!path || !type) {
+    return null
+  }
+
+  return { url: getForumAttachmentPublicUrl(path) ?? '', type }
 }
 
 interface ForumThreadDetailRow extends ForumThreadRow {
@@ -99,6 +121,7 @@ async function mapThread(row: ForumThreadRow): Promise<ForumThreadCard> {
     replyCount: Number(row.replyCount ?? row.reply_count ?? 0),
     likeCount: Number(row.likeCount ?? row.like_count ?? 0),
     viewerLiked: Boolean(row.viewerLiked ?? row.viewer_liked ?? false),
+    attachmentType: row.attachmentType ?? row.attachment_type ?? null,
     createdAt: row.createdAt ?? row.created_at ?? '',
     lastActivityAt: row.lastActivityAt ?? row.last_activity_at ?? '',
   }
@@ -112,6 +135,10 @@ async function mapReply(row: ForumReplyRow): Promise<ForumReply> {
     parentReplyId: row.parentReplyId ?? row.parent_reply_id ?? null,
     parentAuthorName: row.parentAuthorName ?? row.parent_author_name ?? null,
     author: await mapAuthor(row.author),
+    attachment: resolveAttachment(
+      row.attachmentPath ?? row.attachment_path,
+      row.attachmentType ?? row.attachment_type,
+    ),
   }
 }
 
@@ -163,6 +190,10 @@ export async function getForumThread(threadSlug: string): Promise<ForumThreadDet
 
   return {
     ...(await mapThread(row)),
+    attachment: resolveAttachment(
+      row.attachmentPath ?? row.attachment_path,
+      row.attachmentType ?? row.attachment_type,
+    ),
     replies: await Promise.all((row.replies ?? []).map(mapReply)),
   }
 }
@@ -171,12 +202,16 @@ export async function createForumTopic(payload: {
   categorySlug: string
   title: string
   body: string
+  attachmentPath?: string | null
+  attachmentType?: ForumAttachmentType | null
 }) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_topic', {
     category_slug: payload.categorySlug,
     title_text: payload.title.trim(),
     body_text: payload.body.trim(),
+    attachment_path: payload.attachmentPath ?? undefined,
+    attachment_type: payload.attachmentType ?? undefined,
   })
 
   if (error) {
@@ -190,12 +225,16 @@ export async function createForumReply(payload: {
   threadSlug: string
   body: string
   parentReplyId?: string | null
+  attachmentPath?: string | null
+  attachmentType?: ForumAttachmentType | null
 }) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_reply', {
     thread_slug: payload.threadSlug,
     body_text: payload.body.trim(),
     parent_reply_id: payload.parentReplyId ?? undefined,
+    attachment_path: payload.attachmentPath ?? undefined,
+    attachment_type: payload.attachmentType ?? undefined,
   })
 
   if (error) {

@@ -13,6 +13,13 @@ export interface ForumAuthor {
   avatarUrl: string | null
 }
 
+export type ForumAttachmentType = 'image' | 'video'
+
+export interface ForumAttachment {
+  url: string
+  type: ForumAttachmentType
+}
+
 export interface ForumThreadCard {
   id: string
   slug: string
@@ -24,6 +31,7 @@ export interface ForumThreadCard {
   replyCount: number
   likeCount: number
   viewerLiked: boolean
+  attachmentType: ForumAttachmentType | null
   createdAt: string
   lastActivityAt: string
 }
@@ -35,10 +43,12 @@ export interface ForumReply {
   parentReplyId: string | null
   parentAuthorName: string | null
   author: ForumAuthor
+  attachment: ForumAttachment | null
 }
 
 export interface ForumThreadDetail extends ForumThreadCard {
   replies: ForumReply[]
+  attachment: ForumAttachment | null
 }
 
 export interface ForumTopicLikeState {

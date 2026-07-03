@@ -1,3 +1,10 @@
+export type MessageAttachmentType = 'image' | 'video'
+
+export interface MessageAttachment {
+  url: string
+  type: MessageAttachmentType
+}
+
 export interface MessageThread {
   threadId: string
   otherProfileId: string
@@ -5,6 +12,7 @@ export interface MessageThread {
   otherAvatarPath: string | null
   lastMessageBody: string
   lastMessageAt: string | null
+  lastMessageAttachmentType: MessageAttachmentType | null
   unreadCount: number
 }
 
@@ -14,4 +22,5 @@ export interface Message {
   body: string
   isRead: boolean
   createdAt: string
+  attachment: MessageAttachment | null
 }

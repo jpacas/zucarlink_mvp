@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { AttachmentInput } from '../components/AttachmentInput'
+import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import {
   createForumReply,
@@ -11,9 +13,15 @@ import {
   getForumTopicLikeState,
   toggleForumTopicLike,
 } from '../features/forum/api'
-import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
+import type {
+  ForumAttachmentType,
+  ForumAuthor,
+  ForumReply,
+  ForumThreadDetail,
+} from '../features/forum/types'
 import { formatDateTime, formatRelative } from '../lib/date'
 import { getInitials } from '../lib/initials'
+import { removeForumAttachment, uploadForumAttachment } from '../lib/media-storage'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
@@ -90,6 +98,7 @@ export function ForumThreadPage() {
   const [thread, setThread] = useState<ForumThreadDetail | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [replyBody, setReplyBody] = useState('')
+  const [replyAttachmentFile, setReplyAttachmentFile] = useState<File | null>(null)
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -183,25 +192,40 @@ export function ForumThreadPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!thread || !replyBody.trim()) {
+    if (!thread || (!replyBody.trim() && !replyAttachmentFile)) {
       return
     }
 
     setIsSubmitting(true)
 
+    let uploadedPath: string | null = null
+    let uploadedType: ForumAttachmentType | null = null
+
     try {
+      if (replyAttachmentFile && user) {
+        const uploaded = await uploadForumAttachment({ file: replyAttachmentFile, userId: user.id })
+        uploadedPath = uploaded.path
+        uploadedType = uploaded.type
+      }
+
       await createForumReply({
         threadSlug: thread.slug,
         body: replyBody,
         parentReplyId: replyTarget?.id ?? null,
+        attachmentPath: uploadedPath,
+        attachmentType: uploadedType,
       })
 
       const refreshed = await getForumThread(thread.slug)
       setThread(refreshed)
       setReplyBody('')
+      setReplyAttachmentFile(null)
       setReplyTarget(null)
       setErrorMessage(null)
     } catch (error) {
+      if (uploadedPath) {
+        void removeForumAttachment(uploadedPath).catch(() => {})
+      }
       setErrorMessage(
         error instanceof Error ? error.message : 'No fue posible publicar la respuesta.',
       )
@@ -288,7 +312,10 @@ export function ForumThreadPage() {
             {formatRelative(reply.createdAt)}
           </time>
         </div>
-        <p>{reply.body}</p>
+        {reply.body ? <p>{reply.body}</p> : null}
+        {reply.attachment ? (
+          <AttachmentView url={reply.attachment.url} type={reply.attachment.type} />
+        ) : null}
         <div className="forum-reply__actions">
           {user ? (
             <button
@@ -392,6 +419,9 @@ export function ForumThreadPage() {
           </time>
         </div>
         <p className="forum-original__body">{thread.body}</p>
+        {thread.attachment ? (
+          <AttachmentView url={thread.attachment.url} type={thread.attachment.type} />
+        ) : null}
         <div className="forum-post-actions">
           {user ? (
             <button
@@ -487,7 +517,13 @@ export function ForumThreadPage() {
               rows={5}
               value={replyBody}
               onChange={(event) => setReplyBody(event.target.value)}
-              required
+            />
+          </div>
+          <div className="field">
+            <AttachmentInput
+              file={replyAttachmentFile}
+              onSelect={setReplyAttachmentFile}
+              disabled={isSubmitting}
             />
           </div>
           {errorMessage ? <p className="error-text">{errorMessage}</p> : null}

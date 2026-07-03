@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
+import { AttachmentInput } from '../components/AttachmentInput'
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumTopic, listForumCategories } from '../features/forum/api'
+import type { ForumAttachmentType } from '../features/forum/types'
+import { removeForumAttachment, uploadForumAttachment } from '../lib/media-storage'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
@@ -16,6 +19,7 @@ export function ForumNewThreadPage() {
   const [title, setTitle] = useState('')
   const [categorySlug, setCategorySlug] = useState('')
   const [body, setBody] = useState('')
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
   // Basta con ser miembro de Zucarlink con el correo confirmado.
   const canCreateTopic = Boolean(user?.email_confirmed_at)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -52,15 +56,29 @@ export function ForumNewThreadPage() {
     setIsSubmitting(true)
     setErrorMessage(null)
 
+    let uploadedPath: string | null = null
+    let uploadedType: ForumAttachmentType | null = null
+
     try {
+      if (attachmentFile && user) {
+        const uploaded = await uploadForumAttachment({ file: attachmentFile, userId: user.id })
+        uploadedPath = uploaded.path
+        uploadedType = uploaded.type
+      }
+
       const created = await createForumTopic({
         categorySlug,
         title,
         body,
+        attachmentPath: uploadedPath,
+        attachmentType: uploadedType,
       })
 
       navigate(`/forum/thread/${created.slug}`, { replace: true })
     } catch (error) {
+      if (uploadedPath) {
+        void removeForumAttachment(uploadedPath).catch(() => {})
+      }
       setErrorMessage(
         error instanceof Error ? error.message : 'No fue posible publicar el tema.',
       )
@@ -152,6 +170,13 @@ export function ForumNewThreadPage() {
             onChange={(event) => setBody(event.target.value)}
             minLength={24}
             required
+          />
+        </div>
+        <div className="field">
+          <AttachmentInput
+            file={attachmentFile}
+            onSelect={setAttachmentFile}
+            disabled={isSubmitting}
           />
         </div>
         {errorMessage ? <p className="error-text">{errorMessage}</p> : null}

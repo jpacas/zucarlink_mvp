@@ -351,6 +351,14 @@ export function ForumPage() {
                 {thread.title}
               </Link>
               <p>{thread.excerpt}</p>
+              {thread.attachmentType ? (
+                <span
+                  className="attachment-badge forum-card__media-badge"
+                  aria-label={thread.attachmentType === 'video' ? 'Incluye video' : 'Incluye imagen'}
+                >
+                  {thread.attachmentType === 'video' ? '🎬' : '📷'}
+                </span>
+              ) : null}
               <div className="forum-card__footer">
                 <ForumAuthorSummary author={thread.author} />
                 <div className="forum-card__actions">

@@ -280,6 +280,8 @@ export type Database = {
       }
       forum_replies: {
         Row: {
+          attachment_path: string | null
+          attachment_type: string | null
           author_id: string
           body: string
           created_at: string
@@ -290,6 +292,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_path?: string | null
+          attachment_type?: string | null
           author_id: string
           body: string
           created_at?: string
@@ -300,6 +304,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_path?: string | null
+          attachment_type?: string | null
           author_id?: string
           body?: string
           created_at?: string
@@ -354,6 +360,8 @@ export type Database = {
       }
       forum_topics: {
         Row: {
+          attachment_path: string | null
+          attachment_type: string | null
           author_id: string
           body: string
           category_id: string
@@ -367,6 +375,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_path?: string | null
+          attachment_type?: string | null
           author_id: string
           body: string
           category_id: string
@@ -380,6 +390,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_path?: string | null
+          attachment_type?: string | null
           author_id?: string
           body?: string
           category_id?: string
@@ -404,6 +416,8 @@ export type Database = {
       }
       messages: {
         Row: {
+          attachment_path: string | null
+          attachment_type: string | null
           body: string
           conversation_id: string
           created_at: string
@@ -413,6 +427,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_path?: string | null
+          attachment_type?: string | null
           body: string
           conversation_id: string
           created_at?: string
@@ -422,6 +438,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_path?: string | null
+          attachment_type?: string | null
           body?: string
           conversation_id?: string
           created_at?: string
@@ -808,6 +826,8 @@ export type Database = {
       count_my_unread: { Args: never; Returns: number }
       create_forum_reply: {
         Args: {
+          attachment_path?: string
+          attachment_type?: string
           body_text: string
           parent_reply_id?: string
           thread_slug: string
@@ -817,7 +837,13 @@ export type Database = {
         }[]
       }
       create_forum_topic: {
-        Args: { body_text: string; category_slug: string; title_text: string }
+        Args: {
+          attachment_path?: string
+          attachment_type?: string
+          body_text: string
+          category_slug: string
+          title_text: string
+        }
         Returns: {
           slug: string
         }[]
@@ -867,6 +893,8 @@ export type Database = {
       get_forum_thread: {
         Args: { thread_slug: string }
         Returns: {
+          attachment_path: string
+          attachment_type: string
           author: Json
           body: string
           category: Json
@@ -940,6 +968,8 @@ export type Database = {
       get_thread_messages: {
         Args: { p_thread_id: string }
         Returns: {
+          attachment_path: string
+          attachment_type: string
           body: string
           created_at: string
           id: string
@@ -961,6 +991,7 @@ export type Database = {
       list_forum_threads: {
         Args: { category_slug?: string; limit_count?: number }
         Returns: {
+          attachment_type: string
           author: Json
           body: string
           category: Json
@@ -979,6 +1010,7 @@ export type Database = {
         Args: never
         Returns: {
           last_message_at: string
+          last_message_attachment_type: string
           last_message_body: string
           other_avatar_path: string
           other_full_name: string
@@ -1087,7 +1119,12 @@ export type Database = {
         }[]
       }
       send_message: {
-        Args: { body_text: string; p_thread_id: string }
+        Args: {
+          attachment_path?: string
+          attachment_type?: string
+          body_text: string
+          p_thread_id: string
+        }
         Returns: string
       }
       slugify: { Args: { input: string }; Returns: string }
