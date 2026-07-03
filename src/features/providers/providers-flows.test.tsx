@@ -280,7 +280,7 @@ it('lets an anonymous visitor submit a provider lead without logging in', async 
       provider_id: 'provider-automation',
       name_text: 'Visitante Anónimo',
       email_text: 'visitante@ingenio.com',
-      company_text: null,
+      company_text: undefined,
       message_text: 'Quiero información sin crear cuenta.',
     },
   })

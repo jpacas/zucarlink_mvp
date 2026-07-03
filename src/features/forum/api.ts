@@ -141,15 +141,15 @@ export async function listForumCategories(): Promise<ForumCategory[]> {
 export async function listForumThreads(categorySlug?: string, limitCount?: number) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('list_forum_threads', {
-    category_slug: categorySlug ?? null,
-    limit_count: limitCount ?? null,
+    category_slug: categorySlug ?? undefined,
+    limit_count: limitCount ?? undefined,
   })
 
   if (error) {
     throw new Error(error.message)
   }
 
-  return Promise.all(((data ?? []) as ForumThreadRow[]).map(mapThread))
+  return Promise.all(((data ?? []) as unknown as ForumThreadRow[]).map(mapThread))
 }
 
 export async function getForumThread(threadSlug: string): Promise<ForumThreadDetail> {
@@ -162,7 +162,7 @@ export async function getForumThread(threadSlug: string): Promise<ForumThreadDet
     throw new Error(error.message)
   }
 
-  const row = (Array.isArray(data) ? data[0] : data ?? null) as ForumThreadDetailRow | null
+  const row = (Array.isArray(data) ? data[0] : data ?? null) as unknown as ForumThreadDetailRow | null
 
   if (!row) {
     throw new Error('Tema no encontrado.')
@@ -202,7 +202,7 @@ export async function createForumReply(payload: {
   const { data, error } = await client.rpc('create_forum_reply', {
     thread_slug: payload.threadSlug,
     body_text: payload.body.trim(),
-    parent_reply_id: payload.parentReplyId ?? null,
+    parent_reply_id: payload.parentReplyId ?? undefined,
   })
 
   if (error) {

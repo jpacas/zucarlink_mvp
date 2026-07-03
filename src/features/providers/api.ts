@@ -166,16 +166,16 @@ export async function searchProviders(filters?: {
 }): Promise<ProviderCard[]> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('search_providers', {
-    search_text: filters?.searchText?.trim() || null,
-    category_slug: filters?.categorySlug?.trim().toLowerCase() || null,
-    country_filter: filters?.country?.trim() || null,
+    search_text: filters?.searchText?.trim() || undefined,
+    category_slug: filters?.categorySlug?.trim().toLowerCase() || undefined,
+    country_filter: filters?.country?.trim() || undefined,
   })
 
   if (error) {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as ProviderCardRow[]).map(mapCard)
+  return ((data ?? []) as unknown as ProviderCardRow[]).map(mapCard)
 }
 
 export async function getProviderBySlug(slug: string): Promise<ProviderDetail> {
@@ -188,7 +188,7 @@ export async function getProviderBySlug(slug: string): Promise<ProviderDetail> {
     throw new Error(error.message)
   }
 
-  const row = (Array.isArray(data) ? data[0] : data ?? null) as ProviderDetailRow | null
+  const row = (Array.isArray(data) ? data[0] : data ?? null) as unknown as ProviderDetailRow | null
 
   if (!row) {
     throw new Error('Proveedor no encontrado.')
@@ -205,7 +205,7 @@ export async function listAdminProviders(): Promise<AdminProviderRecord[]> {
     throw new Error(error.message)
   }
 
-  return ((data ?? []) as AdminProviderRow[]).map((row) => ({
+  return ((data ?? []) as unknown as AdminProviderRow[]).map((row) => ({
     ...mapCard(row),
     status: row.status,
   }))
@@ -346,7 +346,7 @@ export async function createProviderLead(payload: ProviderLeadInput) {
     provider_id: payload.providerId,
     name_text: payload.name.trim(),
     email_text: payload.email.trim(),
-    company_text: payload.company.trim() || null,
+    company_text: payload.company.trim() || undefined,
     message_text: payload.message.trim(),
   })
 

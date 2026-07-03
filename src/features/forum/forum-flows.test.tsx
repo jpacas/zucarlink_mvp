@@ -400,7 +400,7 @@ it('lets an authenticated member reply to a thread directly from the listing', a
     expect(createReply).toHaveBeenCalledWith({
       thread_slug: 'automatizacion-mano-de-obra-barata',
       body_text: 'Aporte rápido desde el listado.',
-      parent_reply_id: null,
+      parent_reply_id: undefined,
     })
   })
   expect(await screen.findByText('Respuesta publicada.')).toBeInTheDocument()

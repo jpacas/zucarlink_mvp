@@ -122,9 +122,9 @@ export async function searchDirectoryProfiles(
 ): Promise<DirectoryProfileCard[]> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('search_directory_profiles', {
-    search_text: filters.searchText?.trim() || null,
-    country_filter: filters.country?.trim() || null,
-    specialty_slug_filter: filters.specialty?.trim().toLowerCase() || null,
+    search_text: filters.searchText?.trim() || undefined,
+    country_filter: filters.country?.trim() || undefined,
+    specialty_slug_filter: filters.specialty?.trim().toLowerCase() || undefined,
   })
 
   if (error) {

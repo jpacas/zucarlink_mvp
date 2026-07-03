@@ -68,7 +68,7 @@ async function ensureCompanyId(companyName: string, country: string) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('upsert_company', {
     p_name: cleanName,
-    p_country: country.trim() || null,
+    p_country: country.trim() || undefined,
   })
 
   if (error) {
