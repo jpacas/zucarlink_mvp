@@ -341,15 +341,12 @@ function isGenericAvatar(avatarUrl) {
   return !avatarUrl || avatarUrl.includes(GENERIC_AVATAR_MARKER)
 }
 
-function computeProfileStatus({ country, roleTitle, companyName, shortBio, specialtySlugs }) {
-  const complete =
-    Boolean(country?.trim()) &&
-    Boolean(roleTitle?.trim()) &&
-    Boolean(companyName?.trim()) &&
-    Boolean(shortBio?.trim()) &&
-    specialtySlugs.length > 0
-
-  return complete ? 'complete' : 'incomplete'
+function computeProfileStatus({ country }) {
+  // Solo país es obligatorio para listar el perfil (nombre siempre viene del dump).
+  // Cargo, empresa, bio y especialidades son deseables pero no bloquean la visibilidad:
+  // exigirlos dejaba fuera a la mayoría de usuarios legacy, que rara vez completan
+  // todos esos campos en el sistema anterior.
+  return country?.trim() ? 'complete' : 'incomplete'
 }
 
 // --- Operaciones contra Supabase ---

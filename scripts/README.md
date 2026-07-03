@@ -43,3 +43,16 @@ node scripts/cleanup-demo-data.mjs --execute    # real
 
 Es independiente de `migrate-legacy-users.mjs`: puedes limpiar los datos demo
 en el momento que decidas, antes o después de importar usuarios reales.
+
+## `backfill-profile-status.mjs`
+
+Recalcula `profiles.profile_status` para perfiles existentes marcados
+`incomplete`, usando el criterio vigente (país presente => `complete`).
+Útil si el criterio de "perfil completo" cambia después de haber migrado
+usuarios, ya que las vistas públicas y privadas del directorio solo listan
+perfiles con `profile_status = 'complete'`.
+
+```
+node scripts/backfill-profile-status.mjs              # dry-run
+node scripts/backfill-profile-status.mjs --execute    # real
+```
