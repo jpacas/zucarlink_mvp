@@ -152,7 +152,7 @@ async function loadExperiences(profileId: string) {
     throw new Error(error.message)
   }
 
-  return (data ?? []) as ExperienceRow[]
+  return data ?? []
 }
 
 function mapExperience(
@@ -204,7 +204,7 @@ export async function getCurrentProfile(user: User): Promise<CurrentProfile | nu
     return null
   }
 
-  const profile = data as ProfileRow
+  const profile = data as unknown as ProfileRow
   const [specialties, experiences] = await Promise.all([
     loadProfileSpecialties(user.id),
     loadExperiences(user.id),
