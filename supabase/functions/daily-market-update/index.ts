@@ -12,17 +12,22 @@ Deno.serve(async (req: Request) => {
 
   const body = await req.json().catch(() => ({}))
 
-  // En secuencia: el resumen debe escribirse sobre la fila del día que el job
-  // de precios acaba de insertar. Si un job falla, el otro corre igual.
   const prices = await runFetchPrices({ backfill: body?.backfill === true }).catch((error) => {
     console.error('[daily-market-update] fetch prices job failed:', error)
     return { ok: false, error: String(error) }
   })
 
-  const summary = await runMarketSummary().catch((error) => {
-    console.error('[daily-market-update] market summary job failed:', error)
-    return { ok: false, error: String(error) }
-  })
+  // El resumen de mercado es semanal (una entrada por semana en
+  // price_market_summaries): solo corre los lunes, salvo que se fuerce
+  // explícitamente (ej. para sembrar la primera entrada tras el deploy).
+  const isSummaryDay = new Date().getUTCDay() === 1
+  const summary =
+    isSummaryDay || body?.forceSummary === true
+      ? await runMarketSummary().catch((error) => {
+          console.error('[daily-market-update] market summary job failed:', error)
+          return { ok: false, error: String(error) }
+        })
+      : { ok: true, skipped: true, reason: 'not-summary-day' }
 
   const { error: logError } = await getAdminClient()
     .from('market_update_runs')

@@ -1,21 +1,39 @@
 import Anthropic from 'npm:@anthropic-ai/sdk'
 import { getAdminClient } from '../../_shared/supabase-admin.ts'
 
-const LABEL = 'Azúcar crudo NY No.11'
 const MAX_SOURCES = 4
 const MIN_SUMMARY_CHARS = 20
 
 const SYSTEM_PROMPT =
   'Eres analista de mercados para una plataforma del gremio azucarero centroamericano. ' +
   'Escribes en español neutro, con tono profesional y sin sensacionalismo. ' +
-  'Usa el Sistema Internacional de unidades; el azúcar crudo NY No.11 se expresa en ¢ USD/lb.'
+  'Usa el Sistema Internacional de unidades.'
 
-const USER_PROMPT =
-  'Busca en la web las noticias de las últimas 24–48 horas que estén moviendo el precio del ' +
-  'azúcar crudo (contrato ICE No.11). Redacta un párrafo único de máximo 90 palabras explicando ' +
-  'los 2–3 factores principales (por ejemplo: zafra en Brasil, monzón en India/Tailandia, ' +
-  'petróleo/etanol, posiciones de fondos, clima). Sin viñetas, sin encabezados y sin cifras ' +
-  'inventadas: incluye solo lo respaldado por las búsquedas.'
+interface LabelConfig {
+  label: string
+  userPrompt: string
+}
+
+const LABELS: LabelConfig[] = [
+  {
+    label: 'Azúcar crudo NY No.11',
+    userPrompt:
+      'Busca en la web las noticias más relevantes de la última semana que estén moviendo el ' +
+      'precio del azúcar crudo (contrato ICE No.11, cotizado en ¢ USD/lb). Redacta un párrafo ' +
+      'único de máximo 90 palabras explicando los 2–3 factores principales (por ejemplo: zafra ' +
+      'en Brasil, monzón en India/Tailandia, petróleo/etanol, posiciones de fondos, clima). Sin ' +
+      'viñetas, sin encabezados y sin cifras inventadas: incluye solo lo respaldado por las búsquedas.',
+  },
+  {
+    label: 'Azúcar refinada',
+    userPrompt:
+      'Busca en la web las noticias más relevantes de la última semana que estén moviendo el ' +
+      'precio del azúcar blanca/refinada (contrato ICE White Sugar No.5, cotizado en USD/t). ' +
+      'Redacta un párrafo único de máximo 90 palabras explicando los 2–3 factores principales ' +
+      '(por ejemplo: spread crudo-refinado, demanda asiática, oferta europea, fletes, clima). Sin ' +
+      'viñetas, sin encabezados y sin cifras inventadas: incluye solo lo respaldado por las búsquedas.',
+  },
+]
 
 interface SummarySource {
   label: string
@@ -41,8 +59,13 @@ function extractSummaryAndSources(content: Anthropic.ContentBlock[]) {
     sources.push({ label: title?.trim() || hostname(url), url })
   }
 
-  for (const block of content) {
-    if (block.type === 'text') {
+  const lastToolResultIndex = content.reduce(
+    (lastIndex, block, index) => (block.type === 'web_search_tool_result' ? index : lastIndex),
+    -1,
+  )
+
+  for (const [index, block] of content.entries()) {
+    if (block.type === 'text' && index > lastToolResultIndex) {
       summary += block.text
       for (const citation of block.citations ?? []) {
         if ('url' in citation) addSource(citation.url, citation.title ?? undefined)
@@ -50,7 +73,6 @@ function extractSummaryAndSources(content: Anthropic.ContentBlock[]) {
     }
   }
 
-  // Fallback: si el texto no trajo citations, usar los resultados de búsqueda.
   if (sources.length === 0) {
     for (const block of content) {
       if (block.type === 'web_search_tool_result' && Array.isArray(block.content)) {
@@ -64,49 +86,68 @@ function extractSummaryAndSources(content: Anthropic.ContentBlock[]) {
   return { summary: summary.trim(), sources }
 }
 
-export async function runMarketSummary() {
+function currentWeekRange(): { periodStart: string; periodEnd: string } {
+  const now = new Date()
+  const day = now.getUTCDay() // 0 = domingo ... 1 = lunes
+  const diffToMonday = day === 0 ? 6 : day - 1
+  const monday = new Date(now)
+  monday.setUTCDate(now.getUTCDate() - diffToMonday)
+  const sunday = new Date(monday)
+  sunday.setUTCDate(monday.getUTCDate() + 6)
+  return {
+    periodStart: monday.toISOString().slice(0, 10),
+    periodEnd: sunday.toISOString().slice(0, 10),
+  }
+}
+
+async function runForLabel(anthropic: Anthropic, config: LabelConfig) {
+  const { periodStart, periodEnd } = currentWeekRange()
   const admin = getAdminClient()
 
-  // La UI (FeaturedPriceCard) muestra el resumen de la fila más reciente del label destacado.
-  const { data: target, error: targetError } = await admin
-    .from('price_items')
-    .select('id, observed_at')
-    .eq('label', LABEL)
-    .eq('status', 'published')
-    .order('observed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (targetError) throw new Error(`No se pudo buscar la fila destino: ${targetError.message}`)
-  if (!target) throw new Error(`No existe ninguna fila publicada con label "${LABEL}"`)
-
-  const anthropic = new Anthropic()
   const message = await anthropic.messages.create({
     model: 'claude-opus-4-8',
     max_tokens: 1024,
     tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 4 }],
     system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: USER_PROMPT }],
+    messages: [{ role: 'user', content: config.userPrompt }],
   })
 
   const { summary, sources } = extractSummaryAndSources(message.content)
   if (summary.length < MIN_SUMMARY_CHARS) {
-    throw new Error(`El modelo devolvió un resumen demasiado corto (${summary.length} caracteres)`)
+    throw new Error(
+      `El modelo devolvió un resumen demasiado corto para "${config.label}" (${summary.length} caracteres)`,
+    )
   }
 
-  const { error: updateError } = await admin
-    .from('price_items')
-    .update({
-      market_summary: summary,
-      market_summary_sources: sources,
-      market_summary_updated_at: new Date().toISOString(),
-    })
-    .eq('id', target.id)
-  if (updateError) throw new Error(`No se pudo guardar el resumen: ${updateError.message}`)
-
-  return {
-    ok: true,
-    target_observed_at: target.observed_at,
-    chars: summary.length,
-    sources: sources.length,
+  const { error: upsertError } = await admin.from('price_market_summaries').upsert(
+    {
+      label: config.label,
+      period_start: periodStart,
+      period_end: periodEnd,
+      summary,
+      sources,
+    },
+    { onConflict: 'label,period_start' },
+  )
+  if (upsertError) {
+    throw new Error(`No se pudo guardar el resumen de "${config.label}": ${upsertError.message}`)
   }
+
+  return { label: config.label, period_start: periodStart, chars: summary.length, sources: sources.length }
+}
+
+export async function runMarketSummary() {
+  const anthropic = new Anthropic()
+  const results = []
+
+  for (const config of LABELS) {
+    const result = await runForLabel(anthropic, config).catch((error) => ({
+      label: config.label,
+      ok: false,
+      error: String(error),
+    }))
+    results.push(result)
+  }
+
+  return { ok: results.every((r) => !('ok' in r) || r.ok !== false), results }
 }

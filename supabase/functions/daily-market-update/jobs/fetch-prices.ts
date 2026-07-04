@@ -4,7 +4,8 @@ import { getAdminClient } from '../../_shared/supabase-admin.ts'
 const LABEL = 'Azúcar crudo NY No.11'
 const UNIT = '¢ USD/lb'
 const NOTES = 'Cierre diario automático (dato retrasado, no feed en tiempo real).'
-const RETENTION_DAYS = 400
+// ~5 años de historial para el gráfico de precio clave.
+const RETENTION_DAYS = 1900
 
 // Yahoo/CNBC rechazan peticiones sin User-Agent de navegador.
 const BROWSER_UA =
@@ -69,7 +70,7 @@ async function fetchCnbc(): Promise<ClosePoint[]> {
 }
 
 export async function runFetchPrices(options: { backfill?: boolean } = {}) {
-  const range = options.backfill ? '3mo' : '5d'
+  const range = options.backfill ? '5y' : '5d'
 
   let points: ClosePoint[]
   let fallbackUsed = false
@@ -103,7 +104,7 @@ export async function runFetchPrices(options: { backfill?: boolean } = {}) {
     .upsert(rows, { onConflict: 'label,observed_at' })
   if (error) throw new Error(`Upsert en price_items falló: ${error.message}`)
 
-  // Acota la serie a ~13 meses; la UI grafica todo el histórico del label.
+  // Acota la serie a ~5 años; la UI grafica todo el histórico del label.
   const cutoff = new Date()
   cutoff.setUTCDate(cutoff.getUTCDate() - RETENTION_DAYS)
   const { error: cleanupError } = await admin
