@@ -104,10 +104,13 @@ async function runForLabel(anthropic: Anthropic, config: LabelConfig) {
   const { periodStart, periodEnd } = currentWeekRange()
   const admin = getAdminClient()
 
+  // Sonnet en vez de Opus, y menos búsquedas: un resumen de 90 palabras no
+  // necesita el modelo más pesado, y la invocación completa debe caber en el
+  // límite de idle timeout (150s) de la Edge Function.
   const message = await anthropic.messages.create({
-    model: 'claude-opus-4-8',
-    max_tokens: 1024,
-    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 4 }],
+    model: 'claude-sonnet-5',
+    max_tokens: 512,
+    tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 2 }],
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: config.userPrompt }],
   })
@@ -136,14 +139,23 @@ async function runForLabel(anthropic: Anthropic, config: LabelConfig) {
   return { label: config.label, period_start: periodStart, chars: summary.length, sources: sources.length }
 }
 
-export async function runMarketSummary() {
+export async function runMarketSummary(options: { label?: string } = {}) {
   const anthropic = new Anthropic()
 
-  // En paralelo: cada label es independiente y ambos esperan en I/O (llamada a
-  // Anthropic con web_search), correr en serie solo duplicaba el tiempo de
-  // pared de la invocación sin necesidad.
+  const targets = options.label
+    ? LABELS.filter((config) => config.label === options.label)
+    : LABELS
+  if (targets.length === 0) {
+    throw new Error(`Label desconocido para el resumen de mercado: "${options.label}"`)
+  }
+
+  // Cada label es una invocación independiente a Anthropic con web_search
+  // (I/O-bound, puede tardar cerca del límite de idle timeout de 150s de la
+  // Edge Function). Correrlas en paralelo dentro de un mismo request seguía
+  // arriesgando ese límite con 2+ labels, así que el caller (index.ts /
+  // el cron) dispara un request por label en vez de todo junto.
   const results = await Promise.all(
-    LABELS.map((config) =>
+    targets.map((config) =>
       runForLabel(anthropic, config).catch((error) => ({
         label: config.label,
         ok: false,
