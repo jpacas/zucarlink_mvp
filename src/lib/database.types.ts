@@ -515,6 +515,36 @@ export type Database = {
         }
         Relationships: []
       }
+      price_market_summaries: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          period_end: string
+          period_start: string
+          sources: Json | null
+          summary: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          period_end: string
+          period_start: string
+          sources?: Json | null
+          summary: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          period_end?: string
+          period_start?: string
+          sources?: Json | null
+          summary?: string
+        }
+        Relationships: []
+      }
       profile_specialties: {
         Row: {
           created_at: string

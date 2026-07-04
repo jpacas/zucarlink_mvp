@@ -1408,9 +1408,58 @@ fieldset.field {
   margin: 4px 0;
 }
 
-.price-trend-card__summary {
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+.price-insight-feed {
+  padding-top: 4px;
+}
+
+.price-insight-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.price-insight-item {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--brand-soft);
+}
+
+.price-insight-item__period {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.price-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.price-tab {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.price-tab:hover {
+  border-color: rgba(0, 41, 226, 0.35);
+}
+
+.price-tab--active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--white);
 }
 
 .price-trend-card__sources {

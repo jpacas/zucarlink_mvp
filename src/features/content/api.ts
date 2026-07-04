@@ -5,6 +5,7 @@ import type {
   EventItem,
   GroupedPriceItems,
   PriceItem,
+  PriceMarketSummary,
   PriceMarketSummarySource,
 } from './types'
 
@@ -54,9 +55,15 @@ interface PriceItemRow {
   notes?: string | null
   status: 'draft' | 'published'
   featured?: boolean | null
-  market_summary?: string | null
-  market_summary_sources?: PriceMarketSummarySource[] | null
-  market_summary_updated_at?: string | null
+}
+
+interface PriceMarketSummaryRow {
+  id: string
+  label: string
+  period_start: string
+  period_end: string
+  summary: string
+  sources?: PriceMarketSummarySource[] | null
 }
 
 function mapContentItem(row: ContentItemRow): ContentItem {
@@ -115,9 +122,17 @@ function mapPriceItem(row: PriceItemRow): PriceItem {
     notes: row.notes ?? undefined,
     status: row.status,
     featured: row.featured ?? false,
-    marketSummary: row.market_summary ?? undefined,
-    marketSummarySources: row.market_summary_sources ?? undefined,
-    marketSummaryUpdatedAt: row.market_summary_updated_at ?? undefined,
+  }
+}
+
+function mapPriceMarketSummary(row: PriceMarketSummaryRow): PriceMarketSummary {
+  return {
+    id: row.id,
+    label: row.label,
+    periodStart: row.period_start,
+    periodEnd: row.period_end,
+    summary: row.summary,
+    sources: row.sources ?? [],
   }
 }
 
@@ -225,6 +240,21 @@ export async function listFeaturedContent(limitCount?: number): Promise<ContentI
   const rows = (data ?? []) as unknown as ContentItemRow[]
   const limitedRows = typeof limitCount === 'number' ? rows.slice(0, limitCount) : rows
   return limitedRows.map(mapContentItem)
+}
+
+export async function listPriceMarketSummaries(label: string): Promise<PriceMarketSummary[]> {
+  const client = getSupabaseClientOrThrow()
+  const { data, error } = await client
+    .from('price_market_summaries')
+    .select()
+    .eq('label', label)
+    .order('period_start', { ascending: false })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return ((data ?? []) as unknown as PriceMarketSummaryRow[]).map(mapPriceMarketSummary)
 }
 
 export function groupPriceSeries(items: PriceItem[]): GroupedPriceItems {

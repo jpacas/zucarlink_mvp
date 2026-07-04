@@ -66,14 +66,20 @@ export interface PriceItem {
   sourceUrl?: string
   notes?: string
   featured?: boolean
-  marketSummary?: string
-  marketSummarySources?: PriceMarketSummarySource[]
-  marketSummaryUpdatedAt?: string
 }
 
 export interface PriceSeries {
   label: string
   history: PriceItem[]
+}
+
+export interface PriceMarketSummary {
+  id: string
+  label: string
+  periodStart: string
+  periodEnd: string
+  summary: string
+  sources: PriceMarketSummarySource[]
 }
 
 export interface GroupedPriceItems {

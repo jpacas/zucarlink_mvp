@@ -1,13 +1,14 @@
 import { formatDate } from '../../../lib/date'
 import { PriceTrendChart } from './PriceTrendChart'
-import type { PriceItem } from '../types'
+import type { PriceItem, PriceMarketSummary } from '../types'
 
 interface FeaturedPriceCardProps {
   label: string
   history: PriceItem[]
+  summaries: PriceMarketSummary[]
 }
 
-export function FeaturedPriceCard({ label, history }: FeaturedPriceCardProps) {
+export function FeaturedPriceCard({ label, history, summaries }: FeaturedPriceCardProps) {
   const latest = history[history.length - 1]
   const pointsWithValue = history.filter((item) => typeof item.valueNumeric === 'number')
   const previous = pointsWithValue[pointsWithValue.length - 2]
@@ -54,26 +55,34 @@ export function FeaturedPriceCard({ label, history }: FeaturedPriceCardProps) {
         ) : null}
       </div>
       <PriceTrendChart history={history} unit={latest.unit} />
-      {latest.marketSummary ? (
-        <div className="price-trend-card__summary">
-          <p className="eyebrow">¿Qué lo está moviendo?</p>
-          <p>{latest.marketSummary}</p>
-          {latest.marketSummarySources?.length ? (
-            <ul className="price-trend-card__sources">
-              {latest.marketSummarySources.map((source) => (
-                <li key={source.url}>
-                  <a href={source.url} target="_blank" rel="noreferrer">
-                    {source.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {latest.marketSummaryUpdatedAt ? (
-            <p className="helper-text">Actualizado el {formatDate(latest.marketSummaryUpdatedAt)}</p>
-          ) : null}
-        </div>
-      ) : null}
+      <div className="price-insight-feed stack stack--compact">
+        <p className="eyebrow">¿Qué ha estado moviendo el precio?</p>
+        {summaries.length > 0 ? (
+          <ul className="price-insight-list">
+            {summaries.map((entry) => (
+              <li key={entry.id} className="price-insight-item">
+                <p className="price-insight-item__period">
+                  Semana del {formatDate(entry.periodStart)} al {formatDate(entry.periodEnd)}
+                </p>
+                <p>{entry.summary}</p>
+                {entry.sources.length ? (
+                  <ul className="price-trend-card__sources">
+                    {entry.sources.map((source) => (
+                      <li key={source.url}>
+                        <a href={source.url} target="_blank" rel="noreferrer">
+                          {source.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="helper-text">Todavía no hay resúmenes semanales para este indicador.</p>
+        )}
+      </div>
     </article>
   )
 }

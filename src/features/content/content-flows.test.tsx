@@ -361,7 +361,7 @@ it('groups featured price series with full history and keeps the rest as flat it
   expect(result.others.map((item) => item.id)).toEqual(['price-3'])
 })
 
-it('renders a featured price card with trend delta and market summary sources', () => {
+it('renders a featured price card with trend delta and a weekly summary feed', () => {
   render(
     <FeaturedPriceCard
       label="Azúcar crudo"
@@ -385,9 +385,16 @@ it('renders a featured price card with trend delta and market summary sources', 
           observedAt: '2026-04-16',
           status: 'published',
           featured: true,
-          marketSummary: 'Suben las referencias por menor oferta en Brasil.',
-          marketSummarySources: [{ label: 'Reuters', url: 'https://example.com/reuters' }],
-          marketSummaryUpdatedAt: '2026-04-16',
+        },
+      ]}
+      summaries={[
+        {
+          id: 'summary-1',
+          label: 'Azúcar crudo',
+          periodStart: '2026-04-13',
+          periodEnd: '2026-04-19',
+          summary: 'Suben las referencias por menor oferta en Brasil.',
+          sources: [{ label: 'Reuters', url: 'https://example.com/reuters' }],
         },
       ]}
     />,
@@ -403,6 +410,31 @@ it('renders a featured price card with trend delta and market summary sources', 
     'href',
     'https://example.com/reuters',
   )
+})
+
+it('shows a placeholder when a price series has no weekly summaries yet', () => {
+  render(
+    <FeaturedPriceCard
+      label="Azúcar refinada"
+      history={[
+        {
+          id: 'price-1',
+          label: 'Azúcar refinada',
+          value: '444.80',
+          valueNumeric: 444.8,
+          unit: 'USD/t',
+          observedAt: '2026-06-24',
+          status: 'published',
+          featured: true,
+        },
+      ]}
+      summaries={[]}
+    />,
+  )
+
+  expect(
+    screen.getByText('Todavía no hay resúmenes semanales para este indicador.'),
+  ).toBeInTheDocument()
 })
 
 it('lists featured published content only', async () => {

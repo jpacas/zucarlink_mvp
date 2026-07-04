@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
-import { FeaturedPriceCard } from '../features/content/components/FeaturedPriceCard'
 import { PriceCard } from '../features/content/components/PriceCard'
+import { SugarPriceModule } from '../features/content/components/SugarPriceModule'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { groupPriceSeries, listPublishedPrices } from '../features/content/api'
 import type { PriceItem } from '../features/content/types'
@@ -45,11 +45,7 @@ export function PricesPage() {
           {featured.length > 0 ? (
             <div className="stack">
               <SectionHeader eyebrow="Mercado" title="Precios clave" />
-              <div className="content-card-grid">
-                {featured.map((series) => (
-                  <FeaturedPriceCard key={series.label} label={series.label} history={series.history} />
-                ))}
-              </div>
+              <SugarPriceModule series={featured} />
             </div>
           ) : null}
           {others.length > 0 ? (

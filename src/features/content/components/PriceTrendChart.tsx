@@ -1,4 +1,4 @@
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 import type { PriceItem } from '../types'
 
@@ -28,8 +28,14 @@ export function PriceTrendChart({ history, unit }: PriceTrendChartProps) {
 
   return (
     <div className="price-trend-card__chart">
-      <ResponsiveContainer width="100%" height={160}>
-        <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <defs>
+            <linearGradient id="priceTrendFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
           <XAxis
             dataKey="observedAt"
             tickFormatter={formatAxisDate}
@@ -43,15 +49,16 @@ export function PriceTrendChart({ history, unit }: PriceTrendChartProps) {
             labelFormatter={(value) => formatAxisDate(String(value))}
             formatter={(value) => [unit ? `${value} ${unit}` : String(value), 'Valor']}
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="value"
             stroke="var(--brand)"
             strokeWidth={2}
+            fill="url(#priceTrendFill)"
             dot={false}
             activeDot={{ r: 4 }}
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   )
