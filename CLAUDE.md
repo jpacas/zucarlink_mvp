@@ -1,5 +1,46 @@
 # Zucarlink MVP — Guías para Claude
 
+## gstack
+
+Use the `/browse` skill from gstack for all web browsing. Never use `mcp__claude-in-chrome__*` tools.
+
+Available skills:
+- `/office-hours` - YC-style office hours / product brainstorming
+- `/plan-ceo-review` - CEO-level plan review
+- `/plan-eng-review` - Engineering plan review
+- `/plan-design-review` - Design plan review
+- `/design-consultation` - Design system consultation
+- `/design-shotgun` - Rapid design exploration
+- `/design-html` - HTML design generation
+- `/review` - Code review
+- `/ship` - Ship code
+- `/land-and-deploy` - Land and deploy changes
+- `/canary` - Canary deployments
+- `/benchmark` - Performance benchmarking
+- `/browse` - Web browsing (use this for ALL web browsing)
+- `/connect-chrome` - Connect to Chrome
+- `/qa` - QA testing + fix bugs
+- `/qa-only` - QA report only (no fixes)
+- `/design-review` - Visual QA and design polish
+- `/setup-browser-cookies` - Set up browser cookies
+- `/setup-deploy` - Setup deployment
+- `/setup-gbrain` - Setup gbrain
+- `/retro` - Retrospective
+- `/investigate` - Investigation
+- `/document-release` - Post-ship docs update
+- `/document-generate` - Generate documentation
+- `/codex` - Code exploration
+- `/cso` - Chief Strategy Officer
+- `/autoplan` - Automatic planning
+- `/plan-devex-review` - Plan devex review
+- `/devex-review` - Developer experience review
+- `/careful` - Careful mode
+- `/freeze` - Freeze changes
+- `/guard` - Guard mode
+- `/unfreeze` - Unfreeze changes
+- `/gstack-upgrade` - Upgrade gstack
+- `/learn` - Learning mode
+
 ## Manual de Marca (implementado)
 
 El sitio implementa fidelidad total al Manual de Marca Básico de Zucarlink (Abril 2020).
