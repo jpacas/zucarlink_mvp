@@ -138,16 +138,19 @@ async function runForLabel(anthropic: Anthropic, config: LabelConfig) {
 
 export async function runMarketSummary() {
   const anthropic = new Anthropic()
-  const results = []
 
-  for (const config of LABELS) {
-    const result = await runForLabel(anthropic, config).catch((error) => ({
-      label: config.label,
-      ok: false,
-      error: String(error),
-    }))
-    results.push(result)
-  }
+  // En paralelo: cada label es independiente y ambos esperan en I/O (llamada a
+  // Anthropic con web_search), correr en serie solo duplicaba el tiempo de
+  // pared de la invocación sin necesidad.
+  const results = await Promise.all(
+    LABELS.map((config) =>
+      runForLabel(anthropic, config).catch((error) => ({
+        label: config.label,
+        ok: false,
+        error: String(error),
+      })),
+    ),
+  )
 
   return { ok: results.every((r) => !('ok' in r) || r.ok !== false), results }
 }
