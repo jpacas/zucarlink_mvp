@@ -90,7 +90,7 @@ export function ProfilePage() {
             <div className="actions">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
               {profile.yearsExperience !== null ? (
-                <span className="user-badge">{profile.yearsExperience} años</span>
+                <span className="user-badge">{profile.yearsExperience} años de experiencia</span>
               ) : null}
             </div>
           </div>

@@ -68,12 +68,16 @@ export function ProvidersLandingPage() {
       <section className="content-card content-card--info stack">
         <p className="eyebrow">Cobertura visible</p>
         <h2>Señales actuales del directorio</h2>
-        <div className="actions">
-          <span className="user-badge user-badge--proveedor">{providers.length} perfiles activos</span>
-          <span className="user-badge user-badge--info">
-            {new Set(providers.flatMap((provider) => provider.countries)).size} países
-          </span>
-        </div>
+        {providers.length > 0 ? (
+          <div className="actions">
+            <span className="user-badge user-badge--proveedor">{providers.length} perfiles activos</span>
+            <span className="user-badge user-badge--info">
+              {new Set(providers.flatMap((provider) => provider.countries)).size} países
+            </span>
+          </div>
+        ) : (
+          <p className="helper-text">Todavía no hay proveedores activos en el directorio.</p>
+        )}
       </section>
     </div>
   )

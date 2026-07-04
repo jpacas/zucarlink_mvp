@@ -71,7 +71,7 @@ export function DirectoryProfileDetailPage() {
             <div className="actions">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
               {profile.yearsExperience !== null ? (
-                <span className="user-badge">{profile.yearsExperience} años</span>
+                <span className="user-badge">{profile.yearsExperience} años de experiencia</span>
               ) : null}
             </div>
           </div>
@@ -143,13 +143,6 @@ export function DirectoryProfileDetailPage() {
         </div>
       </div>
 
-      <div className="info-card stack">
-        <h3>Privacidad</h3>
-        <p className="helper-text">
-          Este detalle solo muestra información profesional. Los datos de contacto personales
-          se mantienen ocultos por defecto.
-        </p>
-      </div>
     </section>
     </div>
   )

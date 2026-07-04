@@ -32,6 +32,7 @@ const HomePage = lazyNamed(() => import('../pages/HomePage'), 'HomePage')
 const InformationHubPage = lazyNamed(() => import('../pages/InformationHubPage'), 'InformationHubPage')
 const LoginPage = lazyNamed(() => import('../pages/LoginPage'), 'LoginPage')
 const MessagesPage = lazyNamed(() => import('../pages/MessagesPage'), 'MessagesPage')
+const NotFoundPage = lazyNamed(() => import('../pages/NotFoundPage'), 'NotFoundPage')
 const NewsListPage = lazyNamed(() => import('../pages/NewsListPage'), 'NewsListPage')
 const OnboardingPage = lazyNamed(() => import('../pages/OnboardingPage'), 'OnboardingPage')
 const ProfilePage = lazyNamed(() => import('../pages/ProfilePage'), 'ProfilePage')
@@ -108,6 +109,7 @@ export function AppRouter() {
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>
@@ -127,10 +129,9 @@ export function AppRouter() {
             </Route>
             <Route path="messages" element={<MessagesPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
-
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )

@@ -979,6 +979,7 @@ fieldset.field {
 
 .info-card {
   padding: 20px;
+  align-content: start;
 }
 
 .info-card h3 {

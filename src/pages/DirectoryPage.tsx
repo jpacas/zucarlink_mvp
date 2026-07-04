@@ -206,35 +206,18 @@ export function DirectoryPage() {
         </section>
       ) : null}
 
-      <section className="content-card stack">
-        <div className="split-header">
-          <div className="stack">
-            <p className="eyebrow">Privacidad primero</p>
-            <h3>Qué puedes evaluar desde aquí</h3>
+      {isPublicSummaryUnavailable ? (
+        <p className="helper-text">El resumen público estará disponible pronto.</p>
+      ) : errorMessage ? (
+        <div className="stack stack--compact">
+          <p className="error-text">{errorMessage}</p>
+          <div className="actions">
+            <button type="button" className="button button--ghost" onClick={reload}>
+              Reintentar resumen
+            </button>
           </div>
         </div>
-        <ul className="list">
-          <li>Señales de presencia: miembros, países, empresas y especialidades.</li>
-          <li>No se muestran emails, teléfonos, WhatsApp ni detalles de contacto.</li>
-          <li>El perfil completo y el contacto directo se habilitan al entrar con tu cuenta.</li>
-        </ul>
-        {isPublicSummaryUnavailable ? (
-          <p className="helper-text">El resumen público estará disponible pronto.</p>
-        ) : errorMessage ? (
-          <div className="stack stack--compact">
-            <p className="error-text">{errorMessage}</p>
-            <div className="actions">
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={reload}
-              >
-                Reintentar resumen
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </section>
+      ) : null}
     </div>
   )
 }

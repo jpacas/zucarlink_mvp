@@ -25,13 +25,9 @@ export function ContactPage() {
           <a href="mailto:contacto@zucarlink.com">contacto@zucarlink.com</a>
         </p>
         <p className="helper-text">Respondemos en un plazo de 2 a 3 días hábiles.</p>
-      </div>
-
-      <div className="info-card stack">
-        <h3>Para proveedores</h3>
-        <p>
-          Si eres proveedor de la industria azucarera y quieres saber cómo aparecer en el
-          directorio o hablar sobre opciones de visibilidad, escríbenos a la misma dirección.
+        <p className="helper-text">
+          ¿Eres proveedor? Escríbenos a la misma dirección para conocer opciones de visibilidad en
+          el directorio.
         </p>
       </div>
 

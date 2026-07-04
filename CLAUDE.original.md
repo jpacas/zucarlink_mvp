@@ -2,7 +2,7 @@
 
 ## gstack
 
-Use `/browse` skill from gstack for all web browsing. Never use `mcp__claude-in-chrome__*` tools.
+Use the `/browse` skill from gstack for all web browsing. Never use `mcp__claude-in-chrome__*` tools.
 
 Available skills:
 - `/office-hours` - YC-style office hours / product brainstorming
@@ -17,7 +17,7 @@ Available skills:
 - `/land-and-deploy` - Land and deploy changes
 - `/canary` - Canary deployments
 - `/benchmark` - Performance benchmarking
-- `/browse` - Web browsing (use for ALL web browsing)
+- `/browse` - Web browsing (use this for ALL web browsing)
 - `/connect-chrome` - Connect to Chrome
 - `/qa` - QA testing + fix bugs
 - `/qa-only` - QA report only (no fixes)
@@ -43,15 +43,15 @@ Available skills:
 
 ## Manual de Marca (implementado)
 
-Sitio fiel total al Manual de Marca Básico de Zucarlink (Abril 2020).
+El sitio implementa fidelidad total al Manual de Marca Básico de Zucarlink (Abril 2020).
 
 ### Colores corporativos (CSS variables en `src/styles/index.css`)
 
 | Variable | Valor | Uso |
 |---|---|---|
-| `--brand-primary` | `#201747` | Azul marino — color primario marca (Pantone 275 C) |
+| `--brand-primary` | `#201747` | Azul marino — color primario de marca (Pantone 275 C) |
 | `--brand` | `#0029E2` | Azul eléctrico — acciones/CTAs/botones |
-| `--brand-strong` | `#001ec0` | Azul oscuro — hover botones |
+| `--brand-strong` | `#001ec0` | Azul oscuro — hover de botones |
 | `--brand-soft` | `rgba(0,41,226,0.10)` | Tinte azul suave |
 | `--accent-cyan` | `#00C9FF` | Complementario 1 — Agua y Aire |
 | `--accent-orange` | `#FF724B` | Complementario 2 — Calor |
@@ -61,27 +61,27 @@ Sitio fiel total al Manual de Marca Básico de Zucarlink (Abril 2020).
 
 ### Tipografía
 
-- **Neurial Grotesk** (Regular 400, Medium 500, Bold 700, Extrabold 800) — fuente principal UI
+- **Neurial Grotesk** (Regular 400, Medium 500, Bold 700, Extrabold 800) — fuente principal de UI
   - Archivos en `src/assets/fonts/NeurialGrotesk-*.otf`
-- **Cirka Bold** — fuente corporativa títulos display
+- **Cirka Bold** — fuente corporativa para títulos de display
   - Archivo en `src/assets/fonts/Cirka-Bold.otf`
 
 ### Logotipo
 
-- Usar componente React `<ZucarLogo />` de `src/components/ZucarLogo.tsx`
+- Usar el componente React `<ZucarLogo />` de `src/components/ZucarLogo.tsx`
 - Props: `variant` ("light"|"dark"), `size` (px), `wordmark` (boolean)
-- `variant="light"` — símbolo color + texto navy `#201747` (fondos claros)
-- `variant="dark"` — símbolo color + texto blanco (fondos oscuros)
+- `variant="light"` — símbolo color + texto navy `#201747` (sobre fondos claros)
+- `variant="dark"` — símbolo color + texto blanco (sobre fondos oscuros)
 - Símbolo hexagonal: pétalos cían/naranja/verde alternos, centro `#201747`
-- **No alterar colores del logo** — prohibido, manual lo prohíbe
+- **No alterar los colores del logo** — prohibido según el manual
 
-### Reglas uso color
+### Reglas de uso de color
 
 - Botones primarios y CTAs: `--brand` (#0029E2)
-- Header/nav app: transparente sobre `--bg`
-- Fondos superficie: `--surface` (#fff) / `--surface-alt` / `--surface-strong`
-- 3 colores complementarios = badges/etiquetas semánticas:
-  - Cián (#00C9FF) — agua, info técnica
+- Header/nav de la aplicación: transparente sobre `--bg`
+- Fondos de superficie: `--surface` (#fff) / `--surface-alt` / `--surface-strong`
+- Los 3 colores complementarios se usan como badges/etiquetas semánticas:
+  - Cián (#00C9FF) — agua, información técnica
   - Naranja (#FF724B) — calor, alertas suaves, categorías activas
   - Verde (#0DDB89) — caña/naturaleza, éxito, agricultores
 
@@ -92,10 +92,8 @@ Sitio fiel total al Manual de Marca Básico de Zucarlink (Abril 2020).
 - Backend: Supabase
 - Routing: React Router DOM
 
-## Convenciones código
+## Convenciones de código
 
 - Componentes en `src/components/` (compartidos) y `src/features/` (por dominio)
 - CSS: clases BEM-inspired, sin módulos CSS ni Tailwind
-- No añadir dependencias estilos nuevas — usar CSS vanilla
-
-No se dio ruta de archivo, así que no sobrescribí nada — este es el resultado comprimido para que lo revises o guardes.
+- No añadir dependencias de estilos nuevas — usar CSS vanilla
