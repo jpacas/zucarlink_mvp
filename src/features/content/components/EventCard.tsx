@@ -88,10 +88,19 @@ export function EventCard({ item, featured = false }: EventCardProps) {
         <h3 className="content-item-card__heading">{item.title}</h3>
         {location ? (
           <p className="event-card__location">
-            <span aria-hidden="true">📍</span> {location}
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M8 1.5c-2.49 0-4.5 2-4.5 4.47C3.5 9.3 8 14.5 8 14.5s4.5-5.2 4.5-8.53C12.5 3.5 10.49 1.5 8 1.5Z"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinejoin="round"
+              />
+              <circle cx="8" cy="6" r="1.6" stroke="currentColor" strokeWidth="1.3" />
+            </svg>
+            {location}
           </p>
         ) : null}
-        <p>{item.summary}</p>
+        <p className="event-card__summary">{item.summary}</p>
         <div className="content-item-card__footer">
           <div className="tag-row">
             {item.tags.slice(0, 3).map((tag) => (

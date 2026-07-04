@@ -8,6 +8,34 @@ import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
 import { useAsyncData } from '../lib/useAsyncData'
 
+const monthYearLabel = new Intl.DateTimeFormat('es-SV', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+function groupByMonth(items: EventItem[]) {
+  const groups: { key: string; label: string; items: EventItem[] }[] = []
+  for (const item of items) {
+    const key = item.startDate.slice(0, 7)
+    const lastGroup = groups[groups.length - 1]
+    if (lastGroup?.key === key) {
+      lastGroup.items.push(item)
+    } else {
+      groups.push({
+        key,
+        label: capitalize(monthYearLabel.format(new Date(item.startDate))),
+        items: [item],
+      })
+    }
+  }
+  return groups
+}
+
 export function EventsPage() {
   const {
     data,
@@ -60,11 +88,16 @@ export function EventsPage() {
         <h3>Próximos</h3>
         {isLoading || errorMessage ? null : upcoming.length > 0 ? (
           restUpcoming.length > 0 ? (
-            <div className="content-card-grid">
-              {restUpcoming.map((item) => (
-                <EventCard key={item.id} item={item} />
-              ))}
-            </div>
+            groupByMonth(restUpcoming).map((group) => (
+              <div className="stack stack--compact" key={group.key}>
+                <p className="eyebrow">{group.label}</p>
+                <div className="content-card-grid">
+                  {group.items.map((item) => (
+                    <EventCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </div>
+            ))
           ) : (
             <p className="helper-text">
               Por ahora solo hay un evento próximo confirmado, destacado arriba.
@@ -78,11 +111,16 @@ export function EventsPage() {
       <div className="stack">
         <h3>Pasados</h3>
         {isLoading || errorMessage ? null : past.length > 0 ? (
-          <div className="content-card-grid">
-            {past.map((item) => (
-              <EventCard key={item.id} item={item} />
-            ))}
-          </div>
+          groupByMonth(past).map((group) => (
+            <div className="stack stack--compact" key={group.key}>
+              <p className="eyebrow">{group.label}</p>
+              <div className="content-card-grid">
+                {group.items.map((item) => (
+                  <EventCard key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          ))
         ) : (
           <p className="helper-text">Todavía no hay un histórico disponible en esta sección.</p>
         )}
