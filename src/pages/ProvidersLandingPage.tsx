@@ -76,7 +76,16 @@ export function ProvidersLandingPage() {
             </span>
           </div>
         ) : (
-          <p className="helper-text">Todavía no hay proveedores activos en el directorio.</p>
+          <div className="actions">
+            <p className="helper-text">Todavía no hay proveedores activos en el directorio.</p>
+            <Link
+              className="button button--proveedor"
+              to="/register"
+              onClick={() => trackEvent('providers_landing_cta_clicked', { destination: 'register' })}
+            >
+              Sé el primero en aparecer
+            </Link>
+          </div>
         )}
       </section>
     </div>

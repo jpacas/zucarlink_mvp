@@ -149,7 +149,9 @@ export function ProvidersDirectoryPage() {
       <div className="stack" data-testid="providers-results">
         {!isLoading && !errorMessage && providers.length === 0 ? (
           <p className="helper-text">
-            No encontramos proveedores con esos filtros. Ajusta tu búsqueda o categoría.
+            {searchText || categorySlug || country
+              ? 'No encontramos proveedores con esos filtros. Ajusta tu búsqueda o categoría.'
+              : 'Todavía no hay proveedores activos en el directorio. Sé el primero en aparecer aquí.'}
           </p>
         ) : null}
         {providers.map((provider) => (

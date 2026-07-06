@@ -494,8 +494,12 @@ export function ForumPage() {
         <div className="empty-state">
           <div className="empty-state__icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M4 8.5A3.5 3.5 0 0 1 7.5 5h13A3.5 3.5 0 0 1 24 8.5v8A3.5 3.5 0 0 1 20.5 20H12l-5 4v-4H7.5A3.5 3.5 0 0 1 4 16.5v-8Z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
           <h3>Sin resultados para «{query.trim()}»</h3>
@@ -513,8 +517,12 @@ export function ForumPage() {
         <div className="empty-state">
           <div className="empty-state__icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M8 14l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M4 8.5A3.5 3.5 0 0 1 7.5 5h13A3.5 3.5 0 0 1 24 8.5v8A3.5 3.5 0 0 1 20.5 20H12l-5 4v-4H7.5A3.5 3.5 0 0 1 4 16.5v-8Z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
           <h3>{activeCategory ? `Sin temas en ${activeCategory.name}` : 'Sin temas aún'}</h3>
