@@ -582,6 +582,11 @@ label {
   width: min(560px, 100%);
 }
 
+.auth-card h2,
+.auth-card p {
+  margin: 0;
+}
+
 .stack {
   display: grid;
   gap: 16px;
