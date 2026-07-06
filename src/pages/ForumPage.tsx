@@ -259,7 +259,7 @@ export function ForumPage() {
 
     return (
       <section className="content-card stack">
-        <h2>Foro técnico</h2>
+        <h1>Foro técnico</h1>
         <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
           {isPublicDataUnavailable ? 'El foro público estará disponible pronto.' : errorMessage}
         </p>
@@ -272,7 +272,7 @@ export function ForumPage() {
       <div className="split-header">
         <div className="stack stack--compact">
           <p className="eyebrow">Público</p>
-          <h2>Foro técnico</h2>
+          <h1>Foro técnico</h1>
           <p>
             Debates prácticos de fábrica, campo y automatización para la industria azucarera.
           </p>

@@ -9,6 +9,7 @@ export function PasswordResetRequestPage() {
   usePageMetadata({
     title: 'Recuperar contraseña',
     description: 'Solicita un enlace para restablecer tu contraseña de Zucarlink.',
+    noindex: true,
   })
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

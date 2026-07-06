@@ -12,7 +12,7 @@ export function PrivacyPage() {
     <section className="content-card stack">
       <div className="stack">
         <p className="eyebrow">Legal</p>
-        <h2>Política de privacidad</h2>
+        <h1>Política de privacidad</h1>
         <p className="helper-text">Última actualización: abril 2026</p>
       </div>
 

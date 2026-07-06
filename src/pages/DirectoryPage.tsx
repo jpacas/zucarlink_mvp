@@ -134,7 +134,7 @@ export function DirectoryPage() {
     <div className="stack">
       <section className="hero-card hero-card--tecnico stack">
         <p className="eyebrow">Directorio público</p>
-        <h2>Directorio de la industria azucarera</h2>
+        <h1>Directorio de la industria azucarera</h1>
         <p>
           Técnicos, especialistas y profesionales del sector en una red curada. El detalle
           completo y el contacto directo están disponibles dentro del área autenticada.

@@ -16,6 +16,7 @@ export function RegisterPage() {
   usePageMetadata({
     title: 'Crear cuenta',
     description: 'Regístrate en Zucarlink como técnico o como proveedor del sector azucarero.',
+    noindex: true,
   })
   const [searchParams] = useSearchParams()
   // Permite que el inicio enlace directo al tipo de cuenta (?tipo=proveedor).

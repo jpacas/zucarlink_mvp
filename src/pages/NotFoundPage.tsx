@@ -1,9 +1,16 @@
 import { Link } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function NotFoundPage() {
   const { user } = useAuth()
+
+  usePageMetadata({
+    title: 'Página no encontrada',
+    description: 'La dirección a la que intentaste llegar no existe o ya no está disponible.',
+    noindex: true,
+  })
 
   return (
     <section className="content-card stack">
@@ -14,7 +21,7 @@ export function NotFoundPage() {
             <path d="M10 10l8 8M18 10l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
-        <h3>Página no encontrada</h3>
+        <h1>Página no encontrada</h1>
         <p>La dirección a la que intentaste llegar no existe o ya no está disponible.</p>
         <div className="actions">
           <Link className="button" to={user ? '/app' : '/'}>

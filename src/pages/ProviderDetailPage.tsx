@@ -8,7 +8,8 @@ import { getProviderBySlug } from '../features/providers/api'
 import type { ProviderDetail } from '../features/providers/types'
 import { trackEvent } from '../lib/analytics'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
-import { usePageMetadata } from '../lib/usePageMetadata'
+import { useJsonLd } from '../lib/useJsonLd'
+import { SITE_URL, usePageMetadata } from '../lib/usePageMetadata'
 
 export function ProviderDetailPage() {
   const { slug = '' } = useParams()
@@ -19,6 +20,19 @@ export function ProviderDetailPage() {
     title: provider?.companyName ?? 'Proveedor',
     description: provider?.shortDescription || undefined,
   })
+  useJsonLd(
+    provider
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: provider.companyName,
+          url: `${SITE_URL}/proveedores/${provider.slug}`,
+          description: provider.shortDescription || undefined,
+          logo: provider.logoUrl || undefined,
+          sameAs: provider.website ? [provider.website] : undefined,
+        }
+      : null,
+  )
 
   useEffect(() => {
     void getProviderBySlug(slug)
@@ -37,7 +51,7 @@ export function ProviderDetailPage() {
 
     return (
       <section className="content-card stack">
-        <h2>{isPublicDataUnavailable ? 'Ficha en preparación' : 'Proveedor no encontrado'}</h2>
+        <h1>{isPublicDataUnavailable ? 'Ficha en preparación' : 'Proveedor no encontrado'}</h1>
         <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
           {isPublicDataUnavailable ? 'La ficha comercial estará disponible pronto.' : errorMessage}
         </p>
@@ -67,7 +81,7 @@ export function ProviderDetailPage() {
           <ProviderLogo companyName={provider.companyName} logoUrl={provider.logoUrl} />
           <div className="stack">
             <p className="eyebrow">Proveedor</p>
-            <h2>{provider.companyName}</h2>
+            <h1>{provider.companyName}</h1>
             <div className="actions">
               <span className="user-badge">{provider.category.name}</span>
             </div>

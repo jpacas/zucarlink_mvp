@@ -10,6 +10,7 @@ export function PasswordResetPage() {
   usePageMetadata({
     title: 'Nueva contraseña',
     description: 'Define una nueva contraseña para tu cuenta de Zucarlink.',
+    noindex: true,
   })
   const navigate = useNavigate()
   const [password, setPassword] = useState('')

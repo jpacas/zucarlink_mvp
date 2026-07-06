@@ -12,7 +12,7 @@ export function TermsPage() {
     <section className="content-card stack">
       <div className="stack">
         <p className="eyebrow">Legal</p>
-        <h2>Términos de uso</h2>
+        <h1>Términos de uso</h1>
         <p className="helper-text">Última actualización: abril 2026</p>
       </div>
 

@@ -5,7 +5,8 @@ import { TagBadge } from '../features/content/components/TagBadge'
 import { getPublishedContentBySlug } from '../features/content/api'
 import { formatDate } from '../lib/date'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
-import { usePageMetadata } from '../lib/usePageMetadata'
+import { useJsonLd } from '../lib/useJsonLd'
+import { SITE_URL, usePageMetadata } from '../lib/usePageMetadata'
 import { useAsyncData } from '../lib/useAsyncData'
 
 export function ContentDetailPage() {
@@ -16,13 +17,28 @@ export function ContentDetailPage() {
     title: item?.title ?? 'Contenido',
     description: item?.summary ?? 'Detalle editorial público de Zucarlink.',
   })
+  useJsonLd(
+    item
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: item.title,
+          description: item.summary,
+          datePublished: item.publishedAt,
+          inLanguage: 'es',
+          mainEntityOfPage: `${SITE_URL}/informacion/${item.slug}`,
+          image: item.coverImageUrl || undefined,
+          publisher: { '@id': `${SITE_URL}/#organization` },
+        }
+      : null,
+  )
 
   if (errorMessage) {
     const isPublicDataUnavailable = isPublicConfigurationError(errorMessage)
 
     return (
       <section className="content-card stack">
-        <h2>{isPublicDataUnavailable ? 'Contenido en preparación' : 'Contenido no disponible'}</h2>
+        <h1>{isPublicDataUnavailable ? 'Contenido en preparación' : 'Contenido no disponible'}</h1>
         <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
           {isPublicDataUnavailable ? 'El detalle editorial estará disponible pronto.' : errorMessage}
         </p>

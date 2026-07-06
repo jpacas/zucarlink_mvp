@@ -72,7 +72,7 @@ export function ProvidersDirectoryPage() {
       <div className="split-header">
         <div className="stack">
           <p className="eyebrow">Público</p>
-          <h2>Directorio de proveedores</h2>
+          <h1>Directorio de proveedores</h1>
           <p>Explora proveedores activos por categoría y país.</p>
         </div>
       </div>

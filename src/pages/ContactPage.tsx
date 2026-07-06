@@ -12,7 +12,7 @@ export function ContactPage() {
     <section className="content-card stack">
       <div className="stack">
         <p className="eyebrow">Contacto</p>
-        <h2>¿En qué podemos ayudarte?</h2>
+        <h1>¿En qué podemos ayudarte?</h1>
         <p>
           Si tienes preguntas sobre Zucarlink, tu cuenta, o quieres hablar sobre cómo tu empresa
           puede estar presente en la red, estamos disponibles.

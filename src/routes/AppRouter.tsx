@@ -86,9 +86,9 @@ export function AppRouter() {
           <Route path="forum/thread/:threadSlug" element={<ForumThreadPage />} />
           <Route path="forum/new" element={<ForumNewThreadPage />} />
           <Route path="foro" element={<Navigate to="/forum" replace />} />
-          <Route path="foro/nuevo" element={<ForumNewThreadPage />} />
-          <Route path="foro/tema/:threadSlug" element={<ForumThreadPage />} />
-          <Route path="foro/:categorySlug" element={<ForumPage />} />
+          <Route path="foro/nuevo" element={<Navigate to="/forum/new" replace />} />
+          <Route path="foro/tema/:threadSlug" element={<LegacyForumThreadRedirect />} />
+          <Route path="foro/:categorySlug" element={<LegacyForumCategoryRedirect />} />
           <Route path="providers" element={<Navigate to="/proveedores" replace />} />
           <Route
             path="providers/directory"
@@ -141,6 +141,18 @@ function LegacyProviderRedirect() {
   const { slug = '' } = useParams()
 
   return <Navigate to={`/proveedores/${slug}`} replace />
+}
+
+function LegacyForumThreadRedirect() {
+  const { threadSlug = '' } = useParams()
+
+  return <Navigate to={`/forum/thread/${threadSlug}`} replace />
+}
+
+function LegacyForumCategoryRedirect() {
+  const { categorySlug = '' } = useParams()
+
+  return <Navigate to={`/forum/category/${categorySlug}`} replace />
 }
 
 function RouteLoadingState() {

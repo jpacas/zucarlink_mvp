@@ -389,7 +389,7 @@ export function ForumThreadPage() {
 
     return (
       <section className="content-card stack">
-        <h2>Tema no disponible</h2>
+        <h1>Tema no disponible</h1>
         <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
           {isPublicDataUnavailable
             ? 'La conversación estará disponible pronto.'
@@ -417,7 +417,7 @@ export function ForumThreadPage() {
             {thread.category.name}
           </Link>
         </div>
-        <h2>{thread.title}</h2>
+        <h1>{thread.title}</h1>
         <div className="forum-meta-row forum-meta-row--split">
           <ForumAuthorSummary author={thread.author} isAuthenticated={Boolean(user)} />
           <time

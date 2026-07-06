@@ -26,7 +26,7 @@ export function ProvidersLandingPage() {
     <div className="stack">
       <section className="hero-card hero-card--proveedor stack">
         <p className="eyebrow">Proveedores</p>
-        <h2>Proveedores con presencia útil dentro del sector azucarero</h2>
+        <h1>Proveedores con presencia útil dentro del sector azucarero</h1>
         <p>
           Zucarlink permite que las marcas correctas se presenten con claridad, sostengan contacto
           interno y mantengan visibilidad frente a una audiencia técnica especializada.

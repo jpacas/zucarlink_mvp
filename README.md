@@ -106,6 +106,8 @@ Contraseña para cuentas demo: obligatoria vía variable de entorno `SEED_DEMO_P
 
 Ambas funciones comparten helpers en `supabase/functions/_shared/`: `resend.ts` (cliente de envío), `email-log.ts` (dedupe/rate-limit vía `engagement_email_log`), `notification-prefs.ts` (preferencias + token de unsubscribe) y `email-footer.ts` (pie con link de gestión de preferencias).
 
+`supabase/functions/sitemap/` — genera `sitemap.xml` dinámico (rutas fijas + slugs publicados de contenido, proveedores activos y temas del foro). Vercel proxya `/sitemap.xml` hacia esta función (rewrite en `vercel.json`). Desplegar con `supabase functions deploy sitemap --no-verify-jwt` **antes** del deploy de Vercel que elimina el sitemap estático, para que `/sitemap.xml` no quede sin respuesta.
+
 ### Pasos manuales de configuración (no versionados en git)
 
 1. En el dashboard de Supabase, eliminar cualquier Database Webhook antiguo sobre `messages.INSERT` (el aviso inmediato de mensaje nuevo fue reemplazado por el recordatorio de 24h).

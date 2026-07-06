@@ -10,6 +10,7 @@ export function LoginPage() {
   usePageMetadata({
     title: 'Ingresar',
     description: 'Ingresa a tu cuenta de Zucarlink.',
+    noindex: true,
   })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

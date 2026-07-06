@@ -12,7 +12,7 @@ export function LegalPage() {
     <section className="content-card stack">
       <div className="stack">
         <p className="eyebrow">Legal</p>
-        <h2>Aviso legal</h2>
+        <h1>Aviso legal</h1>
         <p className="helper-text">Última actualización: abril 2026</p>
       </div>
 

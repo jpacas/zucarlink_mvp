@@ -17,6 +17,7 @@ export function EmailPreferencesPage() {
   usePageMetadata({
     title: 'Preferencias de correo',
     description: 'Elige qué correos de Zucarlink quieres recibir.',
+    noindex: true,
   })
 
   const [searchParams] = useSearchParams()

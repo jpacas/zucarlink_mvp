@@ -63,7 +63,7 @@ export function InformationHubPage() {
     <div className="stack">
       <section className="hero-card stack">
         <p className="eyebrow">Información</p>
-        <h2>Información para seguirle el pulso al sector</h2>
+        <h1>Información para seguirle el pulso al sector</h1>
         <p>
           Noticias, análisis, eventos e indicadores curados para seguir el sector con criterio y
           volver a la plataforma por contexto útil, no por ruido.
@@ -80,7 +80,6 @@ export function InformationHubPage() {
 
       <section className="content-card stack">
         <SectionHeader
-          as="h1"
           eyebrow="Hub"
           title="Explora el módulo"
           description="Cada sección mantiene el mismo criterio: curación humana, lectura rápida y utilidad real."

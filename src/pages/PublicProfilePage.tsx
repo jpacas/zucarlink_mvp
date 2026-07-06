@@ -48,7 +48,7 @@ export function PublicProfilePage() {
 
     return (
       <section className="content-card stack">
-        <h2>Perfil no disponible</h2>
+        <h1>Perfil no disponible</h1>
         <p className={isPublicDataUnavailable ? 'helper-text' : 'error-text'}>
           {isPublicDataUnavailable
             ? 'El perfil público estará disponible pronto.'
@@ -89,7 +89,7 @@ export function PublicProfilePage() {
           )}
           <div className="stack stack--compact">
             <p className="eyebrow">Perfil público</p>
-            <h2>{profile.fullName}</h2>
+            <h1>{profile.fullName}</h1>
             <p>
               {profile.currentRole || 'Cargo pendiente'}
               {profile.organizationName ? ` · ${profile.organizationName}` : ''}
