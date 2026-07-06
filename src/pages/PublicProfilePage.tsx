@@ -90,10 +90,9 @@ export function PublicProfilePage() {
           <div className="stack stack--compact">
             <p className="eyebrow">Perfil público</p>
             <h1>{profile.fullName}</h1>
-            <p>
-              {profile.currentRole || 'Cargo pendiente'}
-              {profile.organizationName ? ` · ${profile.organizationName}` : ''}
-            </p>
+            {profile.currentRole || profile.organizationName ? (
+              <p>{[profile.currentRole, profile.organizationName].filter(Boolean).join(' · ')}</p>
+            ) : null}
             <div className="actions">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
             </div>

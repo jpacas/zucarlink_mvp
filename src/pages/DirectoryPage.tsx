@@ -72,10 +72,11 @@ function PublicProfileCard({ profile }: { profile: PublicPreviewProfile }) {
         )}
         <div className="stack stack--compact">
           <h3>{profile.fullName}</h3>
-          <p className="directory-card__meta">
-            {profile.roleTitle || 'Cargo pendiente'}
-            {profile.organizationName ? ` · ${profile.organizationName}` : ''}
-          </p>
+          {profile.roleTitle || profile.organizationName ? (
+            <p className="directory-card__meta">
+              {[profile.roleTitle, profile.organizationName].filter(Boolean).join(' · ')}
+            </p>
+          ) : null}
           {profile.country ? (
             <span className="directory-card__country">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
