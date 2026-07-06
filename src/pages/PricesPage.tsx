@@ -35,7 +35,7 @@ export function PricesPage() {
         description="Cierre diario del mercado actualizado automáticamente (dato retrasado, no cotización en tiempo real)."
       />
       {isLoading ? (
-        <p className="helper-text">Cargando indicadores.</p>
+        <p className="helper-text">Cargando indicadores…</p>
       ) : isPublicDataUnavailable ? (
         <p className="helper-text">Los indicadores se actualizarán pronto.</p>
       ) : errorMessage ? (

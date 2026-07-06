@@ -126,7 +126,7 @@ export function AdminDashboardPage() {
         ) : null}
       </div>
 
-      {isLoading ? <p className="helper-text">Cargando dashboard gerencial.</p> : null}
+      {isLoading ? <p className="helper-text">Cargando dashboard gerencial…</p> : null}
       {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
 
       {dashboard ? (

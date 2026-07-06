@@ -275,7 +275,7 @@ export function OnboardingPage() {
     return (
       <section className="content-card stack">
         <h2>Completa tu perfil técnico</h2>
-        <p className="helper-text">Cargando perfil...</p>
+        <p className="helper-text">Cargando perfil…</p>
       </section>
     )
   }

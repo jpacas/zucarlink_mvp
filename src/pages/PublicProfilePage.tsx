@@ -33,7 +33,7 @@ export function PublicProfilePage() {
   if (isLoading) {
     return (
       <section className="content-card stack">
-        <h2>Cargando perfil</h2>
+        <h2>Cargando perfil…</h2>
         <p className="helper-text">Estamos abriendo la ficha pública del autor.</p>
       </section>
     )

@@ -66,7 +66,7 @@ export function BlogListPage() {
         onCategoryChange={setSelectedCategory}
       />
       {isLoading ? (
-        <p className="helper-text">Cargando artículos.</p>
+        <p className="helper-text">Cargando artículos…</p>
       ) : isPublicDataUnavailable ? (
         <p className="helper-text">Los artículos se actualizarán pronto.</p>
       ) : errorMessage ? (

@@ -23,7 +23,7 @@ export function ProfilePage() {
   if (isLoading) {
     return (
       <section className="content-card stack">
-        <h2>Cargando perfil</h2>
+        <h2>Cargando perfil…</h2>
         <p className="helper-text">Estamos trayendo tu ficha técnica-profesional.</p>
       </section>
     )

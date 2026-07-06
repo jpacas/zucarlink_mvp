@@ -126,7 +126,7 @@ export function AppProviderLeadsPage() {
         {feedback ? <p className="error-text">{feedback}</p> : null}
 
         {isLoading ? (
-          <p className="helper-text">Cargando solicitudes.</p>
+          <p className="helper-text">Cargando solicitudes…</p>
         ) : null}
         {!isLoading && errorMessage ? <p className="error-text">{errorMessage}</p> : null}
         {!isLoading && !errorMessage && visibleLeads.length === 0 ? (

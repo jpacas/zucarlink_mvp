@@ -49,7 +49,7 @@ export function ContentDetailPage() {
   if (!item) {
     return (
       <section className="content-card stack">
-        <h2>Cargando contenido</h2>
+        <h2>Cargando contenido…</h2>
         <p className="helper-text">Estamos trayendo el detalle editorial.</p>
       </section>
     )

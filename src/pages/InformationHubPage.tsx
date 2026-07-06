@@ -107,7 +107,7 @@ export function InformationHubPage() {
 
       <section className="content-card stack">
         {isLoading ? (
-          <p className="helper-text">Cargando destacados editoriales.</p>
+          <p className="helper-text">Cargando destacados editoriales…</p>
         ) : errorMessage ? (
           <>
             <SectionHeader

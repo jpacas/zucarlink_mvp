@@ -378,7 +378,7 @@ export function ForumThreadPage() {
   if (isLoading) {
     return (
       <section className="content-card stack">
-        <h2>Cargando tema</h2>
+        <h2>Cargando tema…</h2>
         <p className="helper-text">Estamos trayendo la conversación técnica completa.</p>
       </section>
     )

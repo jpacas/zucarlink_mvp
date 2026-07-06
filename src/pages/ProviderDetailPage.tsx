@@ -62,7 +62,7 @@ export function ProviderDetailPage() {
   if (!provider) {
     return (
       <section className="content-card stack">
-        <h2>Cargando proveedor</h2>
+        <h2>Cargando proveedor…</h2>
         <p className="helper-text">Estamos preparando la ficha comercial.</p>
       </section>
     )

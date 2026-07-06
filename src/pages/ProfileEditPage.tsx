@@ -229,7 +229,7 @@ export function ProfileEditPage() {
         </Link>
       </div>
 
-      {isLoading && !profile ? <p className="helper-text">Cargando perfil...</p> : null}
+      {isLoading && !profile ? <p className="helper-text">Cargando perfil…</p> : null}
       {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
 
       {profile ? (

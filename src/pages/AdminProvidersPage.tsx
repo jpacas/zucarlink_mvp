@@ -96,7 +96,7 @@ export function AdminProvidersPage() {
         </div>
       </div>
 
-      {isLoading ? <p className="helper-text">Cargando proveedores.</p> : null}
+      {isLoading ? <p className="helper-text">Cargando proveedores…</p> : null}
       {feedback ? <p className={feedback.includes('No fue posible') ? 'error-text' : 'status'}>{feedback}</p> : null}
 
       <div className="stack">

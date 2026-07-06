@@ -184,7 +184,7 @@ export function DirectoryPage() {
           </div>
 
           {isLoading ? (
-            <p className="helper-text">Cargando perfiles...</p>
+            <p className="helper-text">Cargando perfiles…</p>
           ) : (
             <div className="directory-grid">
               {previewProfiles.map((profile) => (

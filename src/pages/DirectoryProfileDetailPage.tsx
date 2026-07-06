@@ -16,7 +16,7 @@ export function DirectoryProfileDetailPage() {
   if (isLoading) {
     return (
       <section className="content-card stack">
-        <h2>Cargando perfil</h2>
+        <h2>Cargando perfil…</h2>
         <p className="helper-text">Estamos abriendo la ficha técnica seleccionada.</p>
       </section>
     )

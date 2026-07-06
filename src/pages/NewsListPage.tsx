@@ -66,7 +66,7 @@ export function NewsListPage() {
         onCategoryChange={setSelectedCategory}
       />
       {isLoading ? (
-        <p className="helper-text">Cargando noticias.</p>
+        <p className="helper-text">Cargando noticias…</p>
       ) : isPublicDataUnavailable ? (
         <p className="helper-text">Las noticias se actualizarán pronto.</p>
       ) : errorMessage ? (

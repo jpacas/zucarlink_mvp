@@ -17,7 +17,7 @@ export function AppProviderPage() {
     return (
       <section className="content-card stack">
         <h2>Perfil comercial</h2>
-        <p className="helper-text">Cargando perfil de proveedor.</p>
+        <p className="helper-text">Cargando perfil de proveedor…</p>
       </section>
     )
   }

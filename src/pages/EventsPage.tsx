@@ -69,7 +69,7 @@ export function EventsPage() {
         description="Agenda curada de los encuentros más relevantes de la industria azucarera para planificar la asistencia de los técnicos."
       />
 
-      {isLoading ? <p className="helper-text">Cargando eventos.</p> : null}
+      {isLoading ? <p className="helper-text">Cargando eventos…</p> : null}
       {!isLoading && isPublicDataUnavailable ? (
         <p className="helper-text">La agenda se actualizará pronto.</p>
       ) : null}
