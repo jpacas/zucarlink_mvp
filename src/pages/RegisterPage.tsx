@@ -136,7 +136,9 @@ export function RegisterPage() {
           <p className="helper-text">Mínimo 8 caracteres.</p>
         </div>
         {feedback ? (
-          <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>{feedback.message}</p>
+          <p role="alert" className={feedback.kind === 'error' ? 'error-text' : 'status'}>
+            {feedback.message}
+          </p>
         ) : null}
         <div className="actions">
           <button className="button" type="submit" disabled={isSubmitting || !isConfigured}>

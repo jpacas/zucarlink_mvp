@@ -67,7 +67,9 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
         <label htmlFor="provider-lead-name">Nombre</label>
         <input
           id="provider-lead-name"
+          name="name"
           type="text"
+          autoComplete="name"
           value={name}
           onChange={(event) => setName(event.target.value)}
           required
@@ -77,7 +79,9 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
         <label htmlFor="provider-lead-email">Email</label>
         <input
           id="provider-lead-email"
+          name="email"
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
@@ -87,7 +91,9 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
         <label htmlFor="provider-lead-company">Empresa</label>
         <input
           id="provider-lead-company"
+          name="organization"
           type="text"
+          autoComplete="organization"
           value={company}
           onChange={(event) => setCompany(event.target.value)}
         />
@@ -96,6 +102,7 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
         <label htmlFor="provider-lead-message">Mensaje</label>
         <textarea
           id="provider-lead-message"
+          name="message"
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           rows={4}
@@ -115,7 +122,7 @@ export function ProviderLeadForm({ providerId, onSubmitted }: ProviderLeadFormPr
         />
       </div>
       {feedback ? (
-        <p className={feedback.kind === 'error' ? 'error-text' : 'status'}>
+        <p role="alert" className={feedback.kind === 'error' ? 'error-text' : 'status'}>
           {feedback.message}
         </p>
       ) : null}
