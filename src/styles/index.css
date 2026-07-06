@@ -1472,6 +1472,115 @@ fieldset.field {
   font-size: 0.88rem;
 }
 
+.price-range-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.price-range-tab {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.price-range-tab:hover {
+  border-color: rgba(0, 41, 226, 0.35);
+}
+
+.price-range-tab--active {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.price-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.price-stat {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.price-stat dt {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.price-stat dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.price-history summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.price-history__scroll {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.price-history__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.price-history__table th,
+.price-history__table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.price-history__table th {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.price-explainer {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(0, 201, 255, 0.08);
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.price-explainer p:not(.eyebrow) {
+  font-size: 0.92rem;
+}
+
+.price-methodology {
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+}
+
+.price-methodology p:not(.eyebrow) {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
 .avatar-card {
   display: flex;
   align-items: center;

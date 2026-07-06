@@ -3,6 +3,13 @@ import { getAdminClient } from '../../_shared/supabase-admin.ts'
 
 const MAX_SOURCES = 4
 const MIN_SUMMARY_CHARS = 20
+// El prompt pide máximo 90 palabras (~600-700 caracteres en español); un texto
+// mucho más largo es señal de que el modelo devolvió meta-conversación.
+const MAX_SUMMARY_CHARS = 800
+// Frases que delatan que el modelo respondió sobre sus herramientas o límites
+// en vez de entregar el análisis (p. ej. cuando web_search agota su cuota).
+const META_TEXT_PATTERN =
+  /l[ií]mite de b[uú]squedas|l[ií]mite del uso|herramienta de b[uú]squeda|reintentar la b[uú]squeda|env[ií]eme un nuevo mensaje|no puedo (?:completar|redactar)/i
 
 const SYSTEM_PROMPT =
   'Eres analista de mercados para una plataforma del gremio azucarero centroamericano. ' +
@@ -119,6 +126,16 @@ async function runForLabel(anthropic: Anthropic, config: LabelConfig) {
   if (summary.length < MIN_SUMMARY_CHARS) {
     throw new Error(
       `El modelo devolvió un resumen demasiado corto para "${config.label}" (${summary.length} caracteres)`,
+    )
+  }
+  if (summary.length > MAX_SUMMARY_CHARS) {
+    throw new Error(
+      `El modelo devolvió un resumen demasiado largo para "${config.label}" (${summary.length} caracteres)`,
+    )
+  }
+  if (META_TEXT_PATTERN.test(summary)) {
+    throw new Error(
+      `El modelo devolvió meta-conversación en vez de análisis para "${config.label}"`,
     )
   }
 

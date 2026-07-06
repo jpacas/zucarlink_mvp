@@ -211,17 +211,33 @@ export async function listPublishedEvents(): Promise<EventItem[]> {
 
 export async function listPublishedPrices(): Promise<PriceItem[]> {
   const client = getSupabaseClientOrThrow()
-  const { data, error } = await client
-    .from('price_items')
-    .select()
-    .eq('status', 'published')
-    .order('observed_at', { ascending: false })
 
-  if (error) {
-    throw new Error(error.message)
+  // PostgREST corta en 1,000 filas por defecto y el histórico sembrado supera
+  // ese límite — se pagina hasta agotar la tabla.
+  const pageSize = 1000
+  const rows: PriceItemRow[] = []
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await client
+      .from('price_items')
+      .select()
+      .eq('status', 'published')
+      .order('observed_at', { ascending: false })
+      .range(from, from + pageSize - 1)
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    const page = (data ?? []) as unknown as PriceItemRow[]
+    rows.push(...page)
+
+    if (page.length < pageSize) {
+      break
+    }
   }
 
-  return ((data ?? []) as unknown as PriceItemRow[]).map(mapPriceItem)
+  return rows.map(mapPriceItem)
 }
 
 export async function listFeaturedContent(limitCount?: number): Promise<ContentItem[]> {

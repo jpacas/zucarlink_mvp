@@ -58,6 +58,19 @@ export function PricesPage() {
               </div>
             </div>
           ) : null}
+          <div className="price-methodology stack stack--compact">
+            <p className="eyebrow">¿Cómo leer estos precios?</p>
+            <p>
+              Los valores corresponden al cierre diario de cada mercado y se actualizan de forma
+              automática con un día de retraso; no son cotizaciones en tiempo real. Cada indicador
+              enlaza a su fuente original para que puedas verificar el dato.
+            </p>
+            <p>
+              Estos precios internacionales sirven como referencia de mercado: el precio final de
+              liquidación de cada ingenio o contrato local puede diferir según calidad, prima y
+              condiciones de venta.
+            </p>
+          </div>
         </>
       ) : (
         <p className="helper-text">Todavía no hay indicadores visibles.</p>

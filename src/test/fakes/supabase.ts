@@ -305,6 +305,7 @@ class QueryBuilder {
   private deleted = false
   private orderField: string | null = null
   private orderAscending = true
+  private rangeBounds: { from: number; to: number } | null = null
   private mode: SelectMode = 'many'
 
   constructor(
@@ -354,6 +355,11 @@ class QueryBuilder {
   order(field: string, options?: { ascending?: boolean }) {
     this.orderField = field
     this.orderAscending = options?.ascending ?? true
+    return this
+  }
+
+  range(from: number, to: number) {
+    this.rangeBounds = { from, to }
     return this
   }
 
@@ -448,6 +454,10 @@ class QueryBuilder {
 
         return this.orderAscending ? 1 : -1
       })
+    }
+
+    if (this.rangeBounds) {
+      selected = selected.slice(this.rangeBounds.from, this.rangeBounds.to + 1)
     }
 
     const projected = selected.map((row) => this.project(row))

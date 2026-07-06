@@ -412,6 +412,44 @@ it('renders a featured price card with trend delta and a weekly summary feed', (
   )
 })
 
+it('offers history ranges, range stats and an explainer for long price series', async () => {
+  const user = userEvent.setup()
+  const history = Array.from({ length: 120 }, (_, index) => {
+    const date = new Date(Date.UTC(2026, 2, 1))
+    date.setUTCDate(date.getUTCDate() + index)
+    return {
+      id: `price-${index}`,
+      label: 'Azúcar refinada',
+      value: `${400 + index}.00`,
+      valueNumeric: 400 + index,
+      unit: 'USD/t',
+      observedAt: date.toISOString().slice(0, 10),
+      status: 'published' as const,
+      featured: true,
+    }
+  })
+
+  render(<FeaturedPriceCard label="Azúcar refinada" history={history} summaries={[]} />)
+
+  // Con 120 días de datos solo recortan 1M y 3M; el resto no aplica.
+  expect(screen.getByRole('tab', { name: '1M' })).toBeInTheDocument()
+  expect(screen.getByRole('tab', { name: 'Todo' })).toBeInTheDocument()
+  expect(screen.queryByRole('tab', { name: '1A' })).not.toBeInTheDocument()
+
+  // Mínimo del rango 3M por defecto (día 28 de la serie: 428).
+  expect(screen.getByText('Mínimo del rango')).toBeInTheDocument()
+  expect(screen.getByText('Máximo del rango')).toBeInTheDocument()
+  expect(screen.getByText('428.00')).toBeInTheDocument()
+
+  await user.click(screen.getByRole('tab', { name: 'Todo' }))
+  expect(screen.getByText('400.00')).toBeInTheDocument()
+
+  await user.click(screen.getByText('Ver últimos cierres'))
+  expect(screen.getByText('Var. diaria')).toBeInTheDocument()
+
+  expect(screen.getByText('¿Qué es el azúcar refinada (ICE No.5)?')).toBeInTheDocument()
+})
+
 it('shows a placeholder when a price series has no weekly summaries yet', () => {
   render(
     <FeaturedPriceCard
