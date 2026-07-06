@@ -1,12 +1,12 @@
 import { runFetchPrices } from './jobs/fetch-prices.ts'
 import { runMarketSummary } from './jobs/market-summary.ts'
 import { getAdminClient } from '../_shared/supabase-admin.ts'
+import { verifyBearerSecret } from '../_shared/verify-secret.ts'
 
 const CRON_SECRET = Deno.env.get('PRICES_CRON_SECRET') ?? ''
 
 Deno.serve(async (req: Request) => {
-  const authHeader = req.headers.get('Authorization') ?? ''
-  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!(await verifyBearerSecret(req, CRON_SECRET))) {
     return new Response('Unauthorized', { status: 401 })
   }
 

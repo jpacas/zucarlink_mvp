@@ -1,12 +1,12 @@
 import { handleProviderLead } from './handlers/on-provider-lead.ts'
 import { handleProfileComplete } from './handlers/on-profile-complete.ts'
 import { handleForumReply } from './handlers/on-forum-reply.ts'
+import { verifyBearerSecret } from '../_shared/verify-secret.ts'
 
 const WEBHOOK_SECRET = Deno.env.get('EMAIL_WEBHOOK_SECRET') ?? ''
 
 Deno.serve(async (req: Request) => {
-  const authHeader = req.headers.get('Authorization') ?? ''
-  if (!WEBHOOK_SECRET || authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
+  if (!(await verifyBearerSecret(req, WEBHOOK_SECRET))) {
     return new Response('Unauthorized', { status: 401 })
   }
 

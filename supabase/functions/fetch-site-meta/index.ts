@@ -1,22 +1,16 @@
 // Edge Function: lee metadatos públicos del sitio web de un proveedor (<title>, meta
 // description y Open Graph) para prellenar el onboarding. SIN IA y SIN credenciales:
 // solo descarga HTML público. verify_jwt queda activo (lo invoca un proveedor autenticado).
-import { corsHeaders } from '../_shared/cors.ts'
+import { corsHeadersFor } from '../_shared/cors.ts'
 
 const FETCH_TIMEOUT_MS = 5000
 const MAX_BYTES = 512 * 1024 // 512 KB de HTML es más que suficiente para el <head>
+const MAX_REDIRECTS = 5
 
 interface SiteMeta {
   title: string
   description: string
   image: string
-}
-
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
 }
 
 // Guard anti-SSRF: solo http/https hacia hosts públicos. Bloquea localhost y rangos
@@ -99,8 +93,15 @@ function parseMeta(html: string): SiteMeta {
 }
 
 Deno.serve(async (req: Request) => {
+  const cors = corsHeadersFor(req)
+  const jsonResponse = (body: unknown, status = 200): Response =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...cors, 'Content-Type': 'application/json' },
+    })
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: cors })
   }
 
   if (req.method !== 'POST') {
@@ -131,16 +132,48 @@ Deno.serve(async (req: Request) => {
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
   try {
-    const response = await fetch(safeUrl.toString(), {
-      method: 'GET',
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: {
-        // UA explícito: algunos sitios devuelven 403 a clientes sin User-Agent.
-        'User-Agent': 'ZucarlinkBot/1.0 (+https://zucarlink.com)',
-        Accept: 'text/html',
-      },
-    })
+    // Seguimos redirects manualmente y re-validamos CADA salto con el guard
+    // anti-SSRF. Con redirect:'follow', un sitio externo podría redirigir a una
+    // IP interna (p. ej. http://169.254.169.254 de metadata) saltándose la
+    // validación inicial, que solo se aplica a la URL de entrada.
+    let currentUrl = safeUrl
+    let response: Response | null = null
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      response = await fetch(currentUrl.toString(), {
+        method: 'GET',
+        redirect: 'manual',
+        signal: controller.signal,
+        headers: {
+          // UA explícito: algunos sitios devuelven 403 a clientes sin User-Agent.
+          'User-Agent': 'ZucarlinkBot/1.0 (+https://zucarlink.com)',
+          Accept: 'text/html',
+        },
+      })
+
+      if (response.status < 300 || response.status >= 400) {
+        break
+      }
+
+      // Respuesta 3xx: validar el destino antes de seguir.
+      const location = response.headers.get('location')
+      await response.body?.cancel().catch(() => undefined)
+      if (!location) {
+        return jsonResponse({ error: 'Redirección inválida del sitio.' }, 502)
+      }
+      const nextUrl = isSafePublicUrl(new URL(location, currentUrl.toString()).toString())
+      if (!nextUrl) {
+        return jsonResponse(
+          { error: 'La redirección apunta a un destino no permitido.' },
+          400,
+        )
+      }
+      currentUrl = nextUrl
+      response = null
+    }
+
+    if (!response) {
+      return jsonResponse({ error: 'Demasiadas redirecciones.' }, 502)
+    }
 
     if (!response.ok) {
       return jsonResponse(

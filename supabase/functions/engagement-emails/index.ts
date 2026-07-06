@@ -1,11 +1,11 @@
 import { runUnreadReminders } from './jobs/unread-reminders.ts'
 import { runInactivityDigests } from './jobs/inactivity-digest.ts'
+import { verifyBearerSecret } from '../_shared/verify-secret.ts'
 
 const CRON_SECRET = Deno.env.get('ENGAGEMENT_CRON_SECRET') ?? ''
 
 Deno.serve(async (req: Request) => {
-  const authHeader = req.headers.get('Authorization') ?? ''
-  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!(await verifyBearerSecret(req, CRON_SECRET))) {
     return new Response('Unauthorized', { status: 401 })
   }
 
