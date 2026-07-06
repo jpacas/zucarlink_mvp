@@ -505,6 +505,7 @@ label {
 .content-card--status {
   width: min(680px, 100%);
   margin: 10vh auto 0;
+  align-content: start;
   text-align: left;
 }
 
