@@ -499,6 +499,7 @@ label {
 .content-card p,
 .content-card li {
   color: var(--text-muted);
+  max-width: 68ch;
 }
 
 .content-card--status {
@@ -1004,6 +1005,10 @@ fieldset.field {
 
 .info-card h3 {
   margin: 0;
+}
+
+.info-card p {
+  max-width: 68ch;
 }
 
 .content-card--start {
