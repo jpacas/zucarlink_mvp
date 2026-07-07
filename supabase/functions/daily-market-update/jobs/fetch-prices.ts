@@ -1,5 +1,4 @@
 import { getAdminClient } from '../../_shared/supabase-admin.ts'
-import { BROWSER_UA } from '../../_shared/browser-ua.ts'
 
 // El No.11 cotiza en ICE Futures US en centavos de USD por libra (¢/lb).
 const LABEL = 'Azúcar crudo NY No.11'
@@ -7,6 +6,10 @@ const UNIT = '¢ USD/lb'
 const NOTES = 'Cierre diario automático (dato retrasado, no feed en tiempo real).'
 // ~5 años de historial para el gráfico de precio clave.
 const RETENTION_DAYS = 1900
+
+// Yahoo/CNBC rechazan peticiones sin User-Agent de navegador.
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
 
 interface ClosePoint {
   observedAt: string // YYYY-MM-DD en zona America/New_York

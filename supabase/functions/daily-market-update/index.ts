@@ -1,6 +1,4 @@
 import { runFetchPrices } from './jobs/fetch-prices.ts'
-import { runFetchRefinedPrice } from './jobs/fetch-refined-price.ts'
-import { maybeAlertRefinedPriceStale } from './jobs/refined-price-alert.ts'
 import { runMarketSummary } from './jobs/market-summary.ts'
 import { getAdminClient } from '../_shared/supabase-admin.ts'
 import { verifyBearerSecret } from '../_shared/verify-secret.ts'
@@ -19,15 +17,6 @@ Deno.serve(async (req: Request) => {
     return { ok: false, error: String(error) }
   })
 
-  let refinedError: Error | null = null
-  const refinedResult = await runFetchRefinedPrice().catch((error) => {
-    console.error('[daily-market-update] fetch refined price job failed:', error)
-    refinedError = error instanceof Error ? error : new Error(String(error))
-    return { ok: false, error: String(error) }
-  })
-  const alertResult = await maybeAlertRefinedPriceStale(refinedError)
-  const refined = { ...refinedResult, alert_sent: alertResult.alert_sent }
-
   // El resumen de mercado es semanal y una llamada a Anthropic con
   // web_search por label — correr varios labels en un mismo request se
   // acerca al límite de idle timeout (150s) de la Edge Function. Por eso
@@ -45,10 +34,10 @@ Deno.serve(async (req: Request) => {
 
   const { error: logError } = await getAdminClient()
     .from('market_update_runs')
-    .insert({ prices, refined, summary })
+    .insert({ prices, summary })
   if (logError) {
     console.error('[daily-market-update] log insert failed:', logError.message)
   }
 
-  return Response.json({ prices, refined, summary })
+  return Response.json({ prices, summary })
 })
