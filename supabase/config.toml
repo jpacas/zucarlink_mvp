@@ -1,0 +1,19 @@
+# Fija verify_jwt por función para que un `supabase functions deploy` sin
+# banderas manuales no reactive por accidente la verificación de JWT en
+# funciones invocadas por pg_cron con un secret propio (Bearer), no con un
+# JWT de Supabase. Ver README.md para el detalle de cada función.
+
+[functions.daily-market-update]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.engagement-emails]
+verify_jwt = false
+
+[functions.sitemap]
+verify_jwt = false
+
+[functions.fetch-site-meta]
+verify_jwt = true
