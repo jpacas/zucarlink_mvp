@@ -66,11 +66,16 @@ export async function maybeAlertRefinedPriceStale(
     ? `El scraping de Investing.com falló: ${fetchError.message}`
     : `El último precio registrado es del ${latest?.observed_at ?? 'desconocido'}, hace ${staleDays} día(s).`
 
-  await sendEmail({
-    to: ALERT_TO,
-    subject: 'Zucarlink — Azúcar refinada sin actualizar',
-    html: `<p>${reasonText}</p><p>Revisa <code>market_update_runs</code> en Supabase para el detalle del error.</p>`,
-  })
+  try {
+    await sendEmail({
+      to: ALERT_TO,
+      subject: 'Zucarlink — Azúcar refinada sin actualizar',
+      html: `<p>${reasonText}</p><p>Revisa <code>market_update_runs</code> en Supabase para el detalle del error.</p>`,
+    })
+  } catch (sendError) {
+    console.error('[daily-market-update] no se pudo enviar el correo de alerta de Azúcar refinada:', (sendError as Error).message)
+    return { alert_sent: false, reason: 'fallo-envio-correo' }
+  }
 
   return { alert_sent: true }
 }
