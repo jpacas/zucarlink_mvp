@@ -526,7 +526,7 @@ export function OnboardingPage() {
               }
             />
           </div>
-          <div className="stack">
+          <div className={`stack${feedback && selectedSpecialtyIds.length === 0 ? ' field--error' : ''}`}>
             <div>
               <h3>Especialidades técnicas</h3>
               <p className="helper-text">Selecciona al menos una especialidad.</p>
@@ -537,7 +537,11 @@ export function OnboardingPage() {
               onToggle={toggleSpecialty}
             />
           </div>
-          {feedback ? <p className="error-text">{feedback}</p> : null}
+          {feedback ? (
+            <p className="error-text" role="alert" aria-live="assertive">
+              {feedback}
+            </p>
+          ) : null}
           <div className="actions">
             <button
               className="button button--ghost"

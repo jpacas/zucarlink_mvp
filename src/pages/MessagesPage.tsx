@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { AttachmentInput } from '../components/AttachmentInput'
 import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { SkeletonThreadItem } from '../components/Skeleton'
 import { getInitials } from '../lib/initials'
 import { removeMessageAttachment, uploadMessageAttachment } from '../lib/media-storage'
@@ -296,20 +297,6 @@ export function MessagesPage() {
     }
   }
 
-  // Close delete modal with Escape
-  useEffect(() => {
-    if (!showDeleteModal) return
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isDeleting) {
-        setShowDeleteModal(false)
-      }
-    }
-
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [showDeleteModal, isDeleting])
-
   const handleSend = async () => {
     if (!selectedThreadId || (!newMessage.trim() && !attachmentFile) || isSending) return
 
@@ -576,46 +563,15 @@ export function MessagesPage() {
     </section>
 
     {showDeleteModal && selectedThread ? (
-      <div
-        className="confirm-overlay"
-        role="presentation"
-        onClick={() => {
-          if (!isDeleting) setShowDeleteModal(false)
-        }}
-      >
-        <div
-          className="confirm-card stack"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-thread-title"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h3 id="delete-thread-title">¿Borrar conversación?</h3>
-          <p className="helper-text">
-            Se ocultará de tu lista de mensajes. {selectedThread.otherFullName} conservará su copia.
-            Si te vuelve a escribir, la conversación reaparecerá con los mensajes nuevos.
-          </p>
-          {deleteError ? <p className="error-text">{deleteError}</p> : null}
-          <div className="confirm-card__actions">
-            <button
-              type="button"
-              className="button button--secondary"
-              onClick={() => setShowDeleteModal(false)}
-              disabled={isDeleting}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              className="button button--danger"
-              onClick={() => void handleDeleteThread()}
-              disabled={isDeleting}
-            >
-              {isDeleting ? 'Borrando...' : 'Borrar'}
-            </button>
-          </div>
-        </div>
-      </div>
+      <ConfirmDialog
+        titleId="delete-thread-title"
+        title="¿Borrar conversación?"
+        description={`Se ocultará de tu lista de mensajes. ${selectedThread.otherFullName} conservará su copia. Si te vuelve a escribir, la conversación reaparecerá con los mensajes nuevos.`}
+        errorMessage={deleteError}
+        isBusy={isDeleting}
+        onConfirm={() => void handleDeleteThread()}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     ) : null}
     </div>
   )

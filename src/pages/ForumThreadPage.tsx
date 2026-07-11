@@ -6,6 +6,7 @@ import { getMemberProfilePath } from '../features/directory/memberProfilePath'
 import { AttachmentInput } from '../components/AttachmentInput'
 import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import {
   createForumReply,
   deleteForumReply,
@@ -112,6 +113,8 @@ export function ForumThreadPage() {
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [pendingDeleteThread, setPendingDeleteThread] = useState(false)
+  const [pendingDeleteReply, setPendingDeleteReply] = useState<ReplyNode | null>(null)
   const [likeCount, setLikeCount] = useState(0)
   const [viewerLiked, setViewerLiked] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
@@ -244,16 +247,16 @@ export function ForumThreadPage() {
     }
   }
 
-  async function handleDeleteThread() {
+  function handleDeleteThread() {
     if (!thread || isDeleting) {
       return
     }
 
-    const confirmed = window.confirm(
-      '¿Eliminar esta conversación y todas sus respuestas? Esta acción no se puede deshacer.',
-    )
+    setPendingDeleteThread(true)
+  }
 
-    if (!confirmed) {
+  async function confirmDeleteThread() {
+    if (!thread) {
       return
     }
 
@@ -267,33 +270,31 @@ export function ForumThreadPage() {
         error instanceof Error ? error.message : 'No fue posible eliminar la conversación.',
       )
       setIsDeleting(false)
+      setPendingDeleteThread(false)
     }
   }
 
-  async function handleDeleteReply(node: ReplyNode) {
+  function handleDeleteReply(node: ReplyNode) {
     if (!thread || isDeleting) {
       return
     }
 
-    const childCount = node.children.length
-    const message =
-      childCount > 0
-        ? `Esta respuesta tiene ${childCount} ${
-            childCount === 1 ? 'respuesta' : 'respuestas'
-          } que también se eliminarán. ¿Continuar? Esta acción no se puede deshacer.`
-        : '¿Eliminar esta respuesta? Esta acción no se puede deshacer.'
+    setPendingDeleteReply(node)
+  }
 
-    if (!window.confirm(message)) {
+  async function confirmDeleteReply() {
+    if (!thread || !pendingDeleteReply) {
       return
     }
 
     setIsDeleting(true)
 
     try {
-      await deleteForumReply(node.reply.id)
+      await deleteForumReply(pendingDeleteReply.reply.id)
       const refreshed = await getForumThread(thread.slug)
       setThread(refreshed)
       setErrorMessage(null)
+      setPendingDeleteReply(null)
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : 'No fue posible eliminar la respuesta.',
@@ -479,7 +480,7 @@ export function ForumThreadPage() {
               className="forum-action forum-action--danger"
               onClick={handleDeleteThread}
               disabled={isDeleting}
-              aria-label="Eliminar conversación"
+              aria-label="Eliminar tema"
             >
               <TrashIcon />
               <span>Eliminar</span>
@@ -567,6 +568,36 @@ export function ForumThreadPage() {
           </div>
         </section>
       )}
+
+      {pendingDeleteThread ? (
+        <ConfirmDialog
+          titleId="delete-thread-title"
+          title="¿Eliminar este tema?"
+          description="Se eliminará el tema y todas sus respuestas para siempre. Esta acción no se puede deshacer."
+          isBusy={isDeleting}
+          confirmLabel="Eliminar"
+          onConfirm={() => void confirmDeleteThread()}
+          onCancel={() => setPendingDeleteThread(false)}
+        />
+      ) : null}
+
+      {pendingDeleteReply ? (
+        <ConfirmDialog
+          titleId="delete-reply-title"
+          title="¿Eliminar esta respuesta?"
+          description={
+            pendingDeleteReply.children.length > 0
+              ? `Esta respuesta tiene ${pendingDeleteReply.children.length} ${
+                  pendingDeleteReply.children.length === 1 ? 'respuesta' : 'respuestas'
+                } que también se eliminarán. Esta acción no se puede deshacer.`
+              : 'Esta respuesta se eliminará para siempre. Esta acción no se puede deshacer.'
+          }
+          isBusy={isDeleting}
+          confirmLabel="Eliminar"
+          onConfirm={() => void confirmDeleteReply()}
+          onCancel={() => setPendingDeleteReply(null)}
+        />
+      ) : null}
     </div>
   )
 }

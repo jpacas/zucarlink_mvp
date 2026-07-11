@@ -921,6 +921,13 @@ fieldset.field {
   color: var(--danger);
 }
 
+.field--error {
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin: -0.75rem;
+}
+
 .helper-text {
   color: var(--text-soft);
 }

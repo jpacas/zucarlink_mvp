@@ -11,6 +11,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { getMissingEnvKeys } from '../../lib/env'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type { SignInPayload, SignUpPayload } from '../../types/auth'
+import { mapSupabaseAuthError } from './authErrorMessages'
 import { useLastSeenHeartbeat } from './useLastSeenHeartbeat'
 
 interface AuthContextValue {
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     void client.auth.getSession().then(({ data, error }) => {
       if (error) {
-        setErrorMessage(error.message)
+        setErrorMessage(mapSupabaseAuthError(error.message))
       }
 
       setSession(data.session)
@@ -99,7 +100,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         })
 
         if (error) {
-          setErrorMessage(error.message)
+          setErrorMessage(mapSupabaseAuthError(error.message))
           throw error
         }
 
@@ -137,7 +138,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         })
 
         if (error) {
-          setErrorMessage(error.message)
+          setErrorMessage(mapSupabaseAuthError(error.message))
           throw error
         }
 
@@ -158,7 +159,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         const { error } = await client.auth.signOut()
 
         if (error) {
-          setErrorMessage(error.message)
+          setErrorMessage(mapSupabaseAuthError(error.message))
           throw error
         }
 
