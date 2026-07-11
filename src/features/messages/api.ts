@@ -57,6 +57,25 @@ export async function startOrGetThread(otherProfileId: string): Promise<string> 
   return data as string
 }
 
+interface AttachmentRow {
+  path: string
+  type: string
+  filename: string | null
+  size_bytes: number | null
+}
+
+async function resolveMessageAttachments(rows: AttachmentRow[] | null | undefined): Promise<Message['attachments']> {
+  const list = rows ?? []
+  return Promise.all(
+    list.map(async (row) => ({
+      url: (await getMessageAttachmentSignedUrl(row.path)) ?? '',
+      type: row.type as MessageAttachmentType,
+      filename: row.filename ?? null,
+      sizeBytes: row.size_bytes ?? null,
+    })),
+  )
+}
+
 export async function getThreadMessages(threadId: string): Promise<Message[]> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('get_thread_messages', {
@@ -74,15 +93,9 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
       body: row.body,
       isRead: row.is_read,
       createdAt: row.created_at,
-      attachment:
-        row.attachment_path && row.attachment_type
-          ? {
-              url: (await getMessageAttachmentSignedUrl(row.attachment_path)) ?? '',
-              type: row.attachment_type as MessageAttachmentType,
-              filename: row.attachment_filename ?? null,
-              sizeBytes: row.attachment_size_bytes ?? null,
-            }
-          : null,
+      attachments: await resolveMessageAttachments(
+        (row.attachments as unknown as AttachmentRow[] | null) ?? [],
+      ),
     })),
   )
 }
@@ -90,21 +103,23 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
 export async function sendMessage(
   threadId: string,
   body: string,
-  attachment?: {
+  attachments?: Array<{
     path: string
     type: MessageAttachmentType
     filename?: string | null
     sizeBytes?: number | null
-  } | null,
+  }>,
 ): Promise<string> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('send_message', {
     p_thread_id: threadId,
     body_text: body,
-    attachment_path: attachment?.path ?? undefined,
-    attachment_type: attachment?.type ?? undefined,
-    attachment_filename: attachment?.filename ?? undefined,
-    attachment_size_bytes: attachment?.sizeBytes ?? undefined,
+    attachments: (attachments ?? []).map((a) => ({
+      path: a.path,
+      type: a.type,
+      filename: a.filename ?? null,
+      size_bytes: a.sizeBytes ?? null,
+    })),
   })
 
   if (error) {

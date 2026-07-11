@@ -280,10 +280,6 @@ export type Database = {
       }
       forum_replies: {
         Row: {
-          attachment_filename: string | null
-          attachment_path: string | null
-          attachment_size_bytes: number | null
-          attachment_type: string | null
           author_id: string
           body: string
           created_at: string
@@ -294,10 +290,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          attachment_filename?: string | null
-          attachment_path?: string | null
-          attachment_size_bytes?: number | null
-          attachment_type?: string | null
           author_id: string
           body: string
           created_at?: string
@@ -308,10 +300,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          attachment_filename?: string | null
-          attachment_path?: string | null
-          attachment_size_bytes?: number | null
-          attachment_type?: string | null
           author_id?: string
           body?: string
           created_at?: string
@@ -366,10 +354,6 @@ export type Database = {
       }
       forum_topics: {
         Row: {
-          attachment_filename: string | null
-          attachment_path: string | null
-          attachment_size_bytes: number | null
-          attachment_type: string | null
           author_id: string
           body: string
           category_id: string
@@ -383,10 +367,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          attachment_filename?: string | null
-          attachment_path?: string | null
-          attachment_size_bytes?: number | null
-          attachment_type?: string | null
           author_id: string
           body: string
           category_id: string
@@ -400,10 +380,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          attachment_filename?: string | null
-          attachment_path?: string | null
-          attachment_size_bytes?: number | null
-          attachment_type?: string | null
           author_id?: string
           body?: string
           category_id?: string
@@ -428,10 +404,6 @@ export type Database = {
       }
       messages: {
         Row: {
-          attachment_filename: string | null
-          attachment_path: string | null
-          attachment_size_bytes: number | null
-          attachment_type: string | null
           body: string
           conversation_id: string
           created_at: string
@@ -441,10 +413,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          attachment_filename?: string | null
-          attachment_path?: string | null
-          attachment_size_bytes?: number | null
-          attachment_type?: string | null
           body: string
           conversation_id: string
           created_at?: string
@@ -454,10 +422,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          attachment_filename?: string | null
-          attachment_path?: string | null
-          attachment_size_bytes?: number | null
-          attachment_type?: string | null
           body?: string
           conversation_id?: string
           created_at?: string
@@ -475,6 +439,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      attachments: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          media_type: string
+          owner_id: string
+          owner_type: string
+          path: string
+          position: number
+          size_bytes: number
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          media_type: string
+          owner_id: string
+          owner_type: string
+          path: string
+          position: number
+          size_bytes: number
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          media_type?: string
+          owner_id?: string
+          owner_type?: string
+          path?: string
+          position?: number
+          size_bytes?: number
+        }
+        Relationships: []
       }
       price_items: {
         Row: {
@@ -874,10 +874,7 @@ export type Database = {
       count_my_unread: { Args: never; Returns: number }
       create_forum_reply: {
         Args: {
-          attachment_filename?: string
-          attachment_path?: string
-          attachment_size_bytes?: number
-          attachment_type?: string
+          attachments?: Json
           body_text: string
           parent_reply_id?: string
           thread_slug: string
@@ -888,10 +885,7 @@ export type Database = {
       }
       create_forum_topic: {
         Args: {
-          attachment_filename?: string
-          attachment_path?: string
-          attachment_size_bytes?: number
-          attachment_type?: string
+          attachments?: Json
           body_text: string
           category_slug: string
           title_text: string
@@ -945,10 +939,7 @@ export type Database = {
       get_forum_thread: {
         Args: { thread_slug: string }
         Returns: {
-          attachment_filename: string
-          attachment_path: string
-          attachment_size_bytes: number
-          attachment_type: string
+          attachments: Json
           author: Json
           body: string
           category: Json
@@ -1022,10 +1013,7 @@ export type Database = {
       get_thread_messages: {
         Args: { p_thread_id: string }
         Returns: {
-          attachment_filename: string
-          attachment_path: string
-          attachment_size_bytes: number
-          attachment_type: string
+          attachments: Json
           body: string
           created_at: string
           id: string
@@ -1176,10 +1164,7 @@ export type Database = {
       }
       send_message: {
         Args: {
-          attachment_filename?: string
-          attachment_path?: string
-          attachment_size_bytes?: number
-          attachment_type?: string
+          attachments?: Json
           body_text: string
           p_thread_id: string
         }

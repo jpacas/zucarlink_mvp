@@ -44,9 +44,23 @@ export const MEDIA_VIDEO_ALLOWED_TYPES = [
   'video/quicktime',
 ] as const
 
+export const MEDIA_DOCUMENT_MAX_BYTES = 20 * 1024 * 1024
+
+// Solo Office moderno (Open XML) y PDF. Se excluyen deliberadamente los
+// formatos legacy/macro-enabled (.doc, .xls, .docm, .xlsm) por riesgo de
+// seguridad — ver revisión de seguridad en el plan de adjuntos múltiples.
+export const MEDIA_DOCUMENT_ALLOWED_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+] as const
+
 export type MediaImageMimeType = (typeof MEDIA_IMAGE_ALLOWED_TYPES)[number]
 export type MediaVideoMimeType = (typeof MEDIA_VIDEO_ALLOWED_TYPES)[number]
-export type MediaAttachmentType = 'image' | 'video'
+export type MediaDocumentMimeType = (typeof MEDIA_DOCUMENT_ALLOWED_TYPES)[number]
+export type MediaAttachmentType = 'image' | 'video' | 'pdf' | 'word' | 'excel'
+
+export const MAX_ATTACHMENTS_PER_MESSAGE = 6
 
 export interface MediaUploadResult {
   path: string

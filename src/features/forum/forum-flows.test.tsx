@@ -456,6 +456,7 @@ it('lets an authenticated member reply to a thread directly from the listing', a
       thread_slug: 'automatizacion-mano-de-obra-barata',
       body_text: 'Aporte rápido desde el listado.',
       parent_reply_id: undefined,
+      attachments: [],
     })
   })
   expect(await screen.findByText('Respuesta publicada.')).toBeInTheDocument()
@@ -617,6 +618,7 @@ it('allows complete profiles to create a new thread', async () => {
       body_text: 'Contenido mínimo para abrir el debate.',
       category_slug: 'automatizacion',
       title_text: 'Nuevo hilo desde tests',
+      attachments: [],
     })
   })
 })
@@ -803,7 +805,7 @@ it('creates a new thread with an image attachment, uploading before calling the 
     const file = new File(['foto-bytes'], 'panel.jpg', { type: 'image/jpeg' })
     await user.upload(fileInput, file)
 
-    await screen.findByRole('button', { name: 'Quitar adjunto' })
+    await screen.findByRole('button', { name: /Quitar panel\.jpg/ })
     await user.click(screen.getByRole('button', { name: 'Publicar tema' }))
 
     await waitFor(() => {
@@ -811,8 +813,10 @@ it('creates a new thread with an image attachment, uploading before calling the 
     })
 
     const rpcArgs = createForumTopicSpy.mock.calls[0][0]!
-    expect(rpcArgs.attachment_path).toMatch(/^.+\/[0-9a-f-]{36}\.webp$/)
-    expect(rpcArgs.attachment_type).toBe('image')
+    const attachments = rpcArgs.attachments as Array<{ path: string; type: string }>
+    expect(attachments).toHaveLength(1)
+    expect(attachments[0].path).toMatch(/^.+\/[0-9a-f-]{36}\.webp$/)
+    expect(attachments[0].type).toBe('image')
 
     // El upload de storage debe completarse antes de que se invoque el RPC.
     expect(uploadCalls.length).toBeGreaterThan(0)
@@ -857,7 +861,7 @@ it('removes the uploaded attachment when create_forum_topic fails after upload',
       throw new Error('Attachment file input not found')
     }
     await user.upload(fileInput, new File(['foto-bytes'], 'panel.jpg', { type: 'image/jpeg' }))
-    await screen.findByRole('button', { name: 'Quitar adjunto' })
+    await screen.findByRole('button', { name: /Quitar panel\.jpg/ })
 
     await user.click(screen.getByRole('button', { name: 'Publicar tema' }))
 
@@ -908,7 +912,7 @@ it('lets the user remove a selected attachment before submitting', async () => {
       throw new Error('Attachment file input not found')
     }
     await user.upload(fileInput, new File(['foto-bytes'], 'panel.jpg', { type: 'image/jpeg' }))
-    await user.click(await screen.findByRole('button', { name: 'Quitar adjunto' }))
+    await user.click(await screen.findByRole('button', { name: /Quitar panel\.jpg/ }))
 
     await user.click(screen.getByRole('button', { name: 'Publicar tema' }))
 
@@ -917,8 +921,7 @@ it('lets the user remove a selected attachment before submitting', async () => {
     })
 
     const rpcArgs = createForumTopicSpy.mock.calls[0][0]!
-    expect(rpcArgs.attachment_path).toBeUndefined()
-    expect(rpcArgs.attachment_type).toBeUndefined()
+    expect(rpcArgs.attachments).toEqual([])
   } finally {
     restoreCanvas()
   }
@@ -927,13 +930,11 @@ it('lets the user remove a selected attachment before submitting', async () => {
 it('renders attachments on the thread body and on a reply', async () => {
   const detailWithAttachments = {
     ...threadDetail,
-    attachment_path: 'profile-ana/photo.webp',
-    attachment_type: 'image',
+    attachments: [{ path: 'profile-ana/photo.webp', type: 'image', filename: null, size_bytes: null }],
     replies: [
       {
         ...threadDetail.replies[0],
-        attachment_path: 'profile-carlos/clip.mp4',
-        attachment_type: 'video',
+        attachments: [{ path: 'profile-carlos/clip.mp4', type: 'video', filename: null, size_bytes: null }],
       },
     ],
   }
@@ -1021,7 +1022,7 @@ it('allows replying with only an attachment and an empty body', async () => {
       throw new Error('Attachment file input not found')
     }
     await user.upload(fileInput, new File(['foto-bytes'], 'foto.jpg', { type: 'image/jpeg' }))
-    await screen.findByRole('button', { name: 'Quitar adjunto' })
+    await screen.findByRole('button', { name: /Quitar foto\.jpg/ })
 
     await user.click(screen.getByRole('button', { name: 'Publicar respuesta' }))
 
@@ -1030,8 +1031,10 @@ it('allows replying with only an attachment and an empty body', async () => {
     })
 
     const rpcArgs = createReplySpy.mock.calls[0][0]!
+    const attachments = rpcArgs.attachments as Array<{ path: string; type: string }>
     expect(rpcArgs.body_text).toBe('')
-    expect(rpcArgs.attachment_type).toBe('image')
+    expect(attachments).toHaveLength(1)
+    expect(attachments[0].type).toBe('image')
   } finally {
     restoreCanvas()
   }

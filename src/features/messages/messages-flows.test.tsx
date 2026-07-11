@@ -116,7 +116,7 @@ it('sends a message with only an image attachment (no text)', async () => {
       throw new Error('Attachment file input not found')
     }
     await user.upload(input, new File(['foto-bytes'], 'foto.jpg', { type: 'image/jpeg' }))
-    await screen.findByRole('button', { name: 'Quitar adjunto' })
+    await screen.findByRole('button', { name: /Quitar foto\.jpg/ })
 
     await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }))
 
@@ -125,9 +125,11 @@ it('sends a message with only an image attachment (no text)', async () => {
     })
 
     const rpcArgs = sendMessageSpy.mock.calls[0][0]!
+    const attachments = rpcArgs.attachments as Array<{ path: string; type: string }>
     expect(rpcArgs.body_text).toBe('')
-    expect(rpcArgs.attachment_type).toBe('image')
-    expect(rpcArgs.attachment_path).toMatch(new RegExp(`^thread-1/${authState.user.id}/[0-9a-f-]{36}\\.webp$`))
+    expect(attachments).toHaveLength(1)
+    expect(attachments[0].type).toBe('image')
+    expect(attachments[0].path).toMatch(new RegExp(`^thread-1/${authState.user.id}/[0-9a-f-]{36}\\.webp$`))
     expect(uploadCalls.length).toBeGreaterThan(0)
   } finally {
     restoreCanvas()
@@ -163,7 +165,7 @@ it('restores the message and attachment and cleans up storage when send_message 
       throw new Error('Attachment file input not found')
     }
     await user.upload(input, new File(['foto-bytes'], 'foto.jpg', { type: 'image/jpeg' }))
-    await screen.findByRole('button', { name: 'Quitar adjunto' })
+    await screen.findByRole('button', { name: /Quitar foto\.jpg/ })
 
     await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }))
 
@@ -194,8 +196,14 @@ it('renders an existing message attachment using a signed URL', async () => {
             body: '',
             is_read: true,
             created_at: '2026-06-01T09:00:00.000Z',
-            attachment_path: 'thread-1/profile-carlos/photo.webp',
-            attachment_type: 'image',
+            attachments: [
+              {
+                path: 'thread-1/profile-carlos/photo.webp',
+                type: 'image',
+                filename: null,
+                size_bytes: null,
+              },
+            ],
           },
         ],
       },
@@ -215,6 +223,73 @@ it('renders an existing message attachment using a signed URL', async () => {
     'https://signed.example/thread-1/profile-carlos/photo.webp?expiresIn=3600',
   )
   expect(createSignedUrlCalls.length).toBeGreaterThan(0)
+})
+
+it('surfaces the error instead of silently failing when ?to= cannot start a conversation', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'auto-mensaje@example.com',
+    userMetadata: { full_name: 'Auto Mensaje', account_type: 'technician' },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      list_my_threads: { data: [] },
+      start_or_get_thread: () => ({
+        error: { message: 'No puedes enviarte mensajes a ti mismo.' },
+      }),
+    },
+  })
+
+  await renderApp({
+    initialRoute: `/app/messages?to=${authState.user.id}`,
+    supabase,
+  })
+
+  await screen.findByText('No puedes enviarte mensajes a ti mismo.')
+})
+
+it('opens the composer via ?to= even when the existing conversation was cleared and has no new messages', async () => {
+  const authState = createAuthenticatedAuthState({
+    email: 'reabrir-chat@example.com',
+    userMetadata: { full_name: 'Reabrir Chat', account_type: 'technician' },
+  })
+  const supabase = createSupabaseAuthFake({
+    session: authState.session,
+    user: authState.user,
+    rpc: {
+      // list_my_threads oculta a propósito una conversación "borrada" (clear_thread)
+      // sin mensajes nuevos, aunque start_or_get_thread siga devolviendo su id.
+      list_my_threads: { data: [] },
+      start_or_get_thread: () => ({ data: 'thread-cleared-1' }),
+      get_thread_messages: { data: [] },
+      mark_thread_read: { data: null },
+      get_directory_profile_detail: {
+        data: [
+          {
+            id: otherProfileId,
+            full_name: 'Carlos Ruiz',
+            role_title: 'Supervisor de calderas',
+            organization_name: 'Ingenio San Miguel',
+            country: 'El Salvador',
+            short_bio: null,
+            avatar_path: null,
+            specialties: [],
+            years_experience: null,
+            experiences: [],
+          },
+        ],
+      },
+    },
+  })
+
+  await renderApp({
+    initialRoute: `/app/messages?to=${otherProfileId}`,
+    supabase,
+  })
+
+  await screen.findByLabelText('Escribe un mensaje')
+  expect(screen.queryByText('Selecciona una conversación para comenzar.')).not.toBeInTheDocument()
 })
 
 it('shows a photo/video preview fallback in the thread list when the last message has no text', async () => {

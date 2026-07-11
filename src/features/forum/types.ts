@@ -13,7 +13,7 @@ export interface ForumAuthor {
   avatarUrl: string | null
 }
 
-export type ForumAttachmentType = 'image' | 'video'
+export type ForumAttachmentType = 'image' | 'video' | 'pdf' | 'word' | 'excel'
 
 export interface ForumAttachment {
   url: string
@@ -45,12 +45,12 @@ export interface ForumReply {
   parentReplyId: string | null
   parentAuthorName: string | null
   author: ForumAuthor
-  attachment: ForumAttachment | null
+  attachments: ForumAttachment[]
 }
 
 export interface ForumThreadDetail extends ForumThreadCard {
   replies: ForumReply[]
-  attachment: ForumAttachment | null
+  attachments: ForumAttachment[]
 }
 
 export interface ForumTopicLikeState {

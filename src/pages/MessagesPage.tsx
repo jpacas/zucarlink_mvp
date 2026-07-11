@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
+import { getDirectoryProfileDetail } from '../features/directory/api'
 import { AttachmentInput } from '../components/AttachmentInput'
+import { AttachmentPreviewList } from '../components/AttachmentPreviewList'
 import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -10,7 +12,7 @@ import { SkeletonThreadItem } from '../components/Skeleton'
 import { UploadProgressBar } from '../components/UploadProgressBar'
 import { logAttachmentCleanupFailure } from '../lib/attachment-cleanup-log'
 import { getInitials } from '../lib/initials'
-import { removeMessageAttachment, uploadMessageAttachment } from '../lib/media-storage'
+import { removeOrphanedMessageAttachments, uploadMessageAttachments } from '../lib/media-storage'
 import {
   clearThread,
   getThreadMessages,
@@ -22,6 +24,31 @@ import {
 import type { Message, MessageAttachmentType, MessageThread } from '../features/messages/types'
 
 const POLL_INTERVAL_MS = 8_000
+
+// Evita reemplazar el arreglo de mensajes (y con eso el scroll-to-bottom /
+// re-render de la conversación) cuando el polling trae exactamente lo mismo
+// que ya se estaba mostrando — de lo contrario cada 8s se sentía como un
+// "refresh" visual aunque no hubiera mensajes nuevos.
+function haveSameMessages(a: Message[], b: Message[]) {
+  if (a.length !== b.length) return false
+  return a.every((message, index) => {
+    const other = b[index]
+    return (
+      message.id === other.id &&
+      message.isRead === other.isRead &&
+      message.body === other.body &&
+      message.attachments.length === other.attachments.length
+    )
+  })
+}
+
+const THREAD_PREVIEW_LABEL: Record<MessageAttachmentType, string> = {
+  image: '📷 Foto',
+  video: '🎬 Video',
+  pdf: '📄 PDF',
+  word: '📝 Documento',
+  excel: '📊 Documento',
+}
 
 function formatTime(isoString: string) {
   const date = new Date(isoString)
@@ -99,11 +126,9 @@ function ThreadListItem({
         <p className="messages-thread-item__preview helper-text">
           {thread.lastMessageBody
             ? thread.lastMessageBody.slice(0, 72) + (thread.lastMessageBody.length > 72 ? '…' : '')
-            : thread.lastMessageAttachmentType === 'video'
-              ? '🎬 Video'
-              : thread.lastMessageAttachmentType === 'image'
-                ? '📷 Foto'
-                : 'Sin mensajes todavía'}
+            : thread.lastMessageAttachmentType
+              ? THREAD_PREVIEW_LABEL[thread.lastMessageAttachmentType]
+              : 'Sin mensajes todavía'}
         </p>
       </div>
       {thread.unreadCount > 0 ? (
@@ -125,14 +150,7 @@ function MessageBubble({
   return (
     <div className={`message-bubble-wrap${isMine ? ' message-bubble-wrap--mine' : ''}`}>
       <div className={`message-bubble${isMine ? ' message-bubble--mine' : ''}`}>
-        {message.attachment ? (
-          <AttachmentView
-            url={message.attachment.url}
-            type={message.attachment.type}
-            filename={message.attachment.filename}
-            sizeBytes={message.attachment.sizeBytes}
-          />
-        ) : null}
+        <AttachmentView attachments={message.attachments} />
         {message.body ? <p className="message-bubble__body">{message.body}</p> : null}
         <span className="message-bubble__time helper-text">{formatTime(message.createdAt)}</span>
       </div>
@@ -148,12 +166,13 @@ export function MessagesPage() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
-  const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([])
   const [threadsLoading, setThreadsLoading] = useState(true)
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'saving'>('idle')
   const [threadsError, setThreadsError] = useState<string | null>(null)
+  const [startThreadError, setStartThreadError] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
   const [showMobileThread, setShowMobileThread] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -171,26 +190,71 @@ export function MessagesPage() {
 
     if (!toProfileId) return
 
+    setStartThreadError(null)
+
     void startOrGetThread(toProfileId)
       .then(async (threadId) => {
         // Reload the thread list so a newly created conversation is present
         // before we select it (otherwise selectedThread resolves to null and
         // the empty-state placeholder is shown by mistake).
-        await loadThreads()
+        const rows = await loadThreads()
+
+        // Una conversación que el usuario ya había "borrado" (clear_thread) y que
+        // no tiene mensajes nuevos queda oculta a propósito en list_my_threads
+        // (ver 20260617000018_clear_thread.sql) — pero start_or_get_thread sigue
+        // devolviendo su id existente. Si no aparece en la lista recién cargada,
+        // se arma una entrada mínima para poder abrir igual el composer.
+        if (rows && !rows.some((t) => t.threadId === threadId)) {
+          try {
+            const profile = await getDirectoryProfileDetail(toProfileId)
+            setThreads((prev) =>
+              prev.some((t) => t.threadId === threadId)
+                ? prev
+                : [
+                    {
+                      threadId,
+                      otherProfileId: toProfileId,
+                      otherFullName: profile.fullName,
+                      otherAvatarPath: profile.avatarUrl,
+                      lastMessageBody: '',
+                      lastMessageAt: null,
+                      lastMessageAttachmentType: null,
+                      unreadCount: 0,
+                    },
+                    ...prev,
+                  ],
+            )
+          } catch {
+            // Sin datos de perfil no se puede armar la tarjeta, pero igual se
+            // deja seleccionado el thread — mejor que el estado previo (nada).
+          }
+        }
+
         setSelectedThreadId(threadId)
         setShowMobileThread(true)
       })
-      .catch(() => {})
+      .catch((error) => {
+        // Antes se descartaba en silencio: el usuario terminaba en /app/messages
+        // sin conversación abierta y sin ninguna pista de qué falló (p. ej. al
+        // intentar enviarse un mensaje a sí mismo, rechazado por el backend).
+        // Se usa un estado dedicado (no `threadsError`) porque el `loadThreads()`
+        // inicial en el otro efecto de montaje puede resolver después y limpiarlo.
+        setStartThreadError(
+          error instanceof Error ? error.message : 'No fue posible iniciar la conversación.',
+        )
+      })
   }, [searchParams])
 
   // Load thread list
-  const loadThreads = async () => {
+  const loadThreads = async (): Promise<MessageThread[] | undefined> => {
     try {
       const rows = await listMyThreads()
       setThreads(rows)
       setThreadsError(null)
+      return rows
     } catch (error) {
       setThreadsError(error instanceof Error ? error.message : 'No fue posible cargar conversaciones.')
+      return undefined
     } finally {
       setThreadsLoading(false)
     }
@@ -259,15 +323,19 @@ export function MessagesPage() {
     pollRef.current = setInterval(() => {
       void getThreadMessages(selectedThreadId)
         .then((rows) => {
-          setMessages(rows)
-          return markThreadRead(selectedThreadId)
-        })
-        .then(() => {
-          setThreads((prev) =>
-            prev.map((t) =>
-              t.threadId === selectedThreadId ? { ...t, unreadCount: 0 } : t,
-            ),
-          )
+          let changed = true
+          setMessages((prev) => {
+            changed = !haveSameMessages(prev, rows)
+            return changed ? rows : prev
+          })
+          if (!changed) return
+          return markThreadRead(selectedThreadId).then(() => {
+            setThreads((prev) =>
+              prev.map((t) =>
+                t.threadId === selectedThreadId ? { ...t, unreadCount: 0 } : t,
+              ),
+            )
+          })
         })
         .catch(() => {})
     }, POLL_INTERVAL_MS)
@@ -306,50 +374,48 @@ export function MessagesPage() {
   }
 
   const handleSend = async () => {
-    if (!selectedThreadId || (!newMessage.trim() && !attachmentFile) || isSending) return
+    if (!selectedThreadId || (!newMessage.trim() && attachmentFiles.length === 0) || isSending) return
 
     const body = newMessage.trim()
-    const pendingAttachment = attachmentFile
+    const pendingAttachments = attachmentFiles
     setNewMessage('')
-    setAttachmentFile(null)
+    setAttachmentFiles([])
     setIsSending(true)
     setSendError(null)
 
-    let uploadedPath: string | null = null
+    let uploadedPaths: string[] = []
 
     try {
-      let attachment:
-        | { path: string; type: MessageAttachmentType; filename: string; sizeBytes: number }
-        | undefined
+      let attachments: Array<{ path: string; type: MessageAttachmentType; filename: string; sizeBytes: number }> = []
 
-      if (pendingAttachment && user) {
+      if (pendingAttachments.length > 0 && user) {
         setUploadPhase('uploading')
-        const uploaded = await uploadMessageAttachment({
-          file: pendingAttachment,
+        const uploaded = await uploadMessageAttachments({
+          files: pendingAttachments,
           conversationId: selectedThreadId,
           senderId: user.id,
         })
-        uploadedPath = uploaded.path
-        attachment = uploaded
+        uploadedPaths = uploaded.map((u) => u.path)
+        attachments = uploaded
       }
 
       setUploadPhase('saving')
-      await sendMessage(selectedThreadId, body, attachment)
+      await sendMessage(selectedThreadId, body, attachments)
       const rows = await getThreadMessages(selectedThreadId)
       setMessages(rows)
 
       // Refresh thread list to update last message preview
       void loadThreads()
     } catch (error) {
-      if (uploadedPath) {
-        const path = uploadedPath
-        void removeMessageAttachment(path).catch((cause) =>
-          logAttachmentCleanupFailure({ path, bucket: 'message-media', cause }),
+      if (uploadedPaths.length > 0) {
+        const paths = uploadedPaths
+        void removeOrphanedMessageAttachments(paths).catch((cause) =>
+          logAttachmentCleanupFailure({ path: paths, bucket: 'message-media', cause }),
         )
       }
       setSendError(error instanceof Error ? error.message : 'No fue posible enviar el mensaje.')
       setNewMessage(body) // Restore message on error
-      setAttachmentFile(pendingAttachment)
+      setAttachmentFiles(pendingAttachments)
     } finally {
       setIsSending(false)
       setUploadPhase('idle')
@@ -380,6 +446,8 @@ export function MessagesPage() {
           Ir al directorio
         </Link>
       </div>
+
+      {startThreadError ? <p className="error-text">{startThreadError}</p> : null}
 
       <div className="messages-layout">
         {/* Thread list sidebar */}
@@ -544,13 +612,22 @@ export function MessagesPage() {
                     {sendError}
                   </p>
                 ) : null}
-                <AttachmentInput
-                  file={attachmentFile}
-                  onSelect={setAttachmentFile}
-                  disabled={isSending}
-                  label="Adjuntar"
-                />
+                {attachmentFiles.length > 0 ? (
+                  <div className="messages-composer__attachments">
+                    <AttachmentPreviewList
+                      files={attachmentFiles}
+                      onChange={setAttachmentFiles}
+                      disabled={isSending}
+                    />
+                  </div>
+                ) : null}
                 <div className="messages-composer__row">
+                  <AttachmentInput
+                    files={attachmentFiles}
+                    onChange={setAttachmentFiles}
+                    disabled={isSending}
+                    variant="icon"
+                  />
                   <textarea
                     className="messages-composer__input"
                     placeholder="Escribe tu mensaje... (Enter para enviar)"
@@ -570,7 +647,7 @@ export function MessagesPage() {
                       type="button"
                       className="button messages-composer__send"
                       onClick={() => void handleSend()}
-                      disabled={isSending || (!newMessage.trim() && !attachmentFile)}
+                      disabled={isSending || (!newMessage.trim() && attachmentFiles.length === 0)}
                       aria-label="Enviar mensaje"
                     >
                       {isSending ? '...' : 'Enviar'}

@@ -1,4 +1,4 @@
-export type MessageAttachmentType = 'image' | 'video'
+export type MessageAttachmentType = 'image' | 'video' | 'pdf' | 'word' | 'excel'
 
 export interface MessageAttachment {
   url: string
@@ -24,5 +24,5 @@ export interface Message {
   body: string
   isRead: boolean
   createdAt: string
-  attachment: MessageAttachment | null
+  attachments: MessageAttachment[]
 }

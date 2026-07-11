@@ -27,6 +27,13 @@ interface ForumAuthorRow {
   avatar_path?: string | null
 }
 
+interface ForumAttachmentRow {
+  path: string
+  type: string
+  filename: string | null
+  size_bytes: number | null
+}
+
 interface ForumThreadRow {
   id: string
   slug: string
@@ -44,14 +51,8 @@ interface ForumThreadRow {
   like_count?: number
   viewerLiked?: boolean
   viewer_liked?: boolean
-  attachmentPath?: string | null
-  attachment_path?: string | null
   attachmentType?: ForumAttachmentType | null
   attachment_type?: ForumAttachmentType | null
-  attachmentFilename?: string | null
-  attachment_filename?: string | null
-  attachmentSizeBytes?: number | null
-  attachment_size_bytes?: number | null
   createdAt?: string
   created_at?: string
   lastActivityAt?: string
@@ -67,36 +68,21 @@ interface ForumReplyRow {
   parent_reply_id?: string | null
   parentAuthorName?: string | null
   parent_author_name?: string | null
-  attachmentPath?: string | null
-  attachment_path?: string | null
-  attachmentType?: ForumAttachmentType | null
-  attachment_type?: ForumAttachmentType | null
-  attachmentFilename?: string | null
-  attachment_filename?: string | null
-  attachmentSizeBytes?: number | null
-  attachment_size_bytes?: number | null
+  attachments?: ForumAttachmentRow[] | null
   author: ForumAuthorRow
 }
 
-function resolveAttachment(
-  path: string | null | undefined,
-  type: ForumAttachmentType | null | undefined,
-  filename: string | null | undefined,
-  sizeBytes: number | null | undefined,
-): ForumAttachment | null {
-  if (!path || !type) {
-    return null
-  }
-
-  return {
-    url: getForumAttachmentPublicUrl(path) ?? '',
-    type,
-    filename: filename ?? null,
-    sizeBytes: sizeBytes ?? null,
-  }
+function resolveAttachments(rows: ForumAttachmentRow[] | null | undefined): ForumAttachment[] {
+  return (rows ?? []).map((row) => ({
+    url: getForumAttachmentPublicUrl(row.path) ?? '',
+    type: row.type as ForumAttachmentType,
+    filename: row.filename ?? null,
+    sizeBytes: row.size_bytes ?? null,
+  }))
 }
 
 interface ForumThreadDetailRow extends ForumThreadRow {
+  attachments?: ForumAttachmentRow[] | null
   replies?: ForumReplyRow[] | null
 }
 
@@ -151,12 +137,7 @@ async function mapReply(row: ForumReplyRow): Promise<ForumReply> {
     parentReplyId: row.parentReplyId ?? row.parent_reply_id ?? null,
     parentAuthorName: row.parentAuthorName ?? row.parent_author_name ?? null,
     author: await mapAuthor(row.author),
-    attachment: resolveAttachment(
-      row.attachmentPath ?? row.attachment_path,
-      row.attachmentType ?? row.attachment_type,
-      row.attachmentFilename ?? row.attachment_filename,
-      row.attachmentSizeBytes ?? row.attachment_size_bytes,
-    ),
+    attachments: resolveAttachments(row.attachments),
   }
 }
 
@@ -208,34 +189,35 @@ export async function getForumThread(threadSlug: string): Promise<ForumThreadDet
 
   return {
     ...(await mapThread(row)),
-    attachment: resolveAttachment(
-      row.attachmentPath ?? row.attachment_path,
-      row.attachmentType ?? row.attachment_type,
-      row.attachmentFilename ?? row.attachment_filename,
-      row.attachmentSizeBytes ?? row.attachment_size_bytes,
-    ),
+    attachments: resolveAttachments(row.attachments),
     replies: await Promise.all((row.replies ?? []).map(mapReply)),
   }
+}
+
+interface ForumAttachmentInput {
+  path: string
+  type: ForumAttachmentType
+  filename?: string | null
+  sizeBytes?: number | null
 }
 
 export async function createForumTopic(payload: {
   categorySlug: string
   title: string
   body: string
-  attachmentPath?: string | null
-  attachmentType?: ForumAttachmentType | null
-  attachmentFilename?: string | null
-  attachmentSizeBytes?: number | null
+  attachments?: ForumAttachmentInput[]
 }) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_topic', {
     category_slug: payload.categorySlug,
     title_text: payload.title.trim(),
     body_text: payload.body.trim(),
-    attachment_path: payload.attachmentPath ?? undefined,
-    attachment_type: payload.attachmentType ?? undefined,
-    attachment_filename: payload.attachmentFilename ?? undefined,
-    attachment_size_bytes: payload.attachmentSizeBytes ?? undefined,
+    attachments: (payload.attachments ?? []).map((a) => ({
+      path: a.path,
+      type: a.type,
+      filename: a.filename ?? null,
+      size_bytes: a.sizeBytes ?? null,
+    })),
   })
 
   if (error) {
@@ -249,20 +231,19 @@ export async function createForumReply(payload: {
   threadSlug: string
   body: string
   parentReplyId?: string | null
-  attachmentPath?: string | null
-  attachmentType?: ForumAttachmentType | null
-  attachmentFilename?: string | null
-  attachmentSizeBytes?: number | null
+  attachments?: ForumAttachmentInput[]
 }) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_reply', {
     thread_slug: payload.threadSlug,
     body_text: payload.body.trim(),
     parent_reply_id: payload.parentReplyId ?? undefined,
-    attachment_path: payload.attachmentPath ?? undefined,
-    attachment_type: payload.attachmentType ?? undefined,
-    attachment_filename: payload.attachmentFilename ?? undefined,
-    attachment_size_bytes: payload.attachmentSizeBytes ?? undefined,
+    attachments: (payload.attachments ?? []).map((a) => ({
+      path: a.path,
+      type: a.type,
+      filename: a.filename ?? null,
+      size_bytes: a.sizeBytes ?? null,
+    })),
   })
 
   if (error) {

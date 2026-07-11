@@ -10,7 +10,7 @@ import {
   listForumThreads,
   toggleForumTopicLike,
 } from '../features/forum/api'
-import type { ForumAuthor, ForumThreadCard } from '../features/forum/types'
+import type { ForumAttachmentType, ForumAuthor, ForumThreadCard } from '../features/forum/types'
 import { getInitials } from '../lib/initials'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { Skeleton } from '../components/Skeleton'
@@ -19,6 +19,22 @@ import { ShareMenu } from '../components/ShareMenu'
 import { formatDateTime, formatRelative } from '../lib/date'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePageMetadata } from '../lib/usePageMetadata'
+
+const ATTACHMENT_BADGE_ICON: Record<ForumAttachmentType, string> = {
+  image: '📷',
+  video: '🎬',
+  pdf: '📄',
+  word: '📝',
+  excel: '📊',
+}
+
+const ATTACHMENT_BADGE_LABEL: Record<ForumAttachmentType, string> = {
+  image: 'Incluye imagen',
+  video: 'Incluye video',
+  pdf: 'Incluye PDF',
+  word: 'Incluye documento Word',
+  excel: 'Incluye documento Excel',
+}
 
 function normalizeText(value: string) {
   return value
@@ -364,9 +380,9 @@ export function ForumPage() {
               {thread.attachmentType ? (
                 <span
                   className="attachment-badge forum-card__media-badge"
-                  aria-label={thread.attachmentType === 'video' ? 'Incluye video' : 'Incluye imagen'}
+                  aria-label={ATTACHMENT_BADGE_LABEL[thread.attachmentType]}
                 >
-                  {thread.attachmentType === 'video' ? '🎬' : '📷'}
+                  {ATTACHMENT_BADGE_ICON[thread.attachmentType]}
                 </span>
               ) : null}
               <div className="forum-card__footer">

@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { AttachmentInput } from '../components/AttachmentInput'
+import { AttachmentPreviewList } from '../components/AttachmentPreviewList'
 import { UploadProgressBar } from '../components/UploadProgressBar'
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumTopic, listForumCategories } from '../features/forum/api'
-import type { ForumAttachmentType } from '../features/forum/types'
 import { logAttachmentCleanupFailure } from '../lib/attachment-cleanup-log'
-import { removeForumAttachment, uploadForumAttachment } from '../lib/media-storage'
+import { removeOrphanedForumAttachments, uploadForumAttachments } from '../lib/media-storage'
+import type { MediaUploadResult } from '../types/storage'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
@@ -21,7 +22,7 @@ export function ForumNewThreadPage() {
   const [title, setTitle] = useState('')
   const [categorySlug, setCategorySlug] = useState('')
   const [body, setBody] = useState('')
-  const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([])
   // Basta con ser miembro de Zucarlink con el correo confirmado.
   const canCreateTopic = Boolean(user?.email_confirmed_at)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -59,19 +60,16 @@ export function ForumNewThreadPage() {
     setIsSubmitting(true)
     setErrorMessage(null)
 
-    let uploadedPath: string | null = null
-    let uploadedType: ForumAttachmentType | null = null
-    let uploadedFilename: string | null = null
-    let uploadedSizeBytes: number | null = null
+    let uploadedPaths: string[] = []
 
     try {
-      if (attachmentFile && user) {
+      let attachments: MediaUploadResult[] = []
+
+      if (attachmentFiles.length > 0 && user) {
         setUploadPhase('uploading')
-        const uploaded = await uploadForumAttachment({ file: attachmentFile, userId: user.id })
-        uploadedPath = uploaded.path
-        uploadedType = uploaded.type
-        uploadedFilename = uploaded.filename
-        uploadedSizeBytes = uploaded.sizeBytes
+        const uploaded = await uploadForumAttachments({ files: attachmentFiles, userId: user.id })
+        uploadedPaths = uploaded.map((u) => u.path)
+        attachments = uploaded
       }
 
       setUploadPhase('saving')
@@ -79,18 +77,15 @@ export function ForumNewThreadPage() {
         categorySlug,
         title,
         body,
-        attachmentPath: uploadedPath,
-        attachmentType: uploadedType,
-        attachmentFilename: uploadedFilename,
-        attachmentSizeBytes: uploadedSizeBytes,
+        attachments,
       })
 
       navigate(`/forum/thread/${created.slug}`, { replace: true })
     } catch (error) {
-      if (uploadedPath) {
-        const path = uploadedPath
-        void removeForumAttachment(path).catch((cause) =>
-          logAttachmentCleanupFailure({ path, bucket: 'forum-media', cause }),
+      if (uploadedPaths.length > 0) {
+        const paths = uploadedPaths
+        void removeOrphanedForumAttachments(paths).catch((cause) =>
+          logAttachmentCleanupFailure({ path: paths, bucket: 'forum-media', cause }),
         )
       }
       setErrorMessage(
@@ -189,8 +184,13 @@ export function ForumNewThreadPage() {
         </div>
         <div className="field">
           <AttachmentInput
-            file={attachmentFile}
-            onSelect={setAttachmentFile}
+            files={attachmentFiles}
+            onChange={setAttachmentFiles}
+            disabled={isSubmitting}
+          />
+          <AttachmentPreviewList
+            files={attachmentFiles}
+            onChange={setAttachmentFiles}
             disabled={isSubmitting}
           />
         </div>

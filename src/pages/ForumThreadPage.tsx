@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
 import { getMemberProfilePath } from '../features/directory/memberProfilePath'
 import { AttachmentInput } from '../components/AttachmentInput'
+import { AttachmentPreviewList } from '../components/AttachmentPreviewList'
 import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -16,17 +17,13 @@ import {
   getForumTopicLikeState,
   toggleForumTopicLike,
 } from '../features/forum/api'
-import type {
-  ForumAttachmentType,
-  ForumAuthor,
-  ForumReply,
-  ForumThreadDetail,
-} from '../features/forum/types'
+import type { ForumAuthor, ForumReply, ForumThreadDetail } from '../features/forum/types'
 import { logAttachmentCleanupFailure } from '../lib/attachment-cleanup-log'
 import { formatDateTime, formatRelative } from '../lib/date'
 import { getInitials } from '../lib/initials'
-import { removeForumAttachment, uploadForumAttachment } from '../lib/media-storage'
+import { removeOrphanedForumAttachments, uploadForumAttachments } from '../lib/media-storage'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
+import type { MediaUploadResult } from '../types/storage'
 import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 import { useAsyncData } from '../lib/useAsyncData'
@@ -111,7 +108,7 @@ export function ForumThreadPage() {
   const [thread, setThread] = useState<ForumThreadDetail | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [replyBody, setReplyBody] = useState('')
-  const [replyAttachmentFile, setReplyAttachmentFile] = useState<File | null>(null)
+  const [replyAttachmentFiles, setReplyAttachmentFiles] = useState<File[]>([])
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'saving'>('idle')
@@ -208,25 +205,22 @@ export function ForumThreadPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!thread || (!replyBody.trim() && !replyAttachmentFile)) {
+    if (!thread || (!replyBody.trim() && replyAttachmentFiles.length === 0)) {
       return
     }
 
     setIsSubmitting(true)
 
-    let uploadedPath: string | null = null
-    let uploadedType: ForumAttachmentType | null = null
-    let uploadedFilename: string | null = null
-    let uploadedSizeBytes: number | null = null
+    let uploadedPaths: string[] = []
 
     try {
-      if (replyAttachmentFile && user) {
+      let attachments: MediaUploadResult[] = []
+
+      if (replyAttachmentFiles.length > 0 && user) {
         setUploadPhase('uploading')
-        const uploaded = await uploadForumAttachment({ file: replyAttachmentFile, userId: user.id })
-        uploadedPath = uploaded.path
-        uploadedType = uploaded.type
-        uploadedFilename = uploaded.filename
-        uploadedSizeBytes = uploaded.sizeBytes
+        const uploaded = await uploadForumAttachments({ files: replyAttachmentFiles, userId: user.id })
+        uploadedPaths = uploaded.map((u) => u.path)
+        attachments = uploaded
       }
 
       setUploadPhase('saving')
@@ -234,23 +228,20 @@ export function ForumThreadPage() {
         threadSlug: thread.slug,
         body: replyBody,
         parentReplyId: replyTarget?.id ?? null,
-        attachmentPath: uploadedPath,
-        attachmentType: uploadedType,
-        attachmentFilename: uploadedFilename,
-        attachmentSizeBytes: uploadedSizeBytes,
+        attachments,
       })
 
       const refreshed = await getForumThread(thread.slug)
       setThread(refreshed)
       setReplyBody('')
-      setReplyAttachmentFile(null)
+      setReplyAttachmentFiles([])
       setReplyTarget(null)
       setErrorMessage(null)
     } catch (error) {
-      if (uploadedPath) {
-        const path = uploadedPath
-        void removeForumAttachment(path).catch((cause) =>
-          logAttachmentCleanupFailure({ path, bucket: 'forum-media', cause }),
+      if (uploadedPaths.length > 0) {
+        const paths = uploadedPaths
+        void removeOrphanedForumAttachments(paths).catch((cause) =>
+          logAttachmentCleanupFailure({ path: paths, bucket: 'forum-media', cause }),
         )
       }
       setErrorMessage(
@@ -339,14 +330,7 @@ export function ForumThreadPage() {
           </time>
         </div>
         {reply.body ? <p>{reply.body}</p> : null}
-        {reply.attachment ? (
-          <AttachmentView
-            url={reply.attachment.url}
-            type={reply.attachment.type}
-            filename={reply.attachment.filename}
-            sizeBytes={reply.attachment.sizeBytes}
-          />
-        ) : null}
+        <AttachmentView attachments={reply.attachments} />
         <div className="forum-reply__actions">
           {user ? (
             <button
@@ -450,14 +434,7 @@ export function ForumThreadPage() {
           </time>
         </div>
         <p className="forum-original__body">{thread.body}</p>
-        {thread.attachment ? (
-          <AttachmentView
-            url={thread.attachment.url}
-            type={thread.attachment.type}
-            filename={thread.attachment.filename}
-            sizeBytes={thread.attachment.sizeBytes}
-          />
-        ) : null}
+        <AttachmentView attachments={thread.attachments} />
         <div className="forum-post-actions">
           {user ? (
             <button
@@ -557,8 +534,13 @@ export function ForumThreadPage() {
           </div>
           <div className="field">
             <AttachmentInput
-              file={replyAttachmentFile}
-              onSelect={setReplyAttachmentFile}
+              files={replyAttachmentFiles}
+              onChange={setReplyAttachmentFiles}
+              disabled={isSubmitting}
+            />
+            <AttachmentPreviewList
+              files={replyAttachmentFiles}
+              onChange={setReplyAttachmentFiles}
               disabled={isSubmitting}
             />
           </div>

@@ -6,7 +6,9 @@ import {
   classifyMediaFile,
   getMessageAttachmentSignedUrl,
   uploadForumAttachment,
+  uploadForumAttachments,
   uploadMessageAttachment,
+  uploadMessageAttachments,
   validateMediaFile,
 } from './media-storage'
 
@@ -29,11 +31,40 @@ describe('validateMediaFile / classifyMediaFile', () => {
     expect(classifyMediaFile(fileOfSize('a.mov', 'video/quicktime', 10))).toBe('video')
   })
 
+  it('acepta PDF, docx y xlsx', () => {
+    expect(classifyMediaFile(fileOfSize('a.pdf', 'application/pdf', 10))).toBe('pdf')
+    expect(
+      classifyMediaFile(
+        fileOfSize(
+          'a.docx',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          10,
+        ),
+      ),
+    ).toBe('word')
+    expect(
+      classifyMediaFile(
+        fileOfSize(
+          'a.xlsx',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          10,
+        ),
+      ),
+    ).toBe('excel')
+  })
+
   it('rechaza un formato no soportado', () => {
     expect(classifyMediaFile(fileOfSize('a.gif', 'image/gif', 10))).toBeNull()
     expect(() => validateMediaFile(fileOfSize('a.gif', 'image/gif', 10))).toThrow(
-      'Formato no permitido. Usa JPEG, PNG, WEBP, MP4, WEBM o MOV.',
+      'Formato no permitido. Usa JPEG, PNG, WEBP, MP4, WEBM, MOV, PDF, DOCX o XLSX.',
     )
+  })
+
+  it('rechaza formatos legacy/macro-enabled de Office (.doc, .xlsm)', () => {
+    expect(classifyMediaFile(fileOfSize('a.doc', 'application/msword', 10))).toBeNull()
+    expect(
+      classifyMediaFile(fileOfSize('a.xlsm', 'application/vnd.ms-excel.sheet.macroEnabled.12', 10)),
+    ).toBeNull()
   })
 
   it('rechaza una imagen que excede 10 MB', () => {
@@ -47,6 +78,13 @@ describe('validateMediaFile / classifyMediaFile', () => {
     const oversized = fileOfSize('a.mp4', 'video/mp4', 50 * 1024 * 1024 + 1)
     expect(() => validateMediaFile(oversized)).toThrow(
       'El video excede el máximo permitido de 50 MB.',
+    )
+  })
+
+  it('rechaza un documento que excede 20 MB', () => {
+    const oversized = fileOfSize('a.pdf', 'application/pdf', 20 * 1024 * 1024 + 1)
+    expect(() => validateMediaFile(oversized)).toThrow(
+      'El documento excede el máximo permitido de 20 MB.',
     )
   })
 })
@@ -110,6 +148,62 @@ describe('uploadMessageAttachment', () => {
 
     expect(fromSpy).toHaveBeenCalledWith('message-media')
     expect(result.path).toMatch(/^conv-1\/user-3\/[0-9a-f-]{36}\.webm$/)
+  })
+})
+
+describe('uploadForumAttachments / uploadMessageAttachments', () => {
+  it('rechaza más de 6 archivos', async () => {
+    const supabase = createSupabaseAuthFake()
+    stubSupabaseClient(supabase)
+
+    const files = Array.from({ length: 7 }, (_, i) => fileOfSize(`f${i}.pdf`, 'application/pdf', 10))
+
+    await expect(uploadForumAttachments({ files, userId: 'user-1' })).rejects.toThrow(
+      'Máximo 6 archivos por publicación.',
+    )
+    await expect(
+      uploadMessageAttachments({ files, conversationId: 'conv-1', senderId: 'user-1' }),
+    ).rejects.toThrow('Máximo 6 archivos por mensaje.')
+  })
+
+  it('sube varios archivos válidos y devuelve un resultado por cada uno', async () => {
+    const supabase = createSupabaseAuthFake()
+    stubSupabaseClient(supabase)
+
+    const files = [
+      fileOfSize('a.pdf', 'application/pdf', 10),
+      fileOfSize('b.pdf', 'application/pdf', 10),
+    ]
+
+    const results = await uploadForumAttachments({ files, userId: 'user-1' })
+    expect(results).toHaveLength(2)
+    expect(results.every((r) => r.type === 'pdf')).toBe(true)
+  })
+
+  it('revierte (borra) los archivos ya subidos si uno del lote falla', async () => {
+    const supabase = createSupabaseAuthFake()
+    stubSupabaseClient(supabase)
+
+    // storage.from() devuelve un objeto nuevo por llamada, así que se intercepta
+    // la factory para registrar cada invocación de `remove` sin importar la instancia.
+    const removeCalls: string[][] = []
+    const originalFrom = supabase.storage.from.bind(supabase.storage)
+    vi.spyOn(supabase.storage, 'from').mockImplementation((bucket: string) => {
+      const original = originalFrom(bucket)
+      return {
+        ...original,
+        remove: async (paths: string[]) => {
+          removeCalls.push(paths)
+          return original.remove(paths)
+        },
+      }
+    })
+
+    const badFile = fileOfSize('bad.exe', 'application/x-msdownload', 10)
+    const files = [fileOfSize('a.pdf', 'application/pdf', 10), badFile]
+
+    await expect(uploadForumAttachments({ files, userId: 'user-1' })).rejects.toThrow()
+    expect(removeCalls.length).toBeGreaterThan(0)
   })
 })
 
