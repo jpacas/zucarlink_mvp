@@ -27,11 +27,25 @@ export function AttachmentInput({
       return
     }
 
-    const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
-    setPreviewType(file.type.startsWith('video/') ? 'video' : 'image')
+    const isVideo = file.type.startsWith('video/')
+    setPreviewType(isVideo ? 'video' : 'image')
 
-    return () => URL.revokeObjectURL(url)
+    if (isVideo) {
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+
+    // Evitamos blob: para imágenes: algunos entornos corporativos (antivirus/proxy)
+    // interceptan la carga de blob: y la solicitud queda colgada (net::ERR_TIMED_OUT).
+    const reader = new FileReader()
+    reader.onload = () => setPreviewUrl(reader.result as string)
+    reader.readAsDataURL(file)
+
+    return () => {
+      reader.onload = null
+      setPreviewUrl(null)
+    }
   }, [file])
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {

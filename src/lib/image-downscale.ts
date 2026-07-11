@@ -28,9 +28,14 @@ export async function downscaleImage(file: File, maxSize: number): Promise<Downs
 
     context.drawImage(bitmap, 0, 0, width, height)
 
+    // Safari no soporta codificar a WebP desde canvas.toBlob(): ante un tipo no
+    // soportado, el spec obliga al navegador a caer a PNG silenciosamente, pero
+    // el Blob resultante reporta type 'image/png'. Sin este chequeo, el archivo
+    // quedaría subido con extensión/Content-Type "webp" pero bytes PNG reales,
+    // y Safari falla al decodificarlo ("The source image could not be decoded").
     const webp = await canvasToBlob(canvas, 'image/webp')
 
-    if (webp) {
+    if (webp && webp.type === 'image/webp') {
       return { blob: webp, extension: 'webp', contentType: 'image/webp' }
     }
 

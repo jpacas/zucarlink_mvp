@@ -19,6 +19,12 @@ const VIDEO_EXTENSION_BY_MIME: Record<string, string> = {
   'video/quicktime': 'mov',
 }
 
+const IMAGE_EXTENSION_BY_MIME: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+
 export function classifyMediaFile(file: File): MediaAttachmentType | null {
   if (MEDIA_IMAGE_ALLOWED_TYPES.includes(file.type as (typeof MEDIA_IMAGE_ALLOWED_TYPES)[number])) {
     return 'image'
@@ -58,8 +64,17 @@ async function buildObjectForUpload(file: File): Promise<{
   if (type === 'image') {
     // Redimensionamos/comprimimos en el cliente: el servidor no aplica transformaciones
     // (función de plan de pago no habilitada), igual que avatares y logos.
-    const { blob, extension, contentType } = await downscaleImage(file, MEDIA_IMAGE_OUTPUT_MAX_SIZE)
-    return { blob, extension, contentType, type }
+    try {
+      const { blob, extension, contentType } = await downscaleImage(file, MEDIA_IMAGE_OUTPUT_MAX_SIZE)
+      return { blob, extension, contentType, type }
+    } catch {
+      // Algunos JPEG (p.ej. CMYK de bancos de imágenes) hacen fallar
+      // createImageBitmap ("InvalidStateError: The source image could not be
+      // decoded") aunque el navegador sí puede mostrarlos vía <img>. Subimos el
+      // archivo original sin redimensionar en vez de bloquear el adjunto.
+      const extension = IMAGE_EXTENSION_BY_MIME[file.type] ?? 'jpg'
+      return { blob: file, extension, contentType: file.type, type }
+    }
   }
 
   // Video: se sube tal cual, sin transcodificación.
