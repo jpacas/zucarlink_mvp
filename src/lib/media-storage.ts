@@ -98,12 +98,26 @@ export async function uploadForumAttachment(params: {
     throw new Error(error.message)
   }
 
-  return { path, type }
+  return { path, type, filename: params.file.name.slice(0, 255), sizeBytes: blob.size }
 }
 
 export async function removeForumAttachment(path: string): Promise<void> {
   const client = getSupabaseClientOrThrow()
   const { error } = await client.storage.from(FORUM_MEDIA_BUCKET).remove([path])
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+// Borrado en batch de adjuntos que quedaron huérfanos tras eliminar un tema/respuesta
+// (la fila en DB ya fue borrada exitosamente, así que un fallo aquí no debe bloquear
+// la UX — el llamador debe loguearlo con logAttachmentCleanupFailure).
+export async function removeOrphanedForumAttachments(paths: string[]): Promise<void> {
+  if (paths.length === 0) return
+
+  const client = getSupabaseClientOrThrow()
+  const { error } = await client.storage.from(FORUM_MEDIA_BUCKET).remove(paths)
 
   if (error) {
     throw new Error(error.message)
@@ -136,7 +150,7 @@ export async function uploadMessageAttachment(params: {
     throw new Error(error.message)
   }
 
-  return { path, type }
+  return { path, type, filename: params.file.name.slice(0, 255), sizeBytes: blob.size }
 }
 
 export async function removeMessageAttachment(path: string): Promise<void> {

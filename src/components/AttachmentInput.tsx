@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { formatBytes } from '../lib/format-bytes'
 import { validateMediaFile } from '../lib/media-storage'
 
 interface AttachmentInputProps {
@@ -76,6 +77,11 @@ export function AttachmentInput({
     <div className="attachment-input">
       {previewUrl ? (
         <div className="attachment-input__preview">
+          {file ? (
+            <p className="attachment-input__filename">
+              {file.name} <span className="attachment-input__filesize">· {formatBytes(file.size)}</span>
+            </p>
+          ) : null}
           {previewType === 'video' ? (
             <video src={previewUrl} controls muted className="attachment-input__media" />
           ) : (

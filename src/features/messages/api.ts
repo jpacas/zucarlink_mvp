@@ -79,6 +79,8 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
           ? {
               url: (await getMessageAttachmentSignedUrl(row.attachment_path)) ?? '',
               type: row.attachment_type as MessageAttachmentType,
+              filename: row.attachment_filename ?? null,
+              sizeBytes: row.attachment_size_bytes ?? null,
             }
           : null,
     })),
@@ -88,7 +90,12 @@ export async function getThreadMessages(threadId: string): Promise<Message[]> {
 export async function sendMessage(
   threadId: string,
   body: string,
-  attachment?: { path: string; type: MessageAttachmentType } | null,
+  attachment?: {
+    path: string
+    type: MessageAttachmentType
+    filename?: string | null
+    sizeBytes?: number | null
+  } | null,
 ): Promise<string> {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('send_message', {
@@ -96,6 +103,8 @@ export async function sendMessage(
     body_text: body,
     attachment_path: attachment?.path ?? undefined,
     attachment_type: attachment?.type ?? undefined,
+    attachment_filename: attachment?.filename ?? undefined,
+    attachment_size_bytes: attachment?.sizeBytes ?? undefined,
   })
 
   if (error) {

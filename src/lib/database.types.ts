@@ -280,7 +280,9 @@ export type Database = {
       }
       forum_replies: {
         Row: {
+          attachment_filename: string | null
           attachment_path: string | null
+          attachment_size_bytes: number | null
           attachment_type: string | null
           author_id: string
           body: string
@@ -292,7 +294,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_filename?: string | null
           attachment_path?: string | null
+          attachment_size_bytes?: number | null
           attachment_type?: string | null
           author_id: string
           body: string
@@ -304,7 +308,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_filename?: string | null
           attachment_path?: string | null
+          attachment_size_bytes?: number | null
           attachment_type?: string | null
           author_id?: string
           body?: string
@@ -360,7 +366,9 @@ export type Database = {
       }
       forum_topics: {
         Row: {
+          attachment_filename: string | null
           attachment_path: string | null
+          attachment_size_bytes: number | null
           attachment_type: string | null
           author_id: string
           body: string
@@ -375,7 +383,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_filename?: string | null
           attachment_path?: string | null
+          attachment_size_bytes?: number | null
           attachment_type?: string | null
           author_id: string
           body: string
@@ -390,7 +400,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_filename?: string | null
           attachment_path?: string | null
+          attachment_size_bytes?: number | null
           attachment_type?: string | null
           author_id?: string
           body?: string
@@ -416,7 +428,9 @@ export type Database = {
       }
       messages: {
         Row: {
+          attachment_filename: string | null
           attachment_path: string | null
+          attachment_size_bytes: number | null
           attachment_type: string | null
           body: string
           conversation_id: string
@@ -427,7 +441,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_filename?: string | null
           attachment_path?: string | null
+          attachment_size_bytes?: number | null
           attachment_type?: string | null
           body: string
           conversation_id: string
@@ -438,7 +454,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_filename?: string | null
           attachment_path?: string | null
+          attachment_size_bytes?: number | null
           attachment_type?: string | null
           body?: string
           conversation_id?: string
@@ -856,7 +874,9 @@ export type Database = {
       count_my_unread: { Args: never; Returns: number }
       create_forum_reply: {
         Args: {
+          attachment_filename?: string
           attachment_path?: string
+          attachment_size_bytes?: number
           attachment_type?: string
           body_text: string
           parent_reply_id?: string
@@ -868,7 +888,9 @@ export type Database = {
       }
       create_forum_topic: {
         Args: {
+          attachment_filename?: string
           attachment_path?: string
+          attachment_size_bytes?: number
           attachment_type?: string
           body_text: string
           category_slug: string
@@ -888,8 +910,8 @@ export type Database = {
         }
         Returns: string
       }
-      delete_forum_reply: { Args: { reply_id: string }; Returns: undefined }
-      delete_forum_topic: { Args: { thread_slug: string }; Returns: undefined }
+      delete_forum_reply: { Args: { reply_id: string }; Returns: string[] }
+      delete_forum_topic: { Args: { thread_slug: string }; Returns: string[] }
       get_admin_operational_dashboard: {
         Args: { period_days?: number }
         Returns: Json
@@ -923,7 +945,9 @@ export type Database = {
       get_forum_thread: {
         Args: { thread_slug: string }
         Returns: {
+          attachment_filename: string
           attachment_path: string
+          attachment_size_bytes: number
           attachment_type: string
           author: Json
           body: string
@@ -998,7 +1022,9 @@ export type Database = {
       get_thread_messages: {
         Args: { p_thread_id: string }
         Returns: {
+          attachment_filename: string
           attachment_path: string
+          attachment_size_bytes: number
           attachment_type: string
           body: string
           created_at: string
@@ -1150,7 +1176,9 @@ export type Database = {
       }
       send_message: {
         Args: {
+          attachment_filename?: string
           attachment_path?: string
+          attachment_size_bytes?: number
           attachment_type?: string
           body_text: string
           p_thread_id: string

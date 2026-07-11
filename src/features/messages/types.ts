@@ -3,6 +3,8 @@ export type MessageAttachmentType = 'image' | 'video'
 export interface MessageAttachment {
   url: string
   type: MessageAttachmentType
+  filename: string | null
+  sizeBytes: number | null
 }
 
 export interface MessageThread {

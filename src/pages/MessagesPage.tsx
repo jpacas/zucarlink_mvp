@@ -7,6 +7,8 @@ import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { SkeletonThreadItem } from '../components/Skeleton'
+import { UploadProgressBar } from '../components/UploadProgressBar'
+import { logAttachmentCleanupFailure } from '../lib/attachment-cleanup-log'
 import { getInitials } from '../lib/initials'
 import { removeMessageAttachment, uploadMessageAttachment } from '../lib/media-storage'
 import {
@@ -124,7 +126,12 @@ function MessageBubble({
     <div className={`message-bubble-wrap${isMine ? ' message-bubble-wrap--mine' : ''}`}>
       <div className={`message-bubble${isMine ? ' message-bubble--mine' : ''}`}>
         {message.attachment ? (
-          <AttachmentView url={message.attachment.url} type={message.attachment.type} />
+          <AttachmentView
+            url={message.attachment.url}
+            type={message.attachment.type}
+            filename={message.attachment.filename}
+            sizeBytes={message.attachment.sizeBytes}
+          />
         ) : null}
         {message.body ? <p className="message-bubble__body">{message.body}</p> : null}
         <span className="message-bubble__time helper-text">{formatTime(message.createdAt)}</span>
@@ -145,6 +152,7 @@ export function MessagesPage() {
   const [threadsLoading, setThreadsLoading] = useState(true)
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [isSending, setIsSending] = useState(false)
+  const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'saving'>('idle')
   const [threadsError, setThreadsError] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
   const [showMobileThread, setShowMobileThread] = useState(false)
@@ -310,9 +318,12 @@ export function MessagesPage() {
     let uploadedPath: string | null = null
 
     try {
-      let attachment: { path: string; type: MessageAttachmentType } | undefined
+      let attachment:
+        | { path: string; type: MessageAttachmentType; filename: string; sizeBytes: number }
+        | undefined
 
       if (pendingAttachment && user) {
+        setUploadPhase('uploading')
         const uploaded = await uploadMessageAttachment({
           file: pendingAttachment,
           conversationId: selectedThreadId,
@@ -322,6 +333,7 @@ export function MessagesPage() {
         attachment = uploaded
       }
 
+      setUploadPhase('saving')
       await sendMessage(selectedThreadId, body, attachment)
       const rows = await getThreadMessages(selectedThreadId)
       setMessages(rows)
@@ -330,13 +342,17 @@ export function MessagesPage() {
       void loadThreads()
     } catch (error) {
       if (uploadedPath) {
-        void removeMessageAttachment(uploadedPath).catch(() => {})
+        const path = uploadedPath
+        void removeMessageAttachment(path).catch((cause) =>
+          logAttachmentCleanupFailure({ path, bucket: 'message-media', cause }),
+        )
       }
       setSendError(error instanceof Error ? error.message : 'No fue posible enviar el mensaje.')
       setNewMessage(body) // Restore message on error
       setAttachmentFile(pendingAttachment)
     } finally {
       setIsSending(false)
+      setUploadPhase('idle')
     }
   }
 
@@ -545,15 +561,21 @@ export function MessagesPage() {
                     disabled={isSending}
                     aria-label="Escribe un mensaje"
                   />
-                  <button
-                    type="button"
-                    className="button messages-composer__send"
-                    onClick={() => void handleSend()}
-                    disabled={isSending || (!newMessage.trim() && !attachmentFile)}
-                    aria-label="Enviar mensaje"
-                  >
-                    {isSending ? '...' : 'Enviar'}
-                  </button>
+                  {uploadPhase === 'uploading' ? (
+                    <div className="button messages-composer__send messages-composer__send--progress">
+                      <UploadProgressBar label="Subiendo…" />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="button messages-composer__send"
+                      onClick={() => void handleSend()}
+                      disabled={isSending || (!newMessage.trim() && !attachmentFile)}
+                      aria-label="Enviar mensaje"
+                    >
+                      {isSending ? '...' : 'Enviar'}
+                    </button>
+                  )}
                 </div>
               </div>
             </>

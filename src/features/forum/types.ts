@@ -18,6 +18,8 @@ export type ForumAttachmentType = 'image' | 'video'
 export interface ForumAttachment {
   url: string
   type: ForumAttachmentType
+  filename: string | null
+  sizeBytes: number | null
 }
 
 export interface ForumThreadCard {

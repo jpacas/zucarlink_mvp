@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { AttachmentInput } from '../components/AttachmentInput'
+import { UploadProgressBar } from '../components/UploadProgressBar'
 import { useAuth } from '../features/auth/AuthProvider'
 import { createForumTopic, listForumCategories } from '../features/forum/api'
 import type { ForumAttachmentType } from '../features/forum/types'
+import { logAttachmentCleanupFailure } from '../lib/attachment-cleanup-log'
 import { removeForumAttachment, uploadForumAttachment } from '../lib/media-storage'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePageMetadata } from '../lib/usePageMetadata'
@@ -23,6 +25,7 @@ export function ForumNewThreadPage() {
   // Basta con ser miembro de Zucarlink con el correo confirmado.
   const canCreateTopic = Boolean(user?.email_confirmed_at)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'saving'>('idle')
 
   const {
     data: categories,
@@ -58,32 +61,44 @@ export function ForumNewThreadPage() {
 
     let uploadedPath: string | null = null
     let uploadedType: ForumAttachmentType | null = null
+    let uploadedFilename: string | null = null
+    let uploadedSizeBytes: number | null = null
 
     try {
       if (attachmentFile && user) {
+        setUploadPhase('uploading')
         const uploaded = await uploadForumAttachment({ file: attachmentFile, userId: user.id })
         uploadedPath = uploaded.path
         uploadedType = uploaded.type
+        uploadedFilename = uploaded.filename
+        uploadedSizeBytes = uploaded.sizeBytes
       }
 
+      setUploadPhase('saving')
       const created = await createForumTopic({
         categorySlug,
         title,
         body,
         attachmentPath: uploadedPath,
         attachmentType: uploadedType,
+        attachmentFilename: uploadedFilename,
+        attachmentSizeBytes: uploadedSizeBytes,
       })
 
       navigate(`/forum/thread/${created.slug}`, { replace: true })
     } catch (error) {
       if (uploadedPath) {
-        void removeForumAttachment(uploadedPath).catch(() => {})
+        const path = uploadedPath
+        void removeForumAttachment(path).catch((cause) =>
+          logAttachmentCleanupFailure({ path, bucket: 'forum-media', cause }),
+        )
       }
       setErrorMessage(
         error instanceof Error ? error.message : 'No fue posible publicar el tema.',
       )
     } finally {
       setIsSubmitting(false)
+      setUploadPhase('idle')
     }
   }
 
@@ -181,9 +196,15 @@ export function ForumNewThreadPage() {
         </div>
         {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
         <div className="actions">
-          <button className="button" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Publicando...' : 'Publicar tema'}
-          </button>
+          {uploadPhase === 'uploading' ? (
+            <div className="button">
+              <UploadProgressBar label="Subiendo adjunto…" />
+            </div>
+          ) : (
+            <button className="button" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Publicando...' : 'Publicar tema'}
+            </button>
+          )}
         </div>
       </form>
     </section>

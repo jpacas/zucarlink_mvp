@@ -15,10 +15,10 @@ export function initSentry() {
   })
 }
 
-export function captureException(error: unknown) {
+export function captureException(error: unknown, extra?: Record<string, unknown>) {
   if (!import.meta.env.VITE_SENTRY_DSN) {
     return
   }
 
-  Sentry.captureException(error)
+  Sentry.captureException(error, extra ? { extra } : undefined)
 }

@@ -1,5 +1,6 @@
 import { getAvatarPublicUrl } from '../../lib/avatar-storage'
-import { getForumAttachmentPublicUrl } from '../../lib/media-storage'
+import { logAttachmentCleanupFailure } from '../../lib/attachment-cleanup-log'
+import { getForumAttachmentPublicUrl, removeOrphanedForumAttachments } from '../../lib/media-storage'
 import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import type {
   ForumAttachment,
@@ -47,6 +48,10 @@ interface ForumThreadRow {
   attachment_path?: string | null
   attachmentType?: ForumAttachmentType | null
   attachment_type?: ForumAttachmentType | null
+  attachmentFilename?: string | null
+  attachment_filename?: string | null
+  attachmentSizeBytes?: number | null
+  attachment_size_bytes?: number | null
   createdAt?: string
   created_at?: string
   lastActivityAt?: string
@@ -66,18 +71,29 @@ interface ForumReplyRow {
   attachment_path?: string | null
   attachmentType?: ForumAttachmentType | null
   attachment_type?: ForumAttachmentType | null
+  attachmentFilename?: string | null
+  attachment_filename?: string | null
+  attachmentSizeBytes?: number | null
+  attachment_size_bytes?: number | null
   author: ForumAuthorRow
 }
 
 function resolveAttachment(
   path: string | null | undefined,
   type: ForumAttachmentType | null | undefined,
+  filename: string | null | undefined,
+  sizeBytes: number | null | undefined,
 ): ForumAttachment | null {
   if (!path || !type) {
     return null
   }
 
-  return { url: getForumAttachmentPublicUrl(path) ?? '', type }
+  return {
+    url: getForumAttachmentPublicUrl(path) ?? '',
+    type,
+    filename: filename ?? null,
+    sizeBytes: sizeBytes ?? null,
+  }
 }
 
 interface ForumThreadDetailRow extends ForumThreadRow {
@@ -138,6 +154,8 @@ async function mapReply(row: ForumReplyRow): Promise<ForumReply> {
     attachment: resolveAttachment(
       row.attachmentPath ?? row.attachment_path,
       row.attachmentType ?? row.attachment_type,
+      row.attachmentFilename ?? row.attachment_filename,
+      row.attachmentSizeBytes ?? row.attachment_size_bytes,
     ),
   }
 }
@@ -193,6 +211,8 @@ export async function getForumThread(threadSlug: string): Promise<ForumThreadDet
     attachment: resolveAttachment(
       row.attachmentPath ?? row.attachment_path,
       row.attachmentType ?? row.attachment_type,
+      row.attachmentFilename ?? row.attachment_filename,
+      row.attachmentSizeBytes ?? row.attachment_size_bytes,
     ),
     replies: await Promise.all((row.replies ?? []).map(mapReply)),
   }
@@ -204,6 +224,8 @@ export async function createForumTopic(payload: {
   body: string
   attachmentPath?: string | null
   attachmentType?: ForumAttachmentType | null
+  attachmentFilename?: string | null
+  attachmentSizeBytes?: number | null
 }) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_topic', {
@@ -212,6 +234,8 @@ export async function createForumTopic(payload: {
     body_text: payload.body.trim(),
     attachment_path: payload.attachmentPath ?? undefined,
     attachment_type: payload.attachmentType ?? undefined,
+    attachment_filename: payload.attachmentFilename ?? undefined,
+    attachment_size_bytes: payload.attachmentSizeBytes ?? undefined,
   })
 
   if (error) {
@@ -227,6 +251,8 @@ export async function createForumReply(payload: {
   parentReplyId?: string | null
   attachmentPath?: string | null
   attachmentType?: ForumAttachmentType | null
+  attachmentFilename?: string | null
+  attachmentSizeBytes?: number | null
 }) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client.rpc('create_forum_reply', {
@@ -235,6 +261,8 @@ export async function createForumReply(payload: {
     parent_reply_id: payload.parentReplyId ?? undefined,
     attachment_path: payload.attachmentPath ?? undefined,
     attachment_type: payload.attachmentType ?? undefined,
+    attachment_filename: payload.attachmentFilename ?? undefined,
+    attachment_size_bytes: payload.attachmentSizeBytes ?? undefined,
   })
 
   if (error) {
@@ -246,23 +274,37 @@ export async function createForumReply(payload: {
 
 export async function deleteForumTopic(threadSlug: string): Promise<void> {
   const client = getSupabaseClientOrThrow()
-  const { error } = await client.rpc('delete_forum_topic', {
+  const { data, error } = await client.rpc('delete_forum_topic', {
     thread_slug: threadSlug,
   })
 
   if (error) {
     throw new Error(error.message)
   }
+
+  const orphanedPaths = (data as string[] | null) ?? []
+  if (orphanedPaths.length > 0) {
+    void removeOrphanedForumAttachments(orphanedPaths).catch((cause) =>
+      logAttachmentCleanupFailure({ path: orphanedPaths, bucket: 'forum-media', cause }),
+    )
+  }
 }
 
 export async function deleteForumReply(replyId: string): Promise<void> {
   const client = getSupabaseClientOrThrow()
-  const { error } = await client.rpc('delete_forum_reply', {
+  const { data, error } = await client.rpc('delete_forum_reply', {
     reply_id: replyId,
   })
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  const orphanedPaths = (data as string[] | null) ?? []
+  if (orphanedPaths.length > 0) {
+    void removeOrphanedForumAttachments(orphanedPaths).catch((cause) =>
+      logAttachmentCleanupFailure({ path: orphanedPaths, bucket: 'forum-media', cause }),
+    )
   }
 }
 

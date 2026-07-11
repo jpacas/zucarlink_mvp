@@ -7,6 +7,7 @@ import { AttachmentInput } from '../components/AttachmentInput'
 import { AttachmentView } from '../components/AttachmentView'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { UploadProgressBar } from '../components/UploadProgressBar'
 import {
   createForumReply,
   deleteForumReply,
@@ -21,6 +22,7 @@ import type {
   ForumReply,
   ForumThreadDetail,
 } from '../features/forum/types'
+import { logAttachmentCleanupFailure } from '../lib/attachment-cleanup-log'
 import { formatDateTime, formatRelative } from '../lib/date'
 import { getInitials } from '../lib/initials'
 import { removeForumAttachment, uploadForumAttachment } from '../lib/media-storage'
@@ -112,6 +114,7 @@ export function ForumThreadPage() {
   const [replyAttachmentFile, setReplyAttachmentFile] = useState<File | null>(null)
   const [replyTarget, setReplyTarget] = useState<{ id: string; authorName: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'saving'>('idle')
   const [isDeleting, setIsDeleting] = useState(false)
   const [pendingDeleteThread, setPendingDeleteThread] = useState(false)
   const [pendingDeleteReply, setPendingDeleteReply] = useState<ReplyNode | null>(null)
@@ -213,20 +216,28 @@ export function ForumThreadPage() {
 
     let uploadedPath: string | null = null
     let uploadedType: ForumAttachmentType | null = null
+    let uploadedFilename: string | null = null
+    let uploadedSizeBytes: number | null = null
 
     try {
       if (replyAttachmentFile && user) {
+        setUploadPhase('uploading')
         const uploaded = await uploadForumAttachment({ file: replyAttachmentFile, userId: user.id })
         uploadedPath = uploaded.path
         uploadedType = uploaded.type
+        uploadedFilename = uploaded.filename
+        uploadedSizeBytes = uploaded.sizeBytes
       }
 
+      setUploadPhase('saving')
       await createForumReply({
         threadSlug: thread.slug,
         body: replyBody,
         parentReplyId: replyTarget?.id ?? null,
         attachmentPath: uploadedPath,
         attachmentType: uploadedType,
+        attachmentFilename: uploadedFilename,
+        attachmentSizeBytes: uploadedSizeBytes,
       })
 
       const refreshed = await getForumThread(thread.slug)
@@ -237,13 +248,17 @@ export function ForumThreadPage() {
       setErrorMessage(null)
     } catch (error) {
       if (uploadedPath) {
-        void removeForumAttachment(uploadedPath).catch(() => {})
+        const path = uploadedPath
+        void removeForumAttachment(path).catch((cause) =>
+          logAttachmentCleanupFailure({ path, bucket: 'forum-media', cause }),
+        )
       }
       setErrorMessage(
         error instanceof Error ? error.message : 'No fue posible publicar la respuesta.',
       )
     } finally {
       setIsSubmitting(false)
+      setUploadPhase('idle')
     }
   }
 
@@ -325,7 +340,12 @@ export function ForumThreadPage() {
         </div>
         {reply.body ? <p>{reply.body}</p> : null}
         {reply.attachment ? (
-          <AttachmentView url={reply.attachment.url} type={reply.attachment.type} />
+          <AttachmentView
+            url={reply.attachment.url}
+            type={reply.attachment.type}
+            filename={reply.attachment.filename}
+            sizeBytes={reply.attachment.sizeBytes}
+          />
         ) : null}
         <div className="forum-reply__actions">
           {user ? (
@@ -431,7 +451,12 @@ export function ForumThreadPage() {
         </div>
         <p className="forum-original__body">{thread.body}</p>
         {thread.attachment ? (
-          <AttachmentView url={thread.attachment.url} type={thread.attachment.type} />
+          <AttachmentView
+            url={thread.attachment.url}
+            type={thread.attachment.type}
+            filename={thread.attachment.filename}
+            sizeBytes={thread.attachment.sizeBytes}
+          />
         ) : null}
         <div className="forum-post-actions">
           {user ? (
@@ -539,9 +564,15 @@ export function ForumThreadPage() {
           </div>
           {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
           <div className="actions">
-            <button className="button" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Publicando...' : 'Publicar respuesta'}
-            </button>
+            {uploadPhase === 'uploading' ? (
+              <div className="button">
+                <UploadProgressBar label="Subiendo adjunto…" />
+              </div>
+            ) : (
+              <button className="button" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Publicando...' : 'Publicar respuesta'}
+              </button>
+            )}
           </div>
         </form>
       ) : user ? (

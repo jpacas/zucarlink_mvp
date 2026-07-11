@@ -51,4 +51,6 @@ export type MediaAttachmentType = 'image' | 'video'
 export interface MediaUploadResult {
   path: string
   type: MediaAttachmentType
+  filename: string
+  sizeBytes: number
 }
