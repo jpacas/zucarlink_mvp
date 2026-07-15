@@ -1007,6 +1007,7 @@ export type Database = {
           organization_name: string
           role_title: string
           short_bio: string
+          specialties: string[]
           verification_status: string
         }[]
       }

@@ -27,7 +27,17 @@ export function PublicProfilePage() {
 
   usePageMetadata({
     title: profile?.fullName ?? 'Perfil público',
-    description: profile?.shortBio || undefined,
+    description:
+      profile?.shortBio ||
+      (profile
+        ? [profile.currentRole.trim(), profile.organizationName.trim()]
+            .filter(Boolean)
+            .join(' · ')
+            .concat(
+              ' — perfil en Zucarlink, la red profesional de la industria azucarera de Latinoamérica.',
+            )
+            .trim()
+        : undefined),
   })
 
   if (isLoading) {
@@ -61,6 +71,8 @@ export function PublicProfilePage() {
     )
   }
 
+  const firstName = profile.fullName.split(' ')[0]
+
   return (
     <div className="stack">
       <Breadcrumbs items={[
@@ -91,15 +103,22 @@ export function PublicProfilePage() {
             <p className="eyebrow">Perfil público</p>
             <h1>{profile.fullName}</h1>
             {profile.currentRole || profile.organizationName ? (
-              <p>{[profile.currentRole, profile.organizationName].filter(Boolean).join(' · ')}</p>
+              <p>
+                {[profile.currentRole.trim(), profile.organizationName.trim()]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
             ) : null}
-            <div className="actions">
+            <div className="badge-row">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
+              {profile.isVerified ? (
+                <span className="user-badge user-badge--success">Verificado</span>
+              ) : null}
             </div>
           </div>
         </div>
-        <Link className="button button--secondary" to="/forum">
-          Volver al foro
+        <Link className="button" to="/register?tipo=tecnico">
+          Conectar con {firstName}
         </Link>
       </div>
 
@@ -108,9 +127,22 @@ export function PublicProfilePage() {
         <p>{profile.shortBio || 'Este miembro todavía no añadió un resumen público.'}</p>
       </div>
 
+      {profile.specialties.length > 0 ? (
+        <div className="info-card stack">
+          <h3>Especialidades técnicas</h3>
+          <div className="chip-grid">
+            {profile.specialties.map((specialty) => (
+              <span key={specialty} className="chip chip--tecnico">
+                {specialty}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="info-card stack">
         <h3>Actividad en foro</h3>
-        <div className="actions">
+        <div className="badge-row">
           <span className="user-badge">{activity?.threadCount ?? 0} temas</span>
           <span className="user-badge">{activity?.replyCount ?? 0} respuestas</span>
         </div>
@@ -144,6 +176,22 @@ export function PublicProfilePage() {
         ) : (
           <p className="helper-text">Aún no hay contribuciones visibles en el foro.</p>
         )}
+      </div>
+
+      <div className="info-card stack">
+        <h3>Conecta con {firstName} en Zucarlink</h3>
+        <p className="helper-text">
+          Regístrate gratis para ver el perfil completo —especialidades técnicas, experiencia y
+          contacto— y enviar un mensaje directo dentro de la red.
+        </p>
+        <div className="actions">
+          <Link className="button" to="/register?tipo=tecnico">
+            Crear mi cuenta
+          </Link>
+          <Link className="button button--secondary" to="/login">
+            Ingresar
+          </Link>
+        </div>
       </div>
     </section>
     </div>

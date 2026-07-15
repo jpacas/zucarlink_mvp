@@ -17,6 +17,12 @@ const shortDateFormatter = new Intl.DateTimeFormat('es-SV', {
   month: 'short',
 })
 
+const monthYearFormatter = new Intl.DateTimeFormat('es-SV', {
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
 export function formatDate(value: string) {
   if (!value) {
     return ''
@@ -29,6 +35,25 @@ export function formatDateTime(value: string) {
     return ''
   }
   return dateTimeFormatter.format(new Date(value))
+}
+
+export function formatMonthYear(value: string) {
+  if (!value) {
+    return ''
+  }
+  return monthYearFormatter.format(new Date(value))
+}
+
+// Rango legible para una entrada de experiencia profesional. Evita mostrar
+// fechas ISO crudas (p.ej. "2011-05-02 · Actual") en las fichas de perfil.
+export function formatExperienceRange(
+  startDate: string,
+  endDate: string | null,
+  isCurrent: boolean,
+) {
+  const start = formatMonthYear(startDate)
+  const end = isCurrent ? 'Actual' : endDate ? formatMonthYear(endDate) : 'Sin cierre'
+  return start ? `${start} – ${end}` : end
 }
 
 export function formatRelative(value: string) {

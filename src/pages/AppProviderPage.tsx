@@ -5,6 +5,15 @@ import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getProviderStatusMeta } from '../features/providers/status'
 import { useCurrentProviderProfile } from '../features/providers/useCurrentProviderProfile'
 
+// Los campos marcas/países/servicios se guardan como texto separado por comas.
+// Los mostramos como chips para igualar la ficha comercial pública.
+function splitList(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
 export function AppProviderPage() {
   const { user } = useAuth()
   const { provider, isLoading, errorMessage } = useCurrentProviderProfile(user)
@@ -58,8 +67,10 @@ export function AppProviderPage() {
         <div className="stack">
           <p className="eyebrow">Proveedor</p>
           <h2>{provider.companyName}</h2>
-          <div className="actions">
-            {provider.category ? <span className="user-badge">{provider.category.name}</span> : null}
+          <div className="badge-row">
+            {provider.category ? (
+              <span className="user-badge user-badge--proveedor">{provider.category.name}</span>
+            ) : null}
             <span className={`user-badge ${statusMeta.badgeClass}`}>{statusMeta.label}</span>
           </div>
         </div>
@@ -87,17 +98,47 @@ export function AppProviderPage() {
 
       <div className="info-card stack">
         <h3>Marcas que ofrece</h3>
-        <p>{provider.brands || 'Agrega las marcas que fabricas o representas.'}</p>
+        {splitList(provider.brands).length > 0 ? (
+          <div className="chip-grid">
+            {splitList(provider.brands).map((brand) => (
+              <span key={brand} className="chip chip--info">
+                {brand}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">Agrega las marcas que fabricas o representas.</p>
+        )}
       </div>
 
       <div className="info-card stack">
         <h3>Cobertura</h3>
-        <p>{provider.countries || 'Define países donde operas.'}</p>
+        {splitList(provider.countries).length > 0 ? (
+          <div className="chip-grid">
+            {splitList(provider.countries).map((country) => (
+              <span key={country} className="chip chip--proveedor">
+                {country}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">Define países donde operas.</p>
+        )}
       </div>
 
       <div className="info-card stack">
         <h3>Productos y servicios</h3>
-        <p>{provider.productsServices || 'Detalla tus soluciones principales.'}</p>
+        {splitList(provider.productsServices).length > 0 ? (
+          <div className="chip-grid">
+            {splitList(provider.productsServices).map((item) => (
+              <span key={item} className="chip chip--proveedor">
+                {item}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">Detalla tus soluciones principales.</p>
+        )}
       </div>
     </section>
     </div>

@@ -42,6 +42,10 @@ export async function getPublicMemberProfile(profileId: string): Promise<PublicM
     organizationName: row.organization_name ?? '',
     country: row.country ?? '',
     shortBio: row.short_bio ?? '',
+    // Defensivo: la migración 20260715000050 agrega `specialties`; antes de
+    // aplicarla el RPC no devuelve el campo y la ficha simplemente lo omite.
+    specialties: Array.isArray(row.specialties) ? row.specialties : [],
+    isVerified: row.verification_status === 'verified',
   }
 }
 
