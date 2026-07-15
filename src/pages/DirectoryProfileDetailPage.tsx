@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { getDirectoryProfileDetail } from '../features/directory/api'
+import { formatExperienceRange } from '../lib/date'
 import { getInitials } from '../lib/initials'
 import { useAsyncData } from '../lib/useAsyncData'
 
@@ -65,10 +66,10 @@ export function DirectoryProfileDetailPage() {
             <p className="eyebrow">Directorio privado</p>
             <h2>{profile.fullName}</h2>
             <p>
-              {profile.currentRole || 'Cargo pendiente'}
-              {profile.organizationName ? ` · ${profile.organizationName}` : ''}
+              {profile.currentRole.trim() || 'Cargo pendiente'}
+              {profile.organizationName ? ` · ${profile.organizationName.trim()}` : ''}
             </p>
-            <div className="actions">
+            <div className="badge-row">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
               {profile.yearsExperience !== null ? (
                 <span className="user-badge">{profile.yearsExperience} años de experiencia</span>
@@ -95,7 +96,7 @@ export function DirectoryProfileDetailPage() {
         {profile.specialties.length > 0 ? (
           <div className="chip-grid">
             {profile.specialties.map((specialty) => (
-              <span key={specialty} className="chip chip--active">
+              <span key={specialty} className="chip chip--tecnico">
                 {specialty}
               </span>
             ))}
@@ -109,13 +110,17 @@ export function DirectoryProfileDetailPage() {
         <h3>Experiencia profesional</h3>
         {profile.experiences.length > 0 ? (
           profile.experiences.map((experience) => (
-            <article key={experience.id} className="stack">
+            <article key={experience.id} className="stack experience-entry">
               <strong>
-                {experience.roleTitle} · {experience.companyName || 'Empresa por confirmar'}
+                {experience.roleTitle.trim()} ·{' '}
+                {experience.companyName.trim() || 'Empresa por confirmar'}
               </strong>
               <span className="helper-text">
-                {experience.startDate} ·{' '}
-                {experience.isCurrent ? 'Actual' : experience.endDate ?? 'Sin cierre'}
+                {formatExperienceRange(
+                  experience.startDate,
+                  experience.endDate,
+                  experience.isCurrent,
+                )}
               </span>
               {experience.description ? <p>{experience.description}</p> : null}
               {experience.achievements ? (

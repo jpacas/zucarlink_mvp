@@ -799,6 +799,15 @@ fieldset.field {
   align-items: center;
 }
 
+/* Fila de badges de identidad (país, años, categoría). A diferencia de
+   `.actions`, se mantiene en línea con wrap en móvil en vez de apilarse. */
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -1653,6 +1662,12 @@ fieldset.field {
   display: flex;
   align-items: flex-start;
   gap: 20px;
+}
+
+/* Separación entre entradas de experiencia profesional dentro de una tarjeta. */
+.experience-entry + .experience-entry {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
 }
 
 .section-grid--directory {

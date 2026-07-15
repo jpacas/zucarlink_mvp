@@ -70,6 +70,8 @@ export interface PublicMemberProfile {
   organizationName: string
   country: string
   shortBio: string
+  specialties: string[]
+  isVerified: boolean
 }
 
 export interface PublicProfileForumActivity {

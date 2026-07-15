@@ -82,14 +82,14 @@ export function ProviderDetailPage() {
           <div className="stack">
             <p className="eyebrow">Proveedor</p>
             <h1>{provider.companyName}</h1>
-            <div className="actions">
-              <span className="user-badge">{provider.category.name}</span>
+            <div className="badge-row">
+              <span className="user-badge user-badge--proveedor">{provider.category.name}</span>
             </div>
           </div>
         </div>
         <div className="chip-grid">
           {provider.countries.map((item) => (
-            <span key={item} className="chip chip--active">
+            <span key={item} className="chip chip--proveedor">
               {item}
             </span>
           ))}
@@ -118,7 +118,7 @@ export function ProviderDetailPage() {
         <h3>Productos y servicios</h3>
         <div className="chip-grid">
           {provider.productsServices.map((item) => (
-            <span key={item} className="chip chip--active">
+            <span key={item} className="chip chip--proveedor">
               {item}
             </span>
           ))}

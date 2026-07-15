@@ -2,6 +2,7 @@ import { Link, Navigate } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { Breadcrumbs } from '../components/Breadcrumbs'
+import { formatExperienceRange } from '../lib/date'
 import { getInitials } from '../lib/initials'
 import { getProfileForumActivity } from '../features/profile/public-api'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
@@ -87,7 +88,7 @@ export function ProfilePage() {
               {profile.roleTitle || 'Cargo pendiente'} ·{' '}
               {profile.companyName || 'Empresa / ingenio pendiente'}
             </p>
-            <div className="actions">
+            <div className="badge-row">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
               {profile.yearsExperience !== null ? (
                 <span className="user-badge">{profile.yearsExperience} años de experiencia</span>
@@ -113,7 +114,7 @@ export function ProfilePage() {
         {profile.specialties.length > 0 ? (
           <div className="chip-grid">
             {profile.specialties.map((specialty) => (
-              <span key={specialty.id} className="chip chip--active">
+              <span key={specialty.id} className="chip chip--tecnico">
                 {specialty.name}
               </span>
             ))}
@@ -127,13 +128,16 @@ export function ProfilePage() {
         <h3>Experiencia profesional</h3>
         {profile.experiences.length > 0 ? (
           profile.experiences.map((experience) => (
-            <article key={experience.id} className="stack">
+            <article key={experience.id} className="stack experience-entry">
               <strong>
-                {experience.roleTitle} · {experience.companyName}
+                {experience.roleTitle.trim()} · {experience.companyName.trim()}
               </strong>
               <span className="helper-text">
-                {experience.startDate} ·{' '}
-                {experience.isCurrent ? 'Actual' : experience.endDate ?? 'Sin cierre'}
+                {formatExperienceRange(
+                  experience.startDate,
+                  experience.endDate,
+                  experience.isCurrent,
+                )}
               </span>
               {experience.description ? <p>{experience.description}</p> : null}
               {experience.achievements ? (
@@ -148,7 +152,7 @@ export function ProfilePage() {
 
       <div className="info-card stack">
         <h3>Actividad en foro</h3>
-        <div className="actions">
+        <div className="badge-row">
           <span className="user-badge">{forumActivity?.threadCount ?? 0} temas</span>
           <span className="user-badge">{forumActivity?.replyCount ?? 0} respuestas</span>
         </div>
