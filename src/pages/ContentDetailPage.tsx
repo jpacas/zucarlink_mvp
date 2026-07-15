@@ -1,8 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
 
+import { ShareMenu } from '../components/ShareMenu'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { TagBadge } from '../features/content/components/TagBadge'
 import { getPublishedContentBySlug } from '../features/content/api'
+import { useAuth } from '../features/auth/AuthProvider'
 import { formatDate } from '../lib/date'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { useJsonLd } from '../lib/useJsonLd'
@@ -11,6 +13,7 @@ import { useAsyncData } from '../lib/useAsyncData'
 
 export function ContentDetailPage() {
   const { slug = '' } = useParams()
+  const { user } = useAuth()
   const { data: item, error: errorMessage } = useAsyncData(() => getPublishedContentBySlug(slug), [slug])
 
   usePageMetadata({
@@ -55,20 +58,38 @@ export function ContentDetailPage() {
     )
   }
 
+  const paragraphs = item.body
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+
   return (
-    <article className="content-card stack">
+    <article className="content-card article-detail stack">
       <SectionHeader as="h1" eyebrow={item.type === 'news' ? 'Noticia' : 'Blog'} title={item.title} />
       <div className="content-item-card__meta">
         <span>{formatDate(item.publishedAt)}</span>
         {item.sourceName ? <span>{item.sourceName}</span> : null}
+        <ShareMenu url={`${SITE_URL}/informacion/${item.slug}`} title={item.title} />
       </div>
-      <p>{item.summary}</p>
+      {item.coverImageUrl ? (
+        <img
+          className="article-cover"
+          src={item.coverImageUrl}
+          alt=""
+          loading="lazy"
+        />
+      ) : null}
+      <p className="article-lead">{item.summary}</p>
       <div className="tag-row">
         {item.tags.map((tag) => (
           <TagBadge key={tag} label={tag} />
         ))}
       </div>
-      <p>{item.body}</p>
+      <div className="article-body">
+        {paragraphs.map((paragraph, index) => (
+          <p key={index}>{paragraph}</p>
+        ))}
+      </div>
       {item.sourceUrl ? (
         <a className="inline-link" href={item.sourceUrl} target="_blank" rel="noreferrer">
           Fuente original
@@ -80,10 +101,12 @@ export function ContentDetailPage() {
           Usa este contenido como punto de entrada para descubrir miembros y abrir conversación.
         </p>
         <div className="actions">
-          <Link className="button" to="/register">
-            Únete a Zucarlink
-          </Link>
-          <Link className="button button--secondary" to="/forum">
+          {!user ? (
+            <Link className="button" to="/register">
+              Únete a Zucarlink
+            </Link>
+          ) : null}
+          <Link className={user ? 'button' : 'button button--secondary'} to="/forum">
             Participa en el foro
           </Link>
         </div>

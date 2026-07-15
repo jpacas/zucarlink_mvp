@@ -6,6 +6,7 @@ import { ContentFilters } from '../features/content/components/ContentFilters'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listPublishedContent } from '../features/content/api'
 import type { ContentCategory, ContentItem } from '../features/content/types'
+import { useAuth } from '../features/auth/AuthProvider'
 import { isPublicConfigurationError } from '../lib/publicFallbacks'
 import { usePageMetadata } from '../lib/usePageMetadata'
 import { useAsyncData } from '../lib/useAsyncData'
@@ -25,6 +26,7 @@ const categories: ContentCategory[] = [
 ]
 
 export function BlogListPage() {
+  const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
 
@@ -90,10 +92,12 @@ export function BlogListPage() {
         </div>
       )}
       <div className="actions">
-        <Link className="button" to="/register">
-          Únete a Zucarlink
-        </Link>
-        <Link className="button button--secondary" to="/forum">
+        {!user ? (
+          <Link className="button" to="/register">
+            Únete a Zucarlink
+          </Link>
+        ) : null}
+        <Link className={user ? 'button' : 'button button--secondary'} to="/forum">
           Participa en el foro
         </Link>
       </div>

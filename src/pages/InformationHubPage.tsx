@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FeaturedContent } from '../features/content/components/FeaturedContent'
 import { SectionHeader } from '../features/content/components/SectionHeader'
 import { listFeaturedContent } from '../features/content/api'
+import { useAuth } from '../features/auth/AuthProvider'
 import { usePageMetadata } from '../lib/usePageMetadata'
 import { useAsyncData } from '../lib/useAsyncData'
 import { BlogIcon, EventIcon, NewsIcon, PriceIcon } from '../components/InfoIcons'
@@ -50,6 +51,7 @@ const informationSections: InformationSection[] = [
 ]
 
 export function InformationHubPage() {
+  const { user } = useAuth()
   usePageMetadata({
     title: 'Información',
     description:
@@ -69,10 +71,12 @@ export function InformationHubPage() {
           volver a la plataforma por contexto útil, no por ruido.
         </p>
         <div className="actions">
-          <Link className="button" to="/register">
-            Únete a Zucarlink
-          </Link>
-          <Link className="button button--secondary" to="/forum">
+          {!user ? (
+            <Link className="button" to="/register">
+              Únete a Zucarlink
+            </Link>
+          ) : null}
+          <Link className={user ? 'button' : 'button button--secondary'} to="/forum">
             Ver foro
           </Link>
         </div>
