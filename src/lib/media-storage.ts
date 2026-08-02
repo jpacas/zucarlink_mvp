@@ -263,13 +263,22 @@ export async function uploadMessageAttachments(params: {
   }
 }
 
-// Bucket privado: requiere URL firmada por request (no cacheable a largo plazo).
-// 1h alcanza para ver la conversación abierta; se re-firma en cada carga de
-// getThreadMessages.
+// Bucket privado: requiere URL firmada. getThreadMessages se re-ejecuta en
+// cada carga y en cada ciclo de polling (cada 8s en MessagesPage), así que
+// sin cache se re-firmaba la misma URL una y otra vez para los mismos
+// adjuntos. Se cachea en memoria con un margen bajo el vencimiento real.
+const signedUrlCache = new Map<string, { url: string; expiresAt: number }>()
+const SIGNED_URL_CACHE_MARGIN_MS = 5 * 60_000
+
 export async function getMessageAttachmentSignedUrl(
   path: string,
   expiresInSeconds = 3600,
 ): Promise<string | null> {
+  const cached = signedUrlCache.get(path)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.url
+  }
+
   const client = getSupabaseBrowserClient()
   if (!client) return null
 
@@ -278,5 +287,11 @@ export async function getMessageAttachmentSignedUrl(
     .createSignedUrl(path, expiresInSeconds)
 
   if (error || !data) return null
+
+  signedUrlCache.set(path, {
+    url: data.signedUrl,
+    expiresAt: Date.now() + expiresInSeconds * 1000 - SIGNED_URL_CACHE_MARGIN_MS,
+  })
+
   return data.signedUrl
 }

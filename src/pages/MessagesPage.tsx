@@ -276,15 +276,17 @@ export function MessagesPage() {
 
     const fetchMessages = async () => {
       try {
-        const rows = await getThreadMessages(selectedThreadId)
+        // markThreadRead no depende de los mensajes recién cargados, así que
+        // corre en paralelo en vez de encadenarse después de getThreadMessages
+        // (cada RPC ronda los 250-600ms; encadenados duplicaban esa espera
+        // cada vez que se abría una conversación).
+        const [rows] = await Promise.all([
+          getThreadMessages(selectedThreadId),
+          markThreadRead(selectedThreadId),
+        ])
 
         if (isMounted) {
           setMessages(rows)
-        }
-
-        await markThreadRead(selectedThreadId)
-
-        if (isMounted) {
           setThreads((prev) =>
             prev.map((t) =>
               t.threadId === selectedThreadId ? { ...t, unreadCount: 0 } : t,
