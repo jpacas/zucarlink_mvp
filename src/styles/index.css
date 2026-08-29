@@ -397,7 +397,7 @@ label {
 .hero-card,
 .content-card,
 .auth-card {
-  padding: 32px;
+  padding: clamp(20px, 5vw, 32px);
   border-radius: 28px;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -450,7 +450,7 @@ label {
   max-width: 14ch;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-size: clamp(2rem, 6vw, 4.2rem);
   line-height: 1;
   letter-spacing: -0.02em;
 }
@@ -494,6 +494,11 @@ label {
 
 .content-card {
   min-height: 220px;
+  /* Cuando una tarjeta hermana en .section-grid tiene más contenido, la
+     grilla estira esta al mismo alto (comportamiento normal de CSS Grid).
+     Sin esto, el contenido propio también se estiraba para llenar ese alto,
+     dejando un hueco enorme entre el texto y el botón de acción. */
+  align-content: start;
 }
 
 .content-card p,
@@ -2766,12 +2771,6 @@ fieldset.field {
     width: 100%;
   }
 
-  .hero-card,
-  .content-card,
-  .auth-card {
-    padding: 24px;
-  }
-
   .actions {
     flex-direction: column;
     align-items: flex-start;
@@ -2779,6 +2778,24 @@ fieldset.field {
 
   .actions .button {
     width: 100%;
+  }
+
+  /* El hero de home lleva 3 CTAs de peso distinto (crear perfil / registrar
+     empresa / explorar). Apilarlos los 3 a ancho completo en mobile se sentía
+     desproporcionado, así que solo el primario queda full-width y el resto
+     se acomoda compacto en una fila debajo. */
+  .hero-card--home .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .hero-card--home .actions .button:first-child {
+    width: 100%;
+  }
+
+  .hero-card--home .actions .button:not(:first-child) {
+    width: auto;
+    flex: 1 1 auto;
   }
 
   .directory-card .button {

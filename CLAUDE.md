@@ -41,6 +41,15 @@ Available skills:
 - `/gstack-upgrade` - Upgrade gstack
 - `/learn` - Learning mode
 
+## Design System
+
+Leer siempre `DESIGN.md` antes de tomar decisiones visuales o de UI. Ahí están
+formalizados el patrón de color por rol (ingenio/técnico/proveedor/info), la
+dirección estética (grid-disciplinado en dashboard, editorial en foro/perfiles),
+espaciado, motion y los riesgos deliberados de la propuesta. No desviarse sin
+aprobación explícita del usuario. En modo QA, marcar cualquier código que no
+coincida con `DESIGN.md`.
+
 ## Manual de Marca (implementado)
 
 Sitio fiel total al Manual de Marca Básico de Zucarlink (Abril 2020).
