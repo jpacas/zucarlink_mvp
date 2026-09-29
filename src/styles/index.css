@@ -190,7 +190,7 @@ label {
 .content-card,
 .auth-card,
 .section-grid {
-  width: min(1080px, 100%);
+  width: min(1240px, 100%);
   margin: 0 auto;
 }
 
@@ -231,7 +231,7 @@ label {
 }
 
 .site-footer__inner {
-  width: min(1080px, 100%);
+  width: min(1240px, 100%);
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -313,7 +313,7 @@ label {
   min-height: 44px;
   padding: 10px 16px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.72);
   color: var(--text);
   transition:
@@ -532,25 +532,45 @@ label {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 4px;
+  height: 5px;
   background: var(--role-accent);
+}
+
+/* Tinte suave de fondo + acento superior — probamos relleno sólido a pantalla
+   completa (ver historial en DESIGN.md) y no funcionó: se sentía pesado y
+   poco sobrio. Este es el punto medio: sigue siendo reconocible por rol sin
+   gritar color en toda la tarjeta.
+   OJO: --role-*-soft es rgba() semi-transparente (pensado para badges chicos
+   sobre una card ya blanca). Usado directo como fondo de la card, deja ver
+   los 4 radial-gradient del <body> (background-attachment: fixed) por
+   detrás — se leía como si la tarjeta tuviera un degradado. Estas variables
+   --role-*-card son la misma mezcla pero calculada sobre blanco opaco. */
+:root {
+  --role-tecnico-card: color-mix(in srgb, var(--role-tecnico) 12%, white);
+  --role-proveedor-card: color-mix(in srgb, var(--role-proveedor) 12%, white);
+  --role-ingenio-card: color-mix(in srgb, var(--role-ingenio) 12%, white);
+  --role-info-card: color-mix(in srgb, var(--role-info) 12%, white);
 }
 
 .content-card--tecnico {
   --role-accent: var(--role-tecnico);
   --eyebrow-color: var(--role-tecnico-ink);
+  background: var(--role-tecnico-card);
 }
 .content-card--proveedor {
   --role-accent: var(--role-proveedor);
   --eyebrow-color: var(--role-proveedor-strong);
+  background: var(--role-proveedor-card);
 }
 .content-card--ingenio {
   --role-accent: var(--role-ingenio);
   --eyebrow-color: var(--role-ingenio);
+  background: var(--role-ingenio-card);
 }
 .content-card--info {
   --role-accent: var(--role-info);
   --eyebrow-color: var(--role-info-ink);
+  background: var(--role-info-card);
 }
 
 .route-chip {
@@ -559,7 +579,7 @@ label {
   min-height: 36px;
   padding: 8px 12px;
   border: 1px solid rgba(32, 23, 71, 0.12);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: rgba(32, 23, 71, 0.06);
   color: rgba(32, 23, 71, 0.80);
   font-size: 0.84rem;
@@ -820,7 +840,7 @@ fieldset.field {
   gap: 7px;
   min-height: 46px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   padding: 12px 18px;
   background: var(--brand);
   color: var(--white);
@@ -1162,8 +1182,7 @@ fieldset.field {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background:
-    linear-gradient(160deg, rgba(32, 23, 71, 0.97), rgba(0, 41, 226, 0.88));
+  background: var(--brand-primary);
   color: var(--white);
   font-weight: 800;
 }
@@ -1173,7 +1192,7 @@ fieldset.field {
   align-items: center;
   min-height: 34px;
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--brand-soft);
   color: var(--brand);
   font-weight: 700;
@@ -1212,7 +1231,7 @@ fieldset.field {
   height: 44px;
   border-radius: 999px;
   border: 2px solid rgba(0, 41, 226, 0.20);
-  background: linear-gradient(150deg, rgba(32, 23, 71, 0.97), rgba(0, 41, 226, 0.88));
+  background: var(--brand-primary);
   color: var(--white);
   font-weight: 800;
   font-size: 0.95rem;
@@ -1344,7 +1363,7 @@ fieldset.field {
   min-height: 40px;
   padding: 10px 14px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.86);
   cursor: pointer;
   transition:
@@ -1494,7 +1513,7 @@ fieldset.field {
 
 .price-tab {
   padding: 8px 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--text-muted);
@@ -1532,7 +1551,7 @@ fieldset.field {
 
 .price-range-tab {
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--text-muted);
@@ -1652,8 +1671,7 @@ fieldset.field {
 .forum-author__fallback {
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(150deg, rgba(32, 23, 71, 0.98), rgba(0, 41, 226, 0.88));
+  background: var(--brand-primary);
   color: var(--white);
   font-weight: 700;
 }
@@ -1676,7 +1694,7 @@ fieldset.field {
 }
 
 .section-grid--directory {
-  width: min(1080px, 100%);
+  width: min(1240px, 100%);
 }
 
 .metric-value {
@@ -1694,10 +1712,23 @@ fieldset.field {
 
 .directory-card .avatar-image,
 .directory-card .avatar-fallback {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  font-size: 1.1rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 17px;
+  font-size: 1.3rem;
+}
+
+.directory-card h3 {
+  font-size: 1.05rem;
+}
+
+/* El CTA "Conectar" es la acción más repetida del directorio (una por
+   card) y el .button--sm compacto (34px) queda bajo el mínimo táctil de
+   44px — encontrado en /design-review. Se sube solo en este contexto para
+   no afectar otros usos legítimamente compactos de --sm (toolbars densos). */
+.directory-card__public-cta .button--sm {
+  min-height: 44px;
+  padding: 0 20px;
 }
 
 .directory-toolbar {
@@ -1721,14 +1752,19 @@ fieldset.field {
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
-/* Acento verde técnico: barra superior sutil que identifica al directorio de técnicos */
+/* Acento verde técnico: antes era un sliver superior de 3px — ahora una
+   franja lateral más presente, como la pestaña de una ficha de fichero.
+   Identifica al directorio de técnicos sin llenar la card de color. */
 .directory-card::before {
   content: "";
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
+  inset: 0 auto 0 0;
+  width: 5px;
   background: var(--role-tecnico);
-  opacity: 0.9;
+}
+
+.directory-card {
+  padding-left: 24px;
 }
 
 .directory-card:hover {
@@ -1854,7 +1890,10 @@ fieldset.field {
 }
 
 .forum-thread-list .forum-thread-link {
-  font-size: 1.25rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .content-item-card__footer {
@@ -1874,7 +1913,7 @@ fieldset.field {
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--brand-soft);
   color: var(--brand);
   font-size: 0.85rem;
@@ -2220,7 +2259,7 @@ fieldset.field {
   min-height: 44px;
   padding: 8px 14px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: rgba(32, 23, 71, 0.07);
   color: var(--text);
   font-weight: 600;
@@ -2594,7 +2633,7 @@ fieldset.field {
 /* ─── Breadcrumbs ─────────────────────────────────────────────────────────── */
 
 .breadcrumbs {
-  width: min(1080px, 100%);
+  width: min(1240px, 100%);
   margin: 0 auto;
   padding-bottom: 8px;
 }
@@ -3365,7 +3404,7 @@ fieldset.field {
 .skeleton--chip {
   height: 28px;
   width: 80px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
 }
 
 .skeleton--card {
