@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          payload: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          payload?: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          payload?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           country: string | null
@@ -605,10 +629,12 @@ export type Database = {
           current_company_id: string | null
           full_name: string
           id: string
+          is_demo: boolean
           last_seen_at: string | null
           linkedin_url: string | null
           phone: string | null
           profile_status: string
+          public_listing_opt_out: boolean
           role_title: string | null
           short_bio: string | null
           updated_at: string
@@ -624,10 +650,12 @@ export type Database = {
           current_company_id?: string | null
           full_name: string
           id: string
+          is_demo?: boolean
           last_seen_at?: string | null
           linkedin_url?: string | null
           phone?: string | null
           profile_status?: string
+          public_listing_opt_out?: boolean
           role_title?: string | null
           short_bio?: string | null
           updated_at?: string
@@ -643,10 +671,12 @@ export type Database = {
           current_company_id?: string | null
           full_name?: string
           id?: string
+          is_demo?: boolean
           last_seen_at?: string | null
           linkedin_url?: string | null
           phone?: string | null
           profile_status?: string
+          public_listing_opt_out?: boolean
           role_title?: string | null
           short_bio?: string | null
           updated_at?: string
@@ -862,9 +892,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_verification_log: {
+        Args: { limit_count?: number }
+        Returns: {
+          admin_email: string
+          created_at: string
+          id: string
+          new_status: string
+          previous_status: string
+          profile_full_name: string
+          profile_id: string
+        }[]
+      }
+      admin_search_verifiable_profiles: {
+        Args: { limit_count?: number; search_text?: string; status_filter?: string }
+        Returns: {
+          country: string
+          full_name: string
+          id: string
+          organization_name: string
+          updated_at: string
+          verification_status: string
+        }[]
+      }
       admin_update_provider_status: {
         Args: { next_status: string; provider_id: string }
         Returns: string
+      }
+      admin_update_verification: {
+        Args: { p_new_status: string; p_profile_id: string }
+        Returns: undefined
       }
       build_unique_forum_slug: {
         Args: { base_text: string; topic_id?: string }
@@ -958,6 +1015,13 @@ export type Database = {
         Returns: {
           like_count: number
           viewer_liked: boolean
+        }[]
+      }
+      get_my_referral_summary: {
+        Args: never
+        Returns: {
+          code: string
+          redemption_count: number
         }[]
       }
       get_profile_forum_activity: {
@@ -1115,6 +1179,10 @@ export type Database = {
       }
       mark_thread_read: { Args: { p_thread_id: string }; Returns: undefined }
       normalize_company_name: { Args: { p_name: string }; Returns: string }
+      redeem_referral_code: {
+        Args: { p_code: string; p_referred_id: string }
+        Returns: boolean
+      }
       refresh_forum_topic_metrics: {
         Args: { target_topic_id: string }
         Returns: undefined

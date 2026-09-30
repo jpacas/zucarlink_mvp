@@ -2,10 +2,13 @@ import { Link } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { NotificationPreferencesCard } from '../features/notifications/NotificationPreferencesCard'
+import { PublicListingToggleCard } from '../features/profile/PublicListingToggleCard'
+import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 
 export function SettingsPage() {
   const { user } = useAuth()
+  const { profile } = useCurrentProfile(user)
 
   return (
     <div className="stack">
@@ -46,6 +49,9 @@ export function SettingsPage() {
         </article>
 
         {user ? <NotificationPreferencesCard userId={user.id} /> : null}
+        {user && profile?.accountType === 'technician' ? (
+          <PublicListingToggleCard userId={user.id} />
+        ) : null}
       </div>
     </section>
     </div>

@@ -66,7 +66,7 @@ Deno.serve(async () => {
   try {
     const client = getAdminClient()
 
-    const [contentResult, providersResult, topicsResult] = await Promise.all([
+    const [contentResult, providersResult, topicsResult, profilesResult] = await Promise.all([
       client
         .from('content_items')
         .select('slug, updated_at')
@@ -78,6 +78,12 @@ Deno.serve(async () => {
         .eq('status', 'active')
         .not('slug', 'is', null),
       client.from('forum_topics').select('slug, updated_at').not('slug', 'is', null),
+      client
+        .from('profiles')
+        .select('id, updated_at')
+        .eq('account_type', 'technician')
+        .eq('profile_status', 'complete')
+        .eq('public_listing_opt_out', false),
     ])
 
     for (const row of contentResult.data ?? []) {
@@ -103,6 +109,15 @@ Deno.serve(async () => {
         loc: `${SITE_URL}/forum/thread/${row.slug}`,
         lastmod: toLastmod(row.updated_at),
         changefreq: 'weekly',
+        priority: '0.5',
+      })
+    }
+
+    for (const row of profilesResult.data ?? []) {
+      entries.push({
+        loc: `${SITE_URL}/directory/${row.id}`,
+        lastmod: toLastmod(row.updated_at),
+        changefreq: 'monthly',
         priority: '0.5',
       })
     }

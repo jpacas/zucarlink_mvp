@@ -1,6 +1,10 @@
 import { getAdminClient } from './supabase-admin.ts'
 
-export type EngagementEmailType = 'unread_reminder' | 'inactivity_digest' | 'liked_topic_reply'
+export type EngagementEmailType =
+  | 'unread_reminder'
+  | 'inactivity_digest'
+  | 'liked_topic_reply'
+  | 'welcome'
 
 /**
  * Claims the right to send an email for (userId, emailType, dedupeKey).

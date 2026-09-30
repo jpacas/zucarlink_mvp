@@ -1,6 +1,7 @@
 import { getAdminClient } from '../../_shared/supabase-admin.ts'
 import { sendEmail } from '../../_shared/resend.ts'
 import { renderWelcomeEmail } from '../templates/welcome.ts'
+import { claimEmail } from '../../_shared/email-log.ts'
 
 interface ProfileRow {
   id: string
@@ -10,6 +11,13 @@ interface ProfileRow {
 
 export async function handleProfileComplete(record: ProfileRow): Promise<void> {
   const admin = getAdminClient()
+
+  // Guard de idempotencia: los webhooks de Supabase entregan "at least once",
+  // así que un reintento puede volver a disparar esta transición. dedupe_key
+  // fijo (no hay una fecha/ronda que lo particione, a diferencia de los
+  // digests) porque solo debe enviarse una vez por perfil, siempre.
+  const claimed = await claimEmail(record.id, 'welcome', 'once')
+  if (!claimed) return
 
   const { data: userResponse, error } = await admin.auth.admin.getUserById(record.id)
   if (error || !userResponse?.user?.email) {

@@ -22,6 +22,7 @@ import {
   startOrGetThread,
 } from '../features/messages/api'
 import type { Message, MessageAttachmentType, MessageThread } from '../features/messages/types'
+import { trackEvent } from '../lib/analytics'
 
 const POLL_INTERVAL_MS = 8_000
 
@@ -403,6 +404,7 @@ export function MessagesPage() {
 
       setUploadPhase('saving')
       await sendMessage(selectedThreadId, body, attachments)
+      trackEvent('first_message_sent')
       const rows = await getThreadMessages(selectedThreadId)
       setMessages(rows)
 

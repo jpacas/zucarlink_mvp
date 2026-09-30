@@ -4,6 +4,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
 import { resolvePostAuthDestination } from '../features/profile/api'
+import { redeemReferralCode } from '../features/referrals/api'
+import { sanitizeNextPath } from '../lib/redirect'
 import { usePageMetadata } from '../lib/usePageMetadata'
 import type { AccountType } from '../types/auth'
 
@@ -22,6 +24,11 @@ export function RegisterPage() {
   // Permite que el inicio enlace directo al tipo de cuenta (?tipo=proveedor).
   const initialAccountType: AccountType =
     searchParams.get('tipo') === 'proveedor' ? 'provider' : 'technician'
+  // Destino a preservar a través del flujo de confirmación de email (ver T4b).
+  const nextPath = sanitizeNextPath(searchParams.get('next'))
+  // Código de referido (T14) — sin validar acá, el RPC de canje degrada en
+  // silencio si es inválido/propio, nunca debe bloquear el registro.
+  const referralCode = searchParams.get('ref')
   const [accountType, setAccountType] = useState<AccountType>(initialAccountType)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -42,7 +49,13 @@ export function RegisterPage() {
     setFeedback(null)
 
     try {
-      const result = await signUp({ accountType, fullName, email, password })
+      const result = await signUp({ accountType, fullName, email, password, redirectNext: nextPath })
+
+      if (referralCode && result.user) {
+        // Fire-and-forget: un código roto o auto-referido nunca debe
+        // interrumpir ni ensuciar el flujo de registro con un error visible.
+        void redeemReferralCode(referralCode, result.user.id).catch(() => undefined)
+      }
 
       if (result.needsEmailConfirmation) {
         setFeedback({
@@ -56,7 +69,7 @@ export function RegisterPage() {
         throw new Error('No fue posible recuperar el usuario recién creado.')
       }
 
-      const destination = await resolvePostAuthDestination(result.user)
+      const destination = nextPath ?? (await resolvePostAuthDestination(result.user))
       navigate(destination, { replace: true })
     } catch (error) {
       setFeedback({
@@ -145,7 +158,10 @@ export function RegisterPage() {
             {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
           <span className="helper-text">
-            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+            ¿Ya tienes cuenta?{' '}
+            <Link to={nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : '/login'}>
+              Inicia sesión
+            </Link>
           </span>
         </div>
       </form>

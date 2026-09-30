@@ -4,6 +4,7 @@ import { DirectoryProfileCard } from '../features/directory/DirectoryProfileCard
 import { searchDirectoryProfiles } from '../features/directory/api'
 import type { DirectoryFilters, DirectoryProfileCard as DirectoryProfileCardData } from '../features/directory/types'
 import { SkeletonCard } from '../components/Skeleton'
+import { trackEvent } from '../lib/analytics'
 
 const emptyFilters: DirectoryFilters = {
   searchText: '',
@@ -24,6 +25,10 @@ function toSpecialtySlug(name: string) {
 }
 
 export function AppDirectoryPage() {
+  useEffect(() => {
+    trackEvent('directory_viewed')
+  }, [])
+
   const [filters, setFilters] = useState<DirectoryFilters>({ ...emptyFilters })
   const [searchInput, setSearchInput] = useState('')
   const [debouncedSearchText, setDebouncedSearchText] = useState('')

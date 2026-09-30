@@ -23,4 +23,6 @@ export interface SignInPayload {
 export interface SignUpPayload extends SignInPayload {
   accountType: AccountType
   fullName: string
+  // Ruta a la que volver tras confirmar el email, ya validada (ver src/lib/redirect.ts).
+  redirectNext?: string | null
 }

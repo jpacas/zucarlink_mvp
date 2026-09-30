@@ -214,6 +214,7 @@ interface CreateSupabaseAuthFakeOptions {
 }
 
 type TableName =
+  | 'analytics_events'
   | 'profiles'
   | 'companies'
   | 'specialties'
@@ -702,6 +703,7 @@ export function createSupabaseAuthFake(
   const listeners = new Set<AuthStateChangeHandler>()
 
   const tables: Record<TableName, BaseRow[]> = {
+    analytics_events: [],
     profiles: [...(options.data?.profiles ?? [])],
     companies: [...(options.data?.companies ?? [])],
     specialties: [...(options.data?.specialties ?? [])],

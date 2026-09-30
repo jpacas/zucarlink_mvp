@@ -5,6 +5,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs'
 import { formatExperienceRange } from '../lib/date'
 import { getInitials } from '../lib/initials'
 import { getProfileForumActivity } from '../features/profile/public-api'
+import { ReferralCard } from '../features/referrals/ReferralCard'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import { useAsyncData } from '../lib/useAsyncData'
 
@@ -179,6 +180,8 @@ export function ProfilePage() {
           <p className="helper-text">Tus aportes al foro aparecerán aquí cuando participes.</p>
         )}
       </div>
+
+      <ReferralCard />
 
       <div className="info-card stack">
         <h3>Contacto</h3>

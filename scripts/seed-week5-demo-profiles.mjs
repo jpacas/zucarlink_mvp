@@ -566,6 +566,7 @@ async function syncProfile(client, userId, profile, companyId) {
       linkedin_url: profile.linkedinUrl || null,
       profile_status: 'complete',
       verification_status: profile.verificationStatus,
+      is_demo: true,
     },
     { onConflict: 'id' },
   )

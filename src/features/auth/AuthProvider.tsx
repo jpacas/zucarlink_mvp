@@ -9,6 +9,7 @@ import {
 import type { Session, User } from '@supabase/supabase-js'
 
 import { getMissingEnvKeys } from '../../lib/env'
+import { sanitizeNextPath } from '../../lib/redirect'
 import { getSupabaseBrowserClient } from '../../lib/supabase'
 import type { SignInPayload, SignUpPayload } from '../../types/auth'
 import { mapSupabaseAuthError } from './authErrorMessages'
@@ -119,12 +120,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
           user: authenticatedUser,
         }
       },
-      signUp: async ({ accountType, fullName, email, password }) => {
+      signUp: async ({ accountType, fullName, email, password, redirectNext }) => {
         const client = getSupabaseBrowserClient()
 
         if (!client) {
           throw new Error(configurationError ?? 'Supabase no está configurado.')
         }
+
+        // El link de confirmación de email vuelve a /register con ?next=...
+        // para que PublicOnlyRoute retome al usuario donde estaba (T4b). Se
+        // re-valida acá porque este valor termina embebido en el email.
+        const safeNext = sanitizeNextPath(redirectNext)
+        const emailRedirectTo = safeNext
+          ? `${window.location.origin}/register?next=${encodeURIComponent(safeNext)}`
+          : `${window.location.origin}/register`
 
         const { data, error } = await client.auth.signUp({
           email,
@@ -134,6 +143,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
               account_type: accountType,
               full_name: fullName,
             },
+            emailRedirectTo,
           },
         })
 

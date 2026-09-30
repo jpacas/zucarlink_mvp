@@ -69,6 +69,7 @@ export function AppHeader() {
             ? [
                 { to: '/app/admin/dashboard', label: 'Dashboard' },
                 { to: '/app/providers-admin', label: 'Admin proveedores' },
+                { to: '/app/admin/verificaciones', label: 'Verificaciones' },
               ]
             : []),
         ]

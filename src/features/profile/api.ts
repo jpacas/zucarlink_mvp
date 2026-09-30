@@ -386,6 +386,36 @@ export async function saveAvatarForProfile(userId: string, file: File, currentPa
   return getAvatarPublicUrl(upload.path)
 }
 
+// T12: opt-out de listado público (directorio público, ficha pública y
+// sitemap). No afecta la visibilidad dentro del directorio interno para
+// técnicos ya autenticados — ver src/features/directory/api.ts.
+export async function getMyPublicListingOptOut(userId: string): Promise<boolean> {
+  const client = getSupabaseClientOrThrow()
+  const { data, error } = await client
+    .from('profiles')
+    .select('public_listing_opt_out')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return Boolean((data as { public_listing_opt_out: boolean } | null)?.public_listing_opt_out)
+}
+
+export async function updateMyPublicListingOptOut(userId: string, optOut: boolean): Promise<void> {
+  const client = getSupabaseClientOrThrow()
+  const { error } = await client
+    .from('profiles')
+    .update({ public_listing_opt_out: optOut })
+    .eq('id', userId)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
 export async function resolvePostAuthDestination(user: User) {
   const profile = await getCurrentProfile(user)
 

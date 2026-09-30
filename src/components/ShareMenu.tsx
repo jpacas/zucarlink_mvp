@@ -12,9 +12,31 @@ interface ShareMenuProps {
   url: string
   title: string
   className?: string
+  // Texto usado para WhatsApp y navigator.share. Default: `${title} ${url}`.
+  shareText?: string
+  // Label del ítem "Copiar enlace" en el menú.
+  copyLabel?: string
+  // Feedback mostrado tras copiar con éxito.
+  copySuccessMessage?: string
+  // Si hay navigator.share (mobile), el botón principal lo dispara directo
+  // en vez de abrir el menú desplegable — con fallback al menú si falla o
+  // no está disponible.
+  nativeShare?: boolean
+  // El link/código a compartir todavía se está generando (ej. referidos
+  // creando el código on-demand) — deshabilita el botón principal.
+  isPreparing?: boolean
 }
 
-export function ShareMenu({ url, title, className }: ShareMenuProps) {
+export function ShareMenu({
+  url,
+  title,
+  className,
+  shareText: shareTextProp,
+  copyLabel = 'Copiar enlace',
+  copySuccessMessage = 'Enlace copiado',
+  nativeShare = false,
+  isPreparing = false,
+}: ShareMenuProps) {
   const [open, setOpen] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -45,7 +67,7 @@ export function ShareMenu({ url, title, className }: ShareMenuProps) {
     }
   }, [open])
 
-  const shareText = `${title} ${url}`
+  const shareText = shareTextProp ?? `${title} ${url}`
   const networks = [
     {
       key: 'whatsapp',
@@ -75,7 +97,7 @@ export function ShareMenu({ url, title, className }: ShareMenuProps) {
   async function handleCopyLink() {
     try {
       await navigator.clipboard.writeText(url)
-      setFeedback('Enlace copiado')
+      setFeedback(copySuccessMessage)
     } catch {
       setFeedback('No fue posible copiar el enlace')
     }
@@ -85,12 +107,31 @@ export function ShareMenu({ url, title, className }: ShareMenuProps) {
     }, 1400)
   }
 
+  async function handleMainButtonClick() {
+    if (isPreparing) {
+      return
+    }
+
+    if (nativeShare && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title, text: shareText, url })
+        return
+      } catch {
+        // Cancelado por el usuario o no soportado en runtime pese al check
+        // de feature-detection — cae al menú desplegable de abajo.
+      }
+    }
+
+    setOpen((value) => !value)
+  }
+
   return (
     <div className="share-menu" ref={containerRef}>
       <button
         type="button"
         className={className ?? 'forum-action forum-action--sm'}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => void handleMainButtonClick()}
+        disabled={isPreparing}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Compartir"
@@ -120,7 +161,7 @@ export function ShareMenu({ url, title, className }: ShareMenuProps) {
             onClick={handleCopyLink}
           >
             <LinkIcon />
-            <span>{feedback ?? 'Copiar enlace'}</span>
+            <span>{feedback ?? copyLabel}</span>
           </button>
         </div>
       ) : null}

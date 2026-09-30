@@ -111,9 +111,9 @@ export function PublicProfilePage() {
             ) : null}
             <div className="badge-row">
               {profile.country ? <span className="user-badge">{profile.country}</span> : null}
-              {profile.isVerified ? (
-                <span className="user-badge user-badge--success">Verificado</span>
-              ) : null}
+              {/* Badge "Verificado" oculto hasta que exista el flujo real de
+                  verificación con auditoría (T9) — mostrarlo hoy insinúa una
+                  verificación que no ocurre. */}
             </div>
           </div>
         </div>

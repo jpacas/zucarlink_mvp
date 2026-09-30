@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 
 import {
   AvatarUploader,
@@ -22,6 +22,8 @@ import {
 } from '../features/providers/api'
 import { isProfileComplete } from '../features/profile/profile-status'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
+import { trackEvent } from '../lib/analytics'
+import { sanitizeNextPath } from '../lib/redirect'
 import type { ProfileDraftInput, ProfileSpecialty } from '../features/profile/types'
 import type {
   ProviderCategory,
@@ -58,6 +60,10 @@ function createDraft(
 export function OnboardingPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Destino a retomar si el usuario venía de un enlace externo (ej. un hilo
+  // del foro) preservado a través del signup/confirmación (T4b).
+  const nextPath = sanitizeNextPath(searchParams.get('next'))
   const { profile, isLoading, errorMessage, reload } = useCurrentProfile(user)
   const [draft, setDraft] = useState<ProfileDraftInput>(() =>
     createDraft(
@@ -154,10 +160,10 @@ export function OnboardingPage() {
       setAvatarUrl(profile.avatarUrl)
 
       if (profile.profileStatus === 'complete') {
-        navigate('/app/profile', { replace: true })
+        navigate(nextPath ?? '/app/profile', { replace: true })
       }
     }
-  }, [navigate, profile, user])
+  }, [navigate, nextPath, profile, user])
 
   const canFinish = useMemo(
     () => isProfileComplete(draft, selectedSpecialtyIds.map((id) => ({ id }))),
@@ -179,6 +185,9 @@ export function OnboardingPage() {
       await reload()
       if (typeof nextStep === 'number') {
         setStep(nextStep)
+        if (nextStep === 2) {
+          trackEvent('onboarding_completed', { accountType: 'technician' })
+        }
       }
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : 'No fue posible guardar el avance.')
@@ -247,6 +256,9 @@ export function OnboardingPage() {
 
       if (typeof nextStep === 'number') {
         setStep(nextStep)
+        if (nextStep === 2) {
+          trackEvent('onboarding_completed', { accountType: 'provider' })
+        }
       }
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : 'No fue posible guardar el perfil comercial.')
@@ -565,17 +577,28 @@ export function OnboardingPage() {
 
       {step === 2 ? (
         <div className="stack">
-          <h3>Perfil listo para la siguiente etapa</h3>
+          <h3>Tu perfil está listo</h3>
           <p>
-            Tu perfil ya cuenta con la información mínima para empezar a participar en la red.
-            Si lo necesitas, puedes ampliar contacto y experiencia desde la edición.
+            Ya puedes participar en la red: explorá quién más está activo o sumá tu primera
+            pregunta en el foro. Podés seguir completando tu perfil cuando quieras.
           </p>
           <div className="actions">
-            <Link className="button" to="/app/profile">
+            {nextPath ? (
+              <Link className="button" to={nextPath}>
+                Continuar donde quedé
+              </Link>
+            ) : (
+              <>
+                <Link className="button" to="/app/directory">
+                  Explorar el directorio
+                </Link>
+                <Link className="button button--secondary" to="/forum">
+                  Ir al foro
+                </Link>
+              </>
+            )}
+            <Link className="button button--ghost" to="/app/profile">
               Ver mi perfil
-            </Link>
-            <Link className="button button--secondary" to="/app/profile/edit">
-              Editar más datos
             </Link>
           </div>
         </div>

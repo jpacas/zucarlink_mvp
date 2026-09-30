@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { AuthFormShell } from '../features/auth/AuthFormShell'
 import { useAuth } from '../features/auth/AuthProvider'
 import { resolvePostAuthDestination } from '../features/profile/api'
+import { sanitizeNextPath } from '../lib/redirect'
 import { usePageMetadata } from '../lib/usePageMetadata'
 
 export function LoginPage() {
@@ -18,8 +19,14 @@ export function LoginPage() {
   const { signIn, isConfigured } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const nextPath = (location.state as { from?: { pathname?: string } } | null)?.from
+  const [searchParams] = useSearchParams()
+  // location.state.from lo pone ProtectedRoute (confiable, no viene de la URL).
+  // ?next lo ponen enlaces como el CTA de "iniciar sesión" del foro — hay que
+  // validarlo antes de navegar (ver src/lib/redirect.ts).
+  const stateNextPath = (location.state as { from?: { pathname?: string } } | null)?.from
     ?.pathname
+  const queryNextPath = sanitizeNextPath(searchParams.get('next'))
+  const nextPath = stateNextPath ?? queryNextPath
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -75,7 +82,10 @@ export function LoginPage() {
             {isSubmitting ? 'Ingresando...' : 'Ingresar'}
           </button>
           <span className="helper-text">
-            ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
+            ¿No tienes cuenta?{' '}
+            <Link to={queryNextPath ? `/register?next=${encodeURIComponent(queryNextPath)}` : '/register'}>
+              Regístrate
+            </Link>
           </span>
         </div>
         <p className="helper-text" style={{ textAlign: 'center' }}>

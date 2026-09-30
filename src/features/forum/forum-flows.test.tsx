@@ -238,7 +238,7 @@ it('shows the public thread detail and asks anonymous visitors to sign in before
   expect(screen.getByText('C')).toBeInTheDocument()
   expect(
     screen.getByRole('link', { name: 'Iniciar sesión' }),
-  ).toHaveAttribute('href', '/login')
+  ).toHaveAttribute('href', '/login?next=%2Fforum%2Fthread%2Fautomatizacion-mano-de-obra-barata')
   expect(screen.queryByRole('button', { name: 'Publicar respuesta' })).not.toBeInTheDocument()
   // Visitantes anónimos ven el conteo de likes pero el control lleva a iniciar sesión.
   const anonLike = await screen.findByRole('link', { name: 'Inicia sesión para reaccionar' })

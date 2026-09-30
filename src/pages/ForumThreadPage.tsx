@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/AuthProvider'
 import { getMemberProfilePath } from '../features/directory/memberProfilePath'
@@ -28,6 +28,7 @@ import { HeartIcon, ReplyIcon, TrashIcon } from '../components/ForumIcons'
 import { ShareMenu } from '../components/ShareMenu'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { trackEvent } from '../lib/analytics'
 
 interface ReplyNode {
   reply: ForumReply
@@ -102,6 +103,8 @@ function ForumAuthorSummary({
 export function ForumThreadPage() {
   const { threadSlug = '' } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const nextParam = encodeURIComponent(location.pathname)
   const { user } = useAuth()
   // Cualquier miembro de Zucarlink con el correo confirmado puede responder.
   const canParticipate = Boolean(user?.email_confirmed_at)
@@ -231,6 +234,7 @@ export function ForumThreadPage() {
         attachments,
       })
 
+      trackEvent('first_forum_post', { type: 'reply' })
       const refreshed = await getForumThread(thread.slug)
       setThread(refreshed)
       setReplyBody('')
@@ -572,10 +576,10 @@ export function ForumThreadPage() {
             Puedes leer el foro completo sin registro, pero necesitas sesión para responder.
           </p>
           <div className="actions">
-            <Link className="button" to="/login">
+            <Link className="button" to={`/login?next=${nextParam}`}>
               Iniciar sesión
             </Link>
-            <Link className="button button--secondary" to="/register">
+            <Link className="button button--secondary" to={`/register?next=${nextParam}`}>
               Crear cuenta
             </Link>
           </div>

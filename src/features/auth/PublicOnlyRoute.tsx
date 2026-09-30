@@ -1,18 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from './AuthProvider'
 import { resolvePostAuthDestination } from '../profile/api'
+import { sanitizeNextPath } from '../../lib/redirect'
 
 export function PublicOnlyRoute() {
   const { isLoading, user } = useAuth()
+  const [searchParams] = useSearchParams()
   const [destination, setDestination] = useState<string | null>(null)
+  // Cubre el regreso desde el link de confirmación de email: Supabase
+  // establece la sesión al cargar /register?next=..., y como el usuario ya
+  // está autenticado este guard es el que decide a dónde mandarlo (T4b).
+  const queryNextPath = sanitizeNextPath(searchParams.get('next'))
 
   useEffect(() => {
     let cancelled = false
 
     if (!user) {
       setDestination(null)
+      return
+    }
+
+    if (queryNextPath) {
+      setDestination(queryNextPath)
       return
     }
 
@@ -31,7 +42,7 @@ export function PublicOnlyRoute() {
     return () => {
       cancelled = true
     }
-  }, [user])
+  }, [user, queryNextPath])
 
   if (isLoading) {
     return (

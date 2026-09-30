@@ -14,6 +14,28 @@
       "destination": "https://iubakkrqnbguagultudw.supabase.co/functions/v1/sitemap"
     },
     {
+      "source": "/directory/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(bot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot|Pinterest|SkypeUriPreview).*"
+        }
+      ],
+      "destination": "https://iubakkrqnbguagultudw.supabase.co/functions/v1/social-preview?type=profile&id=:id"
+    },
+    {
+      "source": "/forum/thread/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(bot|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot|Pinterest|SkypeUriPreview).*"
+        }
+      ],
+      "destination": "https://iubakkrqnbguagultudw.supabase.co/functions/v1/social-preview?type=thread&slug=:slug"
+    },
+    {
       "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }

@@ -11,6 +11,7 @@ import { removeOrphanedForumAttachments, uploadForumAttachments } from '../lib/m
 import type { MediaUploadResult } from '../types/storage'
 import { useAsyncData } from '../lib/useAsyncData'
 import { usePageMetadata } from '../lib/usePageMetadata'
+import { trackEvent } from '../lib/analytics'
 
 export function ForumNewThreadPage() {
   const { user, isLoading: isAuthLoading } = useAuth()
@@ -80,6 +81,7 @@ export function ForumNewThreadPage() {
         attachments,
       })
 
+      trackEvent('first_forum_post', { type: 'topic' })
       navigate(`/forum/thread/${created.slug}`, { replace: true })
     } catch (error) {
       if (uploadedPaths.length > 0) {
