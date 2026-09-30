@@ -74,8 +74,12 @@ create trigger forum_topic_likes_bump_reputation
   for each row
   execute function public.bump_reputation_on_topic_like();
 
--- Expone reputation_points en la ficha pública del perfil.
-create or replace function public.get_public_member_profile(profile_id uuid)
+-- Expone reputation_points en la ficha pública del perfil. CREATE OR REPLACE
+-- no puede cambiar las columnas de retorno (SQLSTATE 42P13) — hay que
+-- dropear primero, mismo patrón que el fix de 20260715000050.
+drop function if exists public.get_public_member_profile(uuid);
+
+create function public.get_public_member_profile(profile_id uuid)
 returns table (
   id uuid,
   full_name text,
