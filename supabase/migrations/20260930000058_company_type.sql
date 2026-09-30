@@ -18,7 +18,7 @@ alter table public.companies
 -- sin tipo.
 drop function if exists public.upsert_company(text, text);
 
-create function public.upsert_company(
+create or replace function public.upsert_company(
   p_name text,
   p_country text default null,
   p_company_type text default null
