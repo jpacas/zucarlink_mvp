@@ -46,6 +46,9 @@ export async function getPublicMemberProfile(profileId: string): Promise<PublicM
     // aplicarla el RPC no devuelve el campo y la ficha simplemente lo omite.
     specialties: Array.isArray(row.specialties) ? row.specialties : [],
     isVerified: row.verification_status === 'verified',
+    // Defensivo por el mismo motivo que `specialties` arriba: perfiles
+    // cacheados antes de la migración 20260930000060 no traen el campo.
+    reputationPoints: typeof row.reputation_points === 'number' ? row.reputation_points : 0,
   }
 }
 

@@ -2,6 +2,8 @@ import type { AccountType } from '../../types/auth'
 
 export type ProfileStatus = 'incomplete' | 'complete'
 
+export type CompanyType = 'ingenio' | 'otro'
+
 export interface ProfileSpecialty {
   id: string
   name: string
@@ -27,6 +29,7 @@ export interface CurrentProfile {
   country: string
   roleTitle: string
   companyName: string
+  companyType: CompanyType | null
   yearsExperience: number | null
   shortBio: string
   avatarPath: string | null
@@ -44,6 +47,7 @@ export interface ProfileDraftInput {
   country: string
   roleTitle: string
   companyName: string
+  companyType: CompanyType | ''
   yearsExperience: number | null
   shortBio: string
   phone: string
@@ -72,6 +76,7 @@ export interface PublicMemberProfile {
   shortBio: string
   specialties: string[]
   isVerified: boolean
+  reputationPoints: number
 }
 
 export interface PublicProfileForumActivity {

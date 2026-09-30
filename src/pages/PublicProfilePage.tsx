@@ -114,6 +114,11 @@ export function PublicProfilePage() {
               {/* Badge "Verificado" oculto hasta que exista el flujo real de
                   verificación con auditoría (T9) — mostrarlo hoy insinúa una
                   verificación que no ocurre. */}
+              {profile.reputationPoints > 0 ? (
+                <span className="user-badge user-badge--tecnico">
+                  {profile.reputationPoints} pts en el foro
+                </span>
+              ) : null}
             </div>
           </div>
         </div>

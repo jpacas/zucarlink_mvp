@@ -40,6 +40,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          company_type: string | null
           country: string | null
           created_at: string
           id: string
@@ -47,6 +48,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_type?: string | null
           country?: string | null
           created_at?: string
           id?: string
@@ -54,6 +56,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_type?: string | null
           country?: string | null
           created_at?: string
           id?: string
@@ -635,6 +638,7 @@ export type Database = {
           phone: string | null
           profile_status: string
           public_listing_opt_out: boolean
+          reputation_points: number
           role_title: string | null
           short_bio: string | null
           updated_at: string
@@ -656,6 +660,7 @@ export type Database = {
           phone?: string | null
           profile_status?: string
           public_listing_opt_out?: boolean
+          reputation_points?: number
           role_title?: string | null
           short_bio?: string | null
           updated_at?: string
@@ -677,6 +682,7 @@ export type Database = {
           phone?: string | null
           profile_status?: string
           public_listing_opt_out?: boolean
+          reputation_points?: number
           role_title?: string | null
           short_bio?: string | null
           updated_at?: string
@@ -887,6 +893,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          reply_id: string | null
+          topic_id: string | null
+          type: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          reply_id?: string | null
+          topic_id?: string | null
+          type: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          reply_id?: string | null
+          topic_id?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -929,6 +968,7 @@ export type Database = {
       }
       clear_thread: { Args: { p_thread_id: string }; Returns: undefined }
       count_my_unread: { Args: never; Returns: number }
+      count_my_unread_notifications: { Args: never; Returns: number }
       create_forum_reply: {
         Args: {
           attachments?: Json
@@ -1017,6 +1057,18 @@ export type Database = {
           viewer_liked: boolean
         }[]
       }
+      get_my_notifications: {
+        Args: { limit_count?: number }
+        Returns: {
+          actor_name: string
+          created_at: string
+          id: string
+          read_at: string | null
+          topic_slug: string
+          topic_title: string
+          type: string
+        }[]
+      }
       get_my_referral_summary: {
         Args: never
         Returns: {
@@ -1069,6 +1121,7 @@ export type Database = {
           full_name: string
           id: string
           organization_name: string
+          reputation_points: number
           role_title: string
           short_bio: string
           specialties: string[]
@@ -1177,6 +1230,7 @@ export type Database = {
           specialties: string[]
         }[]
       }
+      mark_notification_read: { Args: { p_notification_id: string }; Returns: undefined }
       mark_thread_read: { Args: { p_thread_id: string }; Returns: undefined }
       normalize_company_name: { Args: { p_name: string }; Returns: string }
       redeem_referral_code: {
@@ -1261,7 +1315,7 @@ export type Database = {
         Returns: undefined
       }
       upsert_company: {
-        Args: { p_country?: string; p_name: string }
+        Args: { p_company_type?: string; p_country?: string; p_name: string }
         Returns: string
       }
     }

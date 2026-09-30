@@ -635,6 +635,7 @@ it('renders a public profile with forum activity from the author link', async ()
           organization_name: 'Ingenio El Carmen',
           country: 'El Salvador',
           short_bio: 'Automatización aplicada a molienda y vapor.',
+          reputation_points: 12,
         },
       },
       get_profile_forum_activity: {
@@ -663,6 +664,7 @@ it('renders a public profile with forum activity from the author link', async ()
   })
 
   await screen.findByRole('heading', { name: 'Ana Mejía' })
+  expect(screen.getByText('12 pts en el foro')).toBeInTheDocument()
   expect(screen.getByText('4 temas')).toBeInTheDocument()
   expect(screen.getByText('9 respuestas')).toBeInTheDocument()
   expect(screen.getByText('Automatización')).toBeInTheDocument()

@@ -4,13 +4,15 @@ Fuente de verdad del plan de crecimiento técnico: `/plan-ceo-review` del 2026-0
 
 ## Estado (2026-09-30)
 
-Fase 0, 1, 2 y 3 implementadas y verificadas (`npm run typecheck && npm run lint && npm test -- --run && npm run build`, todo en verde, 148 tests). **Nada de esto está desplegado ni aplicado contra una base de datos real** — este entorno no tiene `supabase`/`docker`/`deno`, así que las migraciones nuevas (`20260930000051` a `20260930000057`) están escritas y revisadas por lectura, pero no corridas contra Postgres. Antes de deploy:
-1. Aplicar las 7 migraciones nuevas en orden.
-2. Correr manualmente `node scripts/backfill-is-demo.mjs` (T10b, necesita `SUPABASE_SERVICE_ROLE_KEY` de producción).
-3. Desplegar las 2 edge functions nuevas (`social-preview`, y redeploy de `sitemap`/`send-email` que cambiaron) con `--no-verify-jwt` donde corresponda.
-4. Verificar que la regla de ruteo por user-agent de `vercel.json` (T13) funciona en preview antes de mergear a producción.
+**Fase 0, 1, 2 y 3 desplegadas y verificadas en producción.** Las 8 migraciones (incluyendo el fix de `20260715000050`, que nunca había llegado a producción — bloqueaba todo el resto por un `CREATE OR REPLACE` que intentaba cambiar columnas de retorno) corrieron con `supabase db push`. Verificado directamente contra `https://www.zucarlink.com`:
+- `/sitemap.xml` tiene 23 URLs `/directory/:id` reales (T5/T12).
+- El endpoint `social-preview` devuelve OG/Twitter reales para un perfil real, con fallback y redirect funcionando (T13).
+- La regla de ruteo por user-agent en `vercel.json` funciona: bots reciben la card personalizada, browsers normales reciben la SPA (probado con `curl -A`).
+- T10b corrido: 0 de las 10 cuentas demo conocidas existen en esta base — el seed de Semana 5 nunca se corrió contra producción, nada que backfillear.
 
-**Fase 4 (T16-T19) deliberadamente sin empezar.** El plan mismo dice que Fase 4 no arranca hasta que Fase 0-3 esté en producción *midiendo* — ese gate no se cumple todavía porque nada está desplegado. T16-T19 son features grandes (centro de notificaciones, reputación/gamificación, columna `company_type`, distribución de contenido en Guatemala) que no deberían construirse contra una hipótesis sin datos reales del checkpoint de T3.
+**No verificado (sin acceso a la base de datos desde este entorno):** que `analytics_events` recibe filas reales de uso (T1, el propósito original de toda la Fase 0), y el comportamiento en producción de T9/T11/T14 (verificación admin, rate limit de leads, referidos). El checkpoint de T3 (umbral 15%/4 semanas, cohorte ≥30 registros) arranca desde la fecha real de este deploy — completar esa fecha en el criterio de éxito de arriba cuando se confirme.
+
+**Fase 4 (T17-T19) implementada 2026-09-30, por instrucción explícita del usuario — anula el gate original que esperaba al checkpoint de T3 (2026-10-28).** `company_type`, centro de notificaciones y reputación/gamificación están en código, verificados localmente (typecheck/lint/test/build), pero **no desplegados a producción todavía** — requieren aplicar 3 migraciones nuevas más (`20260930000058` a `20260930000060`) antes de tener efecto. T16 (distribución de contenido en Guatemala) sigue sin empezar — es trabajo de GTM del founder, no de código; el ~1 día de setup técnico que le corresponde se hace cuando esa conversación esté encaminada, no antes.
 
 ## Criterio de éxito de Fase 0 (T3) — checkpoint de decisión
 
@@ -19,7 +21,7 @@ Fase 0 (T1 analytics, T2 instrumentación, T4 redirect de onboarding) no es solo
 - **Métrica:** % de nuevos registros técnicos que completan `onboarding_completed` → al menos una acción significativa (`first_forum_post` OR `first_message_sent` OR click real en una card del directorio, NO la sola carga de página del redirect forzado — ver corrección de Codex en el eng review) dentro de 7 días desde el registro.
 - **Cohorte mínima:** ≥30 registros técnicos nuevos antes de evaluar el umbral (corrección de Codex — sin tamaño mínimo, el número no es interpretable).
 - **Umbral:** si el resultado es <15% en las primeras 4 semanas calendario después de que T1+T2+T4 estén en producción, el resultado es **inconclusivo — investigar** (calidad de tráfico, fricción de onboarding, densidad de pares activos) antes de concluir que es un problema de demanda. No es un veredicto automático de "reabrir el pivote de agosto" — es la señal para investigar con los datos reales de `analytics_events` cuál de esas causas aplica.
-- **Checkpoint:** 4 semanas calendario después de la fecha de deploy a producción de T1+T2+T4. *(Completar la fecha exacta el día del deploy — no se fija hoy porque el deploy todavía no ocurrió en esta sesión.)*
+- **Checkpoint:** 2026-10-28 (4 semanas calendario desde el deploy a producción de T1+T2+T4, 2026-09-30).
 - **Cómo consultar:** query directa sobre `analytics_events` con `service_role` (RLS bloquea lectura para roles no-admin por diseño, ver migración `20260930000051_analytics_events.sql`).
 
 ## Fase 4 — apuestas estratégicas (después de que Fase 0-3 esté en producción y midiendo)

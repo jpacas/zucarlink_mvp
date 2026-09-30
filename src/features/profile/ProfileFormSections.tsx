@@ -60,6 +60,18 @@ export function ProfileBasicsFields({
         />
       </div>
       <div className="field">
+        <label htmlFor="profile-company-type">Tipo de organización</label>
+        <select
+          id="profile-company-type"
+          value={values.companyType}
+          onChange={(event) => onChange('companyType', event.target.value)}
+        >
+          <option value="">Sin especificar</option>
+          <option value="ingenio">Ingenio</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div className="field">
         <label htmlFor="profile-years">Años de experiencia</label>
         <input
           id="profile-years"

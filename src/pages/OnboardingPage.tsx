@@ -24,7 +24,7 @@ import { isProfileComplete } from '../features/profile/profile-status'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import { trackEvent } from '../lib/analytics'
 import { sanitizeNextPath } from '../lib/redirect'
-import type { ProfileDraftInput, ProfileSpecialty } from '../features/profile/types'
+import type { CompanyType, ProfileDraftInput, ProfileSpecialty } from '../features/profile/types'
 import type {
   ProviderCategory,
   ProviderProfileDraft,
@@ -37,6 +37,7 @@ function createDraft(
     country: string
     roleTitle: string
     companyName: string
+    companyType: CompanyType | null
     yearsExperience: number | null
     shortBio: string
     phone: string
@@ -49,6 +50,7 @@ function createDraft(
     country: profile?.country ?? '',
     roleTitle: profile?.roleTitle ?? '',
     companyName: profile?.companyName ?? '',
+    companyType: profile?.companyType ?? '',
     yearsExperience: profile?.yearsExperience ?? null,
     shortBio: profile?.shortBio ?? '',
     phone: profile?.phone ?? '',
@@ -493,6 +495,23 @@ export function OnboardingPage() {
                   setDraft((current) => ({ ...current, companyName: event.target.value }))
                 }
               />
+            </div>
+            <div className="field">
+              <label htmlFor="onboarding-company-type">Tipo de organización</label>
+              <select
+                id="onboarding-company-type"
+                value={draft.companyType}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    companyType: event.target.value as ProfileDraftInput['companyType'],
+                  }))
+                }
+              >
+                <option value="">Sin especificar</option>
+                <option value="ingenio">Ingenio</option>
+                <option value="otro">Otro</option>
+              </select>
             </div>
             <div className="field">
               <label htmlFor="onboarding-years">Años de experiencia</label>

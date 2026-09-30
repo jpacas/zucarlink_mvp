@@ -18,6 +18,7 @@ import {
 import { getProfileCompleteness } from '../features/profile/profile-status'
 import { useCurrentProfile } from '../features/profile/useCurrentProfile'
 import type {
+  CompanyType,
   ExperienceInput,
   ProfileDraftInput,
   ProfileSpecialty,
@@ -35,6 +36,7 @@ function createDraft(profile?: {
   country: string
   roleTitle: string
   companyName: string
+  companyType: CompanyType | null
   yearsExperience: number | null
   shortBio: string
   phone: string
@@ -46,6 +48,7 @@ function createDraft(profile?: {
     country: profile?.country ?? '',
     roleTitle: profile?.roleTitle ?? '',
     companyName: profile?.companyName ?? '',
+    companyType: profile?.companyType ?? '',
     yearsExperience: profile?.yearsExperience ?? null,
     shortBio: profile?.shortBio ?? '',
     phone: profile?.phone ?? '',

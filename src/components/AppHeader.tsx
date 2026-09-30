@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { isAdminUser } from '../features/auth/roles'
 import { getMyAvatarUrl } from '../features/profile/api'
 import { useUnreadCount } from '../features/messages/useUnreadCount'
+import { NotificationBell } from '../features/notifications/NotificationBell'
 import { getInitials } from '../lib/initials'
 import { ZucarLogo } from './ZucarLogo'
 
@@ -190,6 +191,8 @@ export function AppHeader() {
             </>
           ) : null}
         </nav>
+
+        {isAuthed ? <NotificationBell /> : null}
 
         {isAuthed ? (
           <div className="nav-user-menu" ref={menuRef}>

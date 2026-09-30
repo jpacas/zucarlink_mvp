@@ -8,6 +8,7 @@ import {
 import { getSupabaseClientOrThrow } from '../../lib/supabase'
 import { getCurrentProviderProfile } from '../providers/api'
 import type {
+  CompanyType,
   CurrentProfile,
   ExperienceInput,
   ProfileDraftInput,
@@ -35,6 +36,7 @@ interface ProfileRow {
 interface CompanyRow {
   id: string
   name: string
+  company_type: string | null
 }
 
 interface ExperienceRow {
@@ -58,7 +60,7 @@ interface SpecialtyRow {
   slug: string
 }
 
-async function ensureCompanyId(companyName: string, country: string) {
+async function ensureCompanyId(companyName: string, country: string, companyType?: string) {
   const cleanName = companyName.trim()
 
   if (!cleanName) {
@@ -69,6 +71,7 @@ async function ensureCompanyId(companyName: string, country: string) {
   const { data, error } = await client.rpc('upsert_company', {
     p_name: cleanName,
     p_country: country.trim() || undefined,
+    p_company_type: companyType || undefined,
   })
 
   if (error) {
@@ -86,7 +89,7 @@ async function loadCompaniesByIds(ids: string[]) {
   const client = getSupabaseClientOrThrow()
   const { data, error } = await client
     .from('companies')
-    .select('id, name')
+    .select('id, name, company_type')
     .in('id', ids)
 
   if (error) {
@@ -236,6 +239,10 @@ export async function getCurrentProfile(user: User): Promise<CurrentProfile | nu
     companyName: profile.current_company_id
       ? (companies.get(profile.current_company_id)?.name ?? '')
       : '',
+    companyType:
+      (profile.current_company_id
+        ? (companies.get(profile.current_company_id)?.company_type as CompanyType | null)
+        : null) ?? null,
     yearsExperience: profile.years_experience,
     shortBio: profile.short_bio ?? '',
     avatarPath: profile.avatar_path,
@@ -269,7 +276,7 @@ export async function saveProfileDraft(
   specialtyIds: string[],
 ) {
   const client = getSupabaseClientOrThrow()
-  const companyId = await ensureCompanyId(payload.companyName, payload.country)
+  const companyId = await ensureCompanyId(payload.companyName, payload.country, payload.companyType)
   const status = getProfileStatus(payload, specialtyIds.map((id) => ({ id })))
 
   const { error } = await client
