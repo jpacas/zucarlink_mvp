@@ -4,7 +4,14 @@
 -- el patrón array_agg de `list_public_preview_profiles`. La experiencia sigue
 -- detrás del gate de registro; aquí sólo exponemos especialidades + verificación.
 
-create or replace function public.get_public_member_profile(profile_id uuid)
+-- CREATE OR REPLACE no puede cambiar las columnas de retorno de una función
+-- (SQLSTATE 42P13) — hay que dropearla primero. Esta migración nunca había
+-- llegado a producción (falló en el primer intento real de `supabase db push`
+-- de este proyecto, 2026-09-30), así que es seguro corregirla acá en vez de
+-- agregar una migración de fix aparte.
+drop function if exists public.get_public_member_profile(uuid);
+
+create function public.get_public_member_profile(profile_id uuid)
 returns table (
   id uuid,
   full_name text,
